@@ -1,2 +1,3 @@
-communication
+Communication
 =============
+This is an auto-generated README file.
