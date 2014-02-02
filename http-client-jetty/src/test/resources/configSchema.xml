@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<NamespaceDefinitions xsi:noNamespaceSchemaLocation="http://ch-infra.il.nds.com/cabResources/CCP_XML.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<NamespaceDefinition>
+		<NamespaceIdentifier version="TBD" name="TBD" />
+        <Parameter name="clientTest" base="service.http.client.base" type="STRUCTURE" description="NA">
+            <DefaultValue>
+                <StructureValue>
+                    <StructureMemberValue name="server">
+                        <StructureValue index="1">
+                            <StructureMemberValue name="http.host" value="localhost"/>
+                            <StructureMemberValue name="http.port" value="1234"/>
+                        </StructureValue>
+                    </StructureMemberValue>
+                    <StructureMemberValue name="http.numberOfAttempts" value="4"/>
+                </StructureValue>
+            </DefaultValue>
+        </Parameter>
+        <Parameter name="clientFailOverTest" base="service.http.client.base" type="STRUCTURE" description="NA">
+            <DefaultValue>
+                <StructureValue>
+                    <StructureMemberValue name="server">
+                        <StructureValue index="1">
+                            <StructureMemberValue name="http.host" value="localhost"/>
+                            <StructureMemberValue name="http.port" value="23456"/>
+                        </StructureValue>
+                        <StructureValue index="2">
+                            <StructureMemberValue name="http.host" value="localhost"/>
+                            <StructureMemberValue name="http.port" value="23457"/>
+                        </StructureValue>
+                    </StructureMemberValue>
+                    <StructureMemberValue name="http.waitingTime" value="5000"/>
+                </StructureValue>
+            </DefaultValue>
+        </Parameter>
+        <Parameter name="clientRoundRobinTest" base="service.http.client.base" type="STRUCTURE" description="NA">
+            <DefaultValue>
+                <StructureValue>
+                    <StructureMemberValue name="server">
+                        <StructureValue index="1">
+                            <StructureMemberValue name="http.host" value="localhost"/>
+                            <StructureMemberValue name="http.port" value="12345"/>
+                        </StructureValue>
+                        <StructureValue index="2">
+                            <StructureMemberValue name="http.host" value="localhost"/>
+                            <StructureMemberValue name="http.port" value="12346"/>
+                        </StructureValue>
+                        <StructureValue index="3">
+                            <StructureMemberValue name="http.host" value="localhost"/>
+                            <StructureMemberValue name="http.port" value="12347"/>
+                        </StructureValue>
+                    </StructureMemberValue>
+                    <StructureMemberValue name="http.waitingTime" value="5000"/>
+                </StructureValue>
+            </DefaultValue>
+        </Parameter>
+        <Parameter name="clientRoundRobinSyncTest" base="service.http.client.base" type="STRUCTURE" description="NA">
+            <DefaultValue>
+                <StructureValue>
+                    <StructureMemberValue name="server">
+                        <StructureValue index="1">
+                            <StructureMemberValue name="http.host" value="localhost"/>
+                            <StructureMemberValue name="http.port" value="13345"/>
+                        </StructureValue>
+                        <StructureValue index="2">
+                            <StructureMemberValue name="http.host" value="localhost"/>
+                            <StructureMemberValue name="http.port" value="13346"/>
+                        </StructureValue>
+                        <StructureValue index="3">
+                            <StructureMemberValue name="http.host" value="localhost"/>
+                            <StructureMemberValue name="http.port" value="13347"/>
+                        </StructureValue>
+                    </StructureMemberValue>
+                    <StructureMemberValue name="http.waitingTime" value="5000"/>
+                </StructureValue>
+            </DefaultValue>
+        </Parameter>
+
+	</NamespaceDefinition>
+</NamespaceDefinitions>
