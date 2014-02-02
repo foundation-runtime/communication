@@ -11,7 +11,7 @@
     <name>http-server-jetty</name>
     <version>0.0.0-1-SNAPSHOT</version>
     <description>This project is...</description>
-    <url>http://maven-doc.nds.com/maven_sites/${project.groupId}/${project.artifactId}/${project.version}</url>
+    <url>https://github.com/foundation-runtime/communication/http-server-jetty</url>
     <issueManagement>
         <system>{put your issue tracking system here - i.e. CQ or JIRA}
         </system>
@@ -43,15 +43,7 @@
         <pluginManagement>
             <plugins/>
         </pluginManagement>
-        <plugins>
-            <plugin>
-                <artifactId>maven-release-plugin</artifactId>
-                <configuration>
-                    <tagBase>
-                        http://savana.il.nds.com/repos/ch_repo/tags/vss/foundation/http-server-jetty
-                    </tagBase>
-                </configuration>
-            </plugin>
+        <plugins>            
         </plugins>
     </build>
     <dependencies>
@@ -75,12 +67,5 @@
             <artifactId>jetty-servlets</artifactId>
             <version>${jetty-version}</version>
         </dependency>
-    </dependencies>
-    <distributionManagement>
-        <site>
-            <id>NDS Site</id>
-            <url>scp://maven-doc.nds.com/cifs/maven_sites/${project.groupId}/${project.artifactId}/${project.version}
-            </url>
-        </site>
-    </distributionManagement>
+    </dependencies>    
 </project>

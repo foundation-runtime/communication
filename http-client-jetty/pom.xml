@@ -12,7 +12,7 @@
     <name>http-client-jetty</name>
     <version>0.0.0-1-SNAPSHOT</version>
     <description>This project is...</description>
-    <url>http://maven-doc.nds.com/maven_sites/${project.groupId}/${project.artifactId}/${project.version}</url>
+    <url>https://github.com/foundation-runtime/communication/http-client-jetty</url>
     <issueManagement>
         <system>{put your issue tracking system here - i.e. CQ or JIRA}
         </system>
@@ -66,23 +66,7 @@
                         </goals>
                     </execution>
                 </executions>
-            </plugin>
-            <plugin>
-                <artifactId>maven-release-plugin</artifactId>
-                <configuration>
-                    <tagBase>
-                        http://savana.il.nds.com/repos/ch_repo/tags/vss/foundation/http-client-apache
-                    </tagBase>
-                </configuration>
-            </plugin>
-            <plugin>
-                <artifactId>maven-release-plugin</artifactId>
-                <configuration>
-                    <tagBase>
-                        http://savana.il.nds.com/repos/ch_repo/tags/vss/foundation/http-client-jetty
-                    </tagBase>
-                </configuration>
-            </plugin>
+            </plugin>            
         </plugins>
     </build>
     <dependencies>
@@ -151,12 +135,5 @@
             <version>2.2.3</version>
             <scope>test</scope>
         </dependency>
-    </dependencies>
-    <distributionManagement>
-        <site>
-            <id>NDS Site</id>
-            <url>scp://maven-doc.nds.com/cifs/maven_sites/${project.groupId}/${project.artifactId}/${project.version}
-            </url>
-        </site>
-    </distributionManagement>
+    </dependencies>    
 </project>
