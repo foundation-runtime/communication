@@ -34,10 +34,7 @@
         </developer>
     </developers>
     <scm>
-        <connection>scm:svn:http://savana.il.nds.com/repos/ch_repo/trunk/vss/foundation/http-client-jetty</connection>
-        <developerConnection>scm:svn:http://savana.il.nds.com/repos/ch_repo/trunk/vss/foundation/http-client-jetty
-        </developerConnection>
-        <url>http://savana.il.nds.com/repos/ch_repo/trunk/vss/foundation/http-client-jetty</url>
+        <url>https://github.com/foundation-runtime/communication/http-client-jetty</url>
     </scm>
     <organization>
         <name>Cisco</name>

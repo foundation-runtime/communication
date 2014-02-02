@@ -33,10 +33,7 @@
         </developer>
     </developers>
     <scm>
-        <connection>scm:svn:http://savana.il.nds.com/repos/ch_repo/trunk/vss/foundation/http-server-api</connection>
-        <developerConnection>scm:svn:http://savana.il.nds.com/repos/ch_repo/trunk/vss/foundation/http-server-api
-        </developerConnection>
-        <url>http://savana.il.nds.com/repos/ch_repo/trunk/vss/foundation/http-server-api</url>
+        <url>https://github.com/foundation-runtime/communication/http-server-api</url>
     </scm>
     <organization>
         <name>Cisco</name>
