@@ -79,8 +79,8 @@
             <artifactId>http-client-api</artifactId>
             <version>${http-client-api-version}</version>
             <scope>test</scope>
-            <classifier>tests</classifier>
-            <!--<type>test-jar</type>-->
+            <!--<classifier>tests</classifier>-->
+            <type>test-jar</type>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
@@ -103,7 +103,7 @@
             <version>${logging-lib-version}</version>
             <scope>test</scope>
         </dependency>
-        <!--<dependency>
+       <!-- <dependency>
             <groupId>com.cisco.vss.foundation</groupId>
             <artifactId>configuration-lib</artifactId>
             <version>${configuration-lib-version}</version>

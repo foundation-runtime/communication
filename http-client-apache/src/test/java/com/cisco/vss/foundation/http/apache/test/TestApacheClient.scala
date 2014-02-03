@@ -6,6 +6,7 @@ import com.cisco.vss.foundation.http.HttpRequest
 import com.cisco.vss.foundation.http.apache.{ApacheHttpClientFactory, ApacheHttpResponse}
 import com.cisco.vss.foundation.loadbalancer.{HighAvailabilityStrategy, RequestTimeoutException, NoActiveServersException}
 import com.cisco.vss.foundation.http.api.test.{MultithreadTestUtil, BasicHttpTestUtil}
+import org.apache.commons.configuration.{Configuration, PropertiesConfiguration}
 
 /**
  * Created by Yair Ogen on 1/19/14.
@@ -13,7 +14,10 @@ import com.cisco.vss.foundation.http.api.test.{MultithreadTestUtil, BasicHttpTes
 class TestApacheClient {
   val httpTestUtil = new BasicHttpTestUtil[HttpRequest,ApacheHttpResponse]
   val httpMultiThreadTestUtil = new MultithreadTestUtil[HttpRequest,ApacheHttpResponse]
-  val clientTest = ApacheHttpClientFactory.createHttpClient("clientTest")
+  val propsConfiguration: Configuration = new PropertiesConfiguration(classOf[TestApacheClient].getResource("/config.properties"))
+  val clientTest = {
+    ApacheHttpClientFactory.createHttpClient("clientTest", propsConfiguration)
+  }
   val LOGGER = LoggerFactory.getLogger(classOf[TestApacheClient])
 
   @Test
@@ -35,16 +39,19 @@ class TestApacheClient {
 
   @Test
   def realServerInvokePostRoudRobin() {
+    val strategy: CABFileChangedReloadingStrategy = new CABFileChangedReloadingStrategy
+    strategy.setRefreshDelay(3000)
+    propsConfiguration.asInstanceOf[PropertiesConfiguration].setReloadingStrategy(strategy)
 
-    val clientRoundRobinTest = ApacheHttpClientFactory.createHttpClient("clientRoundRobinSyncTest")
-    httpTestUtil.realServerInvokePostRoudRobin(clientRoundRobinTest)
+    val clientRoundRobinTest = ApacheHttpClientFactory.createHttpClient("clientRoundRobinSyncTest", propsConfiguration)
+    httpTestUtil.realServerInvokePostRoudRobin(clientRoundRobinTest, propsConfiguration)
 
   }
 
   @Test
   def realServerInvokePostFailOver() {
 
-    val clientFailOverTest = ApacheHttpClientFactory.createHttpClient("clientFailOverTest", HighAvailabilityStrategy.STRATEGY_TYPE.FAIL_OVER)
+    val clientFailOverTest = ApacheHttpClientFactory.createHttpClient("clientFailOverTest", HighAvailabilityStrategy.STRATEGY_TYPE.FAIL_OVER, propsConfiguration)
     httpTestUtil.realServerInvokePostFailOver(clientFailOverTest)
 
   }
@@ -60,7 +67,7 @@ class TestApacheClient {
 
   @Test
   def testUsingActors() {
-    val clientRoundRobinTest = ApacheHttpClientFactory.createHttpClient("clientRoundRobinTest")
+    val clientRoundRobinTest = ApacheHttpClientFactory.createHttpClient("clientRoundRobinTest", propsConfiguration)
     httpMultiThreadTestUtil.testUsingActors(clientRoundRobinTest)
   }
 

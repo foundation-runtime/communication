@@ -6,6 +6,7 @@ import com.cisco.vss.foundation.http.HttpRequest
 import com.cisco.vss.foundation.http.jetty.{JettyHttpClientFactory, JettyHttpResponse}
 import org.slf4j.LoggerFactory
 import com.cisco.vss.foundation.loadbalancer.{HighAvailabilityStrategy, RequestTimeoutException, FailOverStrategy, NoActiveServersException}
+import com.cisco.vss.foundation.configuration.ConfigurationFactory
 
 /**
  * Created by Yair Ogen on 1/23/14.
@@ -37,7 +38,7 @@ class JettyClientTest {
   def realServerInvokePostRoudRobin() {
 
     val clientRoundRobinTest = JettyHttpClientFactory.createHttpClient("clientRoundRobinSyncTest")
-    httpTestUtil.realServerInvokePostRoudRobin(clientRoundRobinTest)
+    httpTestUtil.realServerInvokePostRoudRobin(clientRoundRobinTest, ConfigurationFactory.getConfiguration)
 
   }
 

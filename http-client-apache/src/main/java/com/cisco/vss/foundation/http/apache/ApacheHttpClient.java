@@ -1,8 +1,10 @@
 package com.cisco.vss.foundation.http.apache;
 
+import com.cisco.vss.foundation.configuration.ConfigurationFactory;
 import com.cisco.vss.foundation.http.*;
 import com.cisco.vss.foundation.loadbalancer.HighAvailabilityStrategy;
 import com.google.common.base.Joiner;
+import org.apache.commons.configuration.Configuration;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.*;
 import org.apache.http.client.utils.URIBuilder;
@@ -33,8 +35,18 @@ public class ApacheHttpClient extends AbstractHttpClient<HttpRequest, HttpRespon
         configureClient();
     }
 
+    public ApacheHttpClient(String apiName, Configuration configuration) {
+        super(apiName, configuration);
+        configureClient();
+    }
+
     public ApacheHttpClient(String apiName, HighAvailabilityStrategy.STRATEGY_TYPE strategyType) {
         super(apiName, strategyType);
+        configureClient();
+    }
+
+    public ApacheHttpClient(String apiName, HighAvailabilityStrategy.STRATEGY_TYPE strategyType, Configuration configuration) {
+        super(apiName, strategyType, configuration);
         configureClient();
     }
 

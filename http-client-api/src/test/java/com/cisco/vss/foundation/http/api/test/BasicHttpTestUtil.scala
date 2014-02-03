@@ -6,6 +6,7 @@ import java.util.Properties
 import java.io.{File, FileOutputStream}
 import com.cisco.vss.foundation.configuration.ConfigurationFactory
 import com.cisco.vss.foundation.flowcontext.FlowContextFactory
+import org.apache.commons.configuration.Configuration
 
 /**
  * Created by Yair Ogen on 1/23/14.
@@ -54,7 +55,7 @@ class BasicHttpTestUtil[S <: HttpRequest, R <: HttpResponse] {
     server.stop
   }
 
-  def realServerInvokePostRoudRobin(clientRoundRobinTest: HttpClient[S, R]) {
+  def realServerInvokePostRoudRobin(clientRoundRobinTest: HttpClient[S, R], configuration:Configuration) {
 
     val port1 = 13345
     val port2 = 13346
@@ -157,7 +158,7 @@ class BasicHttpTestUtil[S <: HttpRequest, R <: HttpResponse] {
       props.store(new FileOutputStream(new File(configURL.getFile)), "")
 
       Thread.sleep(3000)
-      ConfigurationFactory.getConfiguration.getBoolean("configuration.dynamicConfigReload.enabled")
+      configuration.getString("clientRoundRobinSyncTest.4.port")
 
       results = List[String]()
 

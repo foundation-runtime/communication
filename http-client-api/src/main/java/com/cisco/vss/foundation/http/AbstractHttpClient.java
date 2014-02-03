@@ -30,15 +30,27 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
     protected HighAvailabilityStrategy highAvailabilityStrategy = new RoundRobinStrategy();
     protected String apiName = "HTTP";
     protected InternalServerProxyMetadata metadata;
+    protected Configuration configuration;
 
     public AbstractHttpClient(String apiName) {
-        this.apiName = apiName;
-        createServerListFromConfig();
-        CabConfigurationListenerRegistry.addCabConfigurationListener(new HighAvailabilityConfigurationListener());
+        this(apiName, HighAvailabilityStrategy.STRATEGY_TYPE.ROUND_ROBIN);
+    }
+
+    public AbstractHttpClient(String apiName, Configuration configuration) {
+        this(apiName, HighAvailabilityStrategy.STRATEGY_TYPE.ROUND_ROBIN, configuration);
     }
 
     public AbstractHttpClient(String apiName, HighAvailabilityStrategy.STRATEGY_TYPE strategyType) {
+        this(apiName, strategyType, ConfigurationFactory.getConfiguration());
+    }
+
+    public AbstractHttpClient(String apiName, HighAvailabilityStrategy.STRATEGY_TYPE strategyType, Configuration configuration) {
         this.apiName = apiName;
+        if(configuration == null){
+            this.configuration = ConfigurationFactory.getConfiguration();
+        }else{
+            this.configuration = configuration;
+        }
         highAvailabilityStrategy = fromHighAvailabilityStrategyType(strategyType);
         createServerListFromConfig();
         CabConfigurationListenerRegistry.addCabConfigurationListener(new HighAvailabilityConfigurationListener());
@@ -183,7 +195,7 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
     private InternalServerProxyMetadata loadServersMetadataConfiguration() {
 
 
-        Configuration subset = ConfigurationFactory.getConfiguration().subset(apiName);
+        Configuration subset = configuration.subset(apiName);
         final Iterator<String> keysIterator = subset.getKeys();
 
         // read default values
