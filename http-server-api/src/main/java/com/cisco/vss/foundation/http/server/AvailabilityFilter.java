@@ -1,7 +1,5 @@
-package com.cisco.vss.foundation.http.server.jetty;
+package com.cisco.vss.foundation.http.server;
 
-import com.cisco.vss.foundation.http.server.AbstractInfraHttpFilter;
-import org.eclipse.jetty.util.thread.ThreadPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,9 +18,9 @@ import java.io.IOException;
 public class AvailabilityFilter extends AbstractInfraHttpFilter {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AvailabilityFilter.class);
 
-	private ThreadPool threadPool;
+	private HttpThreadPool threadPool;
 
-	public AvailabilityFilter(String serviceName, ThreadPool threadPool) {
+	public AvailabilityFilter(String serviceName, HttpThreadPool threadPool) {
 		super(serviceName);
 		this.threadPool = threadPool;
 	}

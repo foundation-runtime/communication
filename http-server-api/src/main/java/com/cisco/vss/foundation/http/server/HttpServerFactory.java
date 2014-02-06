@@ -10,10 +10,14 @@ import javax.servlet.Servlet;
  */
 public interface HttpServerFactory {
 
-    public void startHttpServer(String serviceName, ListMultimap<String, Servlet> servlets);
+    void startHttpServer(String serviceName, ListMultimap<String, Servlet> servlets);
 
-    public void startHttpServer(String serviceName, ListMultimap<String, Servlet> servlets, ListMultimap<String, Filter> filters);
+    void startHttpServer(String serviceName, ListMultimap<String, Servlet> servlets, ListMultimap<String, Filter> filters);
 
-    public void startHttpServer(String serviceName, ListMultimap<String, Servlet> servlets, ListMultimap<String, Filter> filters, String keyStorePath, String keyStorePassword)
+    void startHttpServer(String serviceName, ListMultimap<String, Servlet> servlets, ListMultimap<String, Filter> filters, String keyStorePath, String keyStorePassword);
+
+    void startHttpServer(String serviceName, ListMultimap<String, Servlet> servlets, String keyStorePath, String keyStorePassword);
+
+    void stopHttpServer(String serviceName);
 
 }

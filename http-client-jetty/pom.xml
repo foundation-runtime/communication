@@ -13,6 +13,7 @@
     <version>0.0.0-1-SNAPSHOT</version>
     <description>This project is...</description>
     <url>https://github.com/foundation-runtime/communication/http-client-jetty</url>
+    <packaging>jar</packaging>
     <licenses>
         <license>
             <name>The Apache Software License, Version 2.0</name>
