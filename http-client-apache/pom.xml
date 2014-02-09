@@ -3,13 +3,13 @@
     <parent>
 		<groupId>com.cisco.vss.foundation</groupId>
 		<artifactId>foundation-common-base</artifactId>
-		<version>0.0.0-1-SNAPSHOT</version>
+		<version>0.0.0-2-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.cisco.vss.foundation</groupId>
     <artifactId>http-client-apache</artifactId>
     <name>http-client-apache</name>
-    <version>0.0.0-1-SNAPSHOT</version>
+    <version>0.0.0-2-SNAPSHOT</version>
     <description>This project is...</description>
     <url>https://github.com/foundation-runtime/communication/http-client-apache</url>
     <packaging>jar</packaging>
