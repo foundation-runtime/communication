@@ -36,7 +36,7 @@ public class PingServlet extends HttpServlet {
 
     private void ping(HttpServletRequest req, HttpServletResponse resp) {
         if (enableLogging) {
-            LOGGER.debug("HTTP Ping received from " + HttpServerUtil.getOriginalClient(req));
+            LOGGER.debug("HTTP Ping received from " + AbstractInfraHttpFilter.getOriginalClient(req));
         }
         ((HttpServletResponse) resp).setDateHeader("Date", System.currentTimeMillis());
         ((HttpServletResponse) resp).setStatus(HttpServletResponse.SC_OK);

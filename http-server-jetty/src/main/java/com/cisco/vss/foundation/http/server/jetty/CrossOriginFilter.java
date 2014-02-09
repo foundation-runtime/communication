@@ -1,10 +1,10 @@
 package com.cisco.vss.foundation.http.server.jetty;
 
+import com.cisco.vss.foundation.configuration.ConfigurationFactory;
 import com.cisco.vss.foundation.http.server.AbstractInfraHttpFilter;
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import com.nds.cab.infra.configuration.ConfigurationFactory;
 import org.apache.commons.configuration.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

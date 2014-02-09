@@ -18,8 +18,7 @@ import java.util.Map;
  */
 public abstract class AbstractInfraHttpFilter implements Filter {
 
-    public static final String X_FORWARD_FOR_HEADER = "x-forwarded-for";
-    public static final String FLOW_CONTEXT_HEADER = "FLOW_CONTEXT";
+
 
 	protected String serviceName = null;
 	private String enabledKey = null;
@@ -109,8 +108,8 @@ public abstract class AbstractInfraHttpFilter implements Filter {
 	 * 
 	 * @return The original client host or IP value.
 	 */
-	public String getOriginalClient(final HttpServletRequest request) {
-		return getOriginalClient(request.getRemoteHost(), request.getHeader(X_FORWARD_FOR_HEADER));
+	public static String getOriginalClient(final HttpServletRequest request) {
+		return getOriginalClient(request.getRemoteHost(), request.getHeader(HttpServerFactory.X_FORWARD_FOR_HEADER));
 	}
 
 	/**
@@ -126,7 +125,7 @@ public abstract class AbstractInfraHttpFilter implements Filter {
 	 * 
 	 * @return The original client host or IP value.
 	 */
-	public String getOriginalClient(final String remoteHost, final String forwardedForValue) {
+	public static String getOriginalClient(final String remoteHost, final String forwardedForValue) {
 		// if no forwarded for host, just return the remote host
 		if (forwardedForValue == null) {
 			return remoteHost;

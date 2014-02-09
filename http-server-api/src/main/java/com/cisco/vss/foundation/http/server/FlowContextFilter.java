@@ -25,7 +25,7 @@ public class FlowContextFilter extends AbstractInfraHttpFilter {
 	public void doFilterImpl(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
 		try {
 			HttpServletRequest httpServletRequest = (HttpServletRequest)request;
-			String flowCtxtStr = httpServletRequest.getHeader(FLOW_CONTEXT_HEADER);
+			String flowCtxtStr = httpServletRequest.getHeader(HttpServerFactory.FLOW_CONTEXT_HEADER);
 			if(!Strings.isNullOrEmpty(flowCtxtStr)){
 				FlowContextFactory.deserializeNativeFlowContext(flowCtxtStr);
 			}else{

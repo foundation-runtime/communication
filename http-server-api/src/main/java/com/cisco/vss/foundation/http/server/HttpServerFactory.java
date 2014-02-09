@@ -10,6 +10,9 @@ import javax.servlet.Servlet;
  */
 public interface HttpServerFactory {
 
+    static final String X_FORWARD_FOR_HEADER = "x-forwarded-for";
+    static final String FLOW_CONTEXT_HEADER = "FLOW_CONTEXT";
+
     void startHttpServer(String serviceName, ListMultimap<String, Servlet> servlets);
 
     void startHttpServer(String serviceName, ListMultimap<String, Servlet> servlets, ListMultimap<String, Filter> filters);
