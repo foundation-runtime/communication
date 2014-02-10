@@ -7,11 +7,13 @@ import com.cisco.vss.foundation.loadbalancer.HighAvailabilityStrategy;
 import com.cisco.vss.foundation.loadbalancer.InternalServerProxy;
 import com.cisco.vss.foundation.loadbalancer.RequestTimeoutException;
 import com.google.common.base.Joiner;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.api.ContentResponse;
 import org.eclipse.jetty.client.api.Request;
 import org.eclipse.jetty.client.api.Response;
 import org.eclipse.jetty.client.util.BytesContentProvider;
+import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,10 +45,29 @@ public class JettyHttpClient<S extends HttpRequest, R extends HttpResponse> exte
     @Override
     protected void configureClient() {
 
+        boolean addSslSupport = StringUtils.isNotEmpty(metadata.getKeyStorePath()) && StringUtils.isNotEmpty(metadata.getKeyStorePassword());
+        if(addSslSupport){
+
+            SslContextFactory sslContextFactory = new SslContextFactory();
+            sslContextFactory.setKeyStorePath(metadata.getKeyStorePath());
+            sslContextFactory.setKeyStorePassword(metadata.getKeyStorePassword());
+
+            boolean addTrsutSupport = StringUtils.isNotEmpty(metadata.getTrustStorePath()) && StringUtils.isNotEmpty(metadata.getTrustStorePassword());
+            if(addTrsutSupport){
+                sslContextFactory.setTrustStorePath(metadata.getTrustStorePath());
+                sslContextFactory.setTrustStorePassword(metadata.getTrustStorePassword());
+            }else{
+                sslContextFactory.setTrustAll(true);
+            }
+
+            httpClient = new  HttpClient(sslContextFactory);
+        }
+
         httpClient.setConnectTimeout(metadata.getConnectTimeout());
         httpClient.setIdleTimeout(metadata.getIdleTimeout());
         httpClient.setMaxConnectionsPerDestination(metadata.getMaxConnectionsPerAddress());
         httpClient.setMaxRequestsQueuedPerDestination(metadata.getMaxQueueSizePerAddress());
+
         try {
             httpClient.start();
         } catch (Exception e) {

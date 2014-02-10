@@ -72,12 +72,17 @@ public final class HighAvailabilityConstants {
     public static final String FLOW_CONTEXT_HEADER = "FLOW_CONTEXT";
     public static final String SSL_CONTEXT_FACTORY = "sslContextFactory";
     public static final String INVOCATION_ENRICHER = "invocationEnricher";
-    public static final String IDLE_TIME_OUT = "http.idleTimeout";
+    public static final String IDLE_TIME_OUT = "idleTimeout";
     public static final int DEFAULT_IDLE_TIMEOUT = 180000;
+
+    public static final String KEYSTORE_PATH = "keyStorePath";
+    public static final String KEYSTORE_PASSWORD = "keyStorePassword";
+    public static final String TRUSTSTORE_PATH = "trustStorePath";
+    public static final String TRUSTSTORE_PASSWORD = "trustStorePassword";
 
     public static final int DEFAULT_MAX_CONNECTIONS_PER_ADDRESS = 1000;
     public static final String MAX_CONNECTIONS_PER_ADDRESS = "http.maxConnectionsPerAddress";
-    public static final String MAX_CONNECTIONS_TOTAL = "HTTP.maxConnectionsTotal";
+    public static final String MAX_CONNECTIONS_TOTAL = "http.maxConnectionsTotal";
     public static final int DEFAULT_MAX_CONNECTIONS_TOTAL = 3000;
     public static final String MAX_QUEUE_PER_ADDRESS = "http.maxQueueSizePerAddress";
     public static final int DEFAULT_MAX_QUEUE_PER_ADDRESS = 1000;

@@ -20,6 +20,10 @@ public class InternalServerProxyMetadata {
     private long waitingTime = 0;
     private int numberOfRetries = 0;
     private long retryDelay = 0;
+    private String keyStorePath = "";
+    private String keyStorePassword = "";
+    private String trustStorePath = "";
+    private String trustStorePassword = "";
     private List<Pair<String, Integer>> hostAndPortPairs = new ArrayList<Pair<String, Integer>>(3);
 
     public long getIdleTimeout() {
@@ -46,11 +50,27 @@ public class InternalServerProxyMetadata {
         return connectTimeout;
     }
 
+    public String getKeyStorePath() {
+        return keyStorePath;
+    }
+
+    public String getKeyStorePassword() {
+        return keyStorePassword;
+    }
+
+    public String getTrustStorePath() {
+        return trustStorePath;
+    }
+
+    public String getTrustStorePassword() {
+        return trustStorePassword;
+    }
+
     public long getWaitingTime() {
         return waitingTime;
     }
 
-    public InternalServerProxyMetadata(int readTimeout, int connectTimeout, long idleTimeout, int maxConnectionsPerAddress, int maxConnectionsTotal, int maxQueueSizePerAddress, long waitingTime, int numberOfRetries, long retryDelay, List<Pair<String, Integer>> hostAndPortPairs) {
+    public InternalServerProxyMetadata(int readTimeout, int connectTimeout, long idleTimeout, int maxConnectionsPerAddress, int maxConnectionsTotal, int maxQueueSizePerAddress, long waitingTime, int numberOfRetries, long retryDelay, List<Pair<String, Integer>> hostAndPortPairs, String keyStorePath, String keyStorePassword,String trustStorePath,String trustStorePassword) {
         this.readTimeout = readTimeout;
         this.connectTimeout = connectTimeout;
         this.idleTimeout = idleTimeout;
