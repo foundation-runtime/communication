@@ -52,8 +52,8 @@ public class JettyHttpClient<S extends HttpRequest, R extends HttpResponse> exte
             sslContextFactory.setKeyStorePath(metadata.getKeyStorePath());
             sslContextFactory.setKeyStorePassword(metadata.getKeyStorePassword());
 
-            boolean addTrsutSupport = StringUtils.isNotEmpty(metadata.getTrustStorePath()) && StringUtils.isNotEmpty(metadata.getTrustStorePassword());
-            if(addTrsutSupport){
+            boolean addTrustSupport = StringUtils.isNotEmpty(metadata.getTrustStorePath()) && StringUtils.isNotEmpty(metadata.getTrustStorePassword());
+            if(addTrustSupport){
                 sslContextFactory.setTrustStorePath(metadata.getTrustStorePath());
                 sslContextFactory.setTrustStorePassword(metadata.getTrustStorePassword());
             }else{

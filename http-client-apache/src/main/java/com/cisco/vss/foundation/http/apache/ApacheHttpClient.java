@@ -5,9 +5,11 @@ import com.cisco.vss.foundation.http.*;
 import com.cisco.vss.foundation.loadbalancer.HighAvailabilityStrategy;
 import com.google.common.base.Joiner;
 import org.apache.commons.configuration.Configuration;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.*;
 import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.conn.ssl.SSLContexts;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -16,9 +18,16 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.net.ssl.SSLContext;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 import java.util.Collection;
 import java.util.Map;
 
@@ -57,11 +66,44 @@ public class ApacheHttpClient extends AbstractHttpClient<HttpRequest, HttpRespon
         requestBuilder = requestBuilder.setConnectTimeout(metadata.getConnectTimeout());
         requestBuilder = requestBuilder.setSocketTimeout(metadata.getReadTimeout());
 
+        boolean addSslSupport = StringUtils.isNotEmpty(metadata.getKeyStorePath()) && StringUtils.isNotEmpty(metadata.getKeyStorePassword());
+        SSLContext sslContext = null;
+
+        if (addSslSupport) {
+
+            try {
+                KeyStore keyStore = KeyStore.getInstance("JKS");
+                keyStore.load(new FileInputStream(metadata.getKeyStorePath()), metadata.getKeyStorePassword().toCharArray());
+
+                boolean addTrustSupport = StringUtils.isNotEmpty(metadata.getTrustStorePath()) && StringUtils.isNotEmpty(metadata.getTrustStorePassword());
+                if (addTrustSupport) {
+                    KeyStore trustStore = KeyStore.getInstance("JKS");
+                    trustStore.load(new FileInputStream(metadata.getTrustStorePath()), metadata.getTrustStorePassword().toCharArray());
+
+                    sslContext = SSLContexts.custom()
+                            .useTLS()
+                            .loadTrustMaterial(keyStore)
+                            .loadTrustMaterial(trustStore)
+                            .build();
+                } else {
+                    sslContext = SSLContexts.custom()
+                            .useTLS()
+                            .loadTrustMaterial(keyStore)
+                            .build();
+                }
+            } catch (Exception e) {
+                LOGGER.error("can't set TLS Support. Error is: {}", e, e);
+            }
+
+
+        }
+
         httpClient = HttpClientBuilder.create()
                 .setMaxConnPerRoute(metadata.getMaxConnectionsPerAddress())
                 .setMaxConnTotal(metadata.getMaxConnectionsTotal())
                 .setDefaultRequestConfig(requestBuilder.build())
                 .setKeepAliveStrategy(new InfraConnectionKeepAliveStrategy(metadata.getIdleTimeout()))
+                .setSslcontext(sslContext)
                 .build();
     }
 
