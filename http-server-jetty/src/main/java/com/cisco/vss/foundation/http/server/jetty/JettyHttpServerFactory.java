@@ -75,9 +75,39 @@ public enum JettyHttpServerFactory implements HttpServerFactory {
     }
 
 
+
+
     @Override
     public void startHttpServer(String serviceName, ListMultimap<String, Servlet> servlets, ListMultimap<String, Filter> filters, String keyStorePath, String keyStorePassword) {
 
+        startHttpServer(serviceName, servlets, filters, keyStorePath, keyStorePassword, "", "");
+
+    }
+
+    private ServerConnector getServerConnector(String serviceName, Server server, Configuration configuration, String host, int port, int connectionIdleTime, int numberOfAcceptors, int numberOfSelectors, int acceptQueueSize) {
+
+        HttpConfiguration http_config = new HttpConfiguration();
+        http_config.setRequestHeaderSize(configuration.getInt("service." + serviceName + ".http.requestHeaderSize", http_config.getRequestHeaderSize()));
+
+        ServerConnector connector = new ServerConnector(server, null, null, null, numberOfAcceptors, numberOfSelectors, new  HttpConnectionFactory(http_config));
+
+        connector.setAcceptQueueSize(acceptQueueSize);
+        connector.setPort(port);
+        connector.setHost(host);
+        connector.setIdleTimeout(connectionIdleTime);
+        return connector;
+    }
+
+
+
+
+    @Override
+    public void startHttpServer(String serviceName, ListMultimap<String, Servlet> servlets, String keyStorePath, String keyStorePassword) {
+        startHttpServer(serviceName, servlets, keyStorePath, keyStorePassword, "", "");
+    }
+
+    @Override
+    public void startHttpServer(String serviceName, ListMultimap<String, Servlet> servlets, ListMultimap<String, Filter> filters, String keyStorePath, String keyStorePassword, String trustStorePath, String trustStorePassword) {
         if (servers.get(serviceName) != null) {
             throw new UnsupportedOperationException("you must first stop stop server: " + serviceName + " before you want to start it again!");
         }
@@ -111,9 +141,10 @@ public enum JettyHttpServerFactory implements HttpServerFactory {
             int connectionIdleTime = configuration.getInt("service." + serviceName + ".http.connectionIdleTime", 180000);
             boolean isBlockingChannelConnector = configuration.getBoolean("service." + serviceName + ".http.isBlockingChannelConnector", false);
             int numberOfAcceptors = configuration.getInt("service." + serviceName + ".http.numberOfAcceptors", 1);
+            int numberOfSelectors = configuration.getInt("service." + serviceName + ".http.numberOfSelectors", -1);
             int acceptQueueSize = configuration.getInt("service." + serviceName + ".http.acceptQueueSize", 0);
 
-            ServerConnector connector = getServerConnector(serviceName, server, configuration, host, port, connectionIdleTime, numberOfAcceptors, acceptQueueSize);
+            ServerConnector connector = getServerConnector(serviceName, server, configuration, host, port, connectionIdleTime, numberOfAcceptors, numberOfSelectors, acceptQueueSize);
 
 
             boolean isSSL = StringUtils.isNotBlank(keyStorePath) && StringUtils.isNotBlank(keyStorePassword);
@@ -127,8 +158,14 @@ public enum JettyHttpServerFactory implements HttpServerFactory {
                 sslContextFactory.setKeyStorePath(keyStorePath);
                 sslContextFactory.setKeyStorePassword(keyStorePassword);
 
+                boolean addTrustStoreSupport = StringUtils.isNotEmpty(trustStorePath) && StringUtils.isNotEmpty(trustStorePassword);
+                if(addTrustStoreSupport){
+                    sslContextFactory.setTrustStorePath(trustStorePath);
+                    sslContextFactory.setTrustStorePassword(trustStorePassword);
+                }
+
                 SslConnectionFactory sslConnectionFactory = new SslConnectionFactory(sslContextFactory, "HTTP/1.1");
-                ServerConnector sslConnector = getServerConnector(serviceName, server, configuration, sslHost, sslPort, connectionIdleTime, numberOfAcceptors, acceptQueueSize);
+                ServerConnector sslConnector = getServerConnector(serviceName, server, configuration, sslHost, sslPort, connectionIdleTime, numberOfAcceptors, numberOfSelectors, acceptQueueSize);
                 Collection<ConnectionFactory> connectionFactories = new ArrayList<>(1);
                 connectionFactories.add(sslConnectionFactory);
                 sslConnector.setConnectionFactories(connectionFactories);
@@ -153,31 +190,12 @@ public enum JettyHttpServerFactory implements HttpServerFactory {
             LOGGER.error("Problem starting the http {} server. Error is {}.", new Object[]{serviceName, e, e});
             throw new ServerFailedToStartException(e);
         }
-
-
     }
-
-    private ServerConnector getServerConnector(String serviceName, Server server, Configuration configuration, String host, int port, int connectionIdleTime, int numberOfAcceptors, int acceptQueueSize) {
-
-        HttpConfiguration http_config = new HttpConfiguration();
-        http_config.setRequestHeaderSize(configuration.getInt("service." + serviceName + ".http.requestHeaderSize", http_config.getRequestHeaderSize()));
-
-        int numberOfSelectors = -1; // allow connector defaults
-        ServerConnector connector = new ServerConnector(server, null, null, null, numberOfAcceptors, numberOfSelectors, new  HttpConnectionFactory(http_config));
-
-        connector.setAcceptQueueSize(acceptQueueSize);
-        connector.setPort(port);
-        connector.setHost(host);
-        connector.setIdleTimeout(connectionIdleTime);
-        return connector;
-    }
-
 
     @Override
-    public void startHttpServer(String serviceName, ListMultimap<String, Servlet> servlets, String keyStorePath, String keyStorePassword) {
+    public void startHttpServer(String serviceName, ListMultimap<String, Servlet> servlets, String keyStorePath, String keyStorePassword, String trustStorePath, String trustStorePassword) {
         ArrayListMultimap<String, Filter> filterMap = ArrayListMultimap.create();
-
-        startHttpServer(serviceName, servlets, filterMap, keyStorePath, keyStorePassword);
+        startHttpServer(serviceName, servlets, filterMap, keyStorePath, keyStorePassword, trustStorePath, trustStorePassword);
     }
 
     /**
