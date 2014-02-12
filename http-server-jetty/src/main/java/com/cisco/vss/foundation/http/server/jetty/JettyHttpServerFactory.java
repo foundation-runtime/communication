@@ -84,12 +84,9 @@ public enum JettyHttpServerFactory implements HttpServerFactory {
 
     }
 
-    private ServerConnector getServerConnector(String serviceName, Server server, Configuration configuration, String host, int port, int connectionIdleTime, int numberOfAcceptors, int numberOfSelectors, int acceptQueueSize) {
+    private ServerConnector getServerConnector(String serviceName, Server server, Configuration configuration, String host, int port, int connectionIdleTime, int numberOfAcceptors, int numberOfSelectors, int acceptQueueSize, ConnectionFactory... connectionFactories) {
 
-        HttpConfiguration http_config = new HttpConfiguration();
-        http_config.setRequestHeaderSize(configuration.getInt("service." + serviceName + ".http.requestHeaderSize", http_config.getRequestHeaderSize()));
-
-        ServerConnector connector = new ServerConnector(server, null, null, null, numberOfAcceptors, numberOfSelectors, new  HttpConnectionFactory(http_config));
+        ServerConnector connector = new ServerConnector(server, null, null, null, numberOfAcceptors, numberOfSelectors, connectionFactories);
 
         connector.setAcceptQueueSize(acceptQueueSize);
         connector.setPort(port);
@@ -144,8 +141,12 @@ public enum JettyHttpServerFactory implements HttpServerFactory {
             int numberOfSelectors = configuration.getInt("service." + serviceName + ".http.numberOfSelectors", -1);
             int acceptQueueSize = configuration.getInt("service." + serviceName + ".http.acceptQueueSize", 0);
 
-            ServerConnector connector = getServerConnector(serviceName, server, configuration, host, port, connectionIdleTime, numberOfAcceptors, numberOfSelectors, acceptQueueSize);
+            HttpConfiguration http_config = new HttpConfiguration();
+            http_config.setRequestHeaderSize(configuration.getInt("service." + serviceName + ".http.requestHeaderSize", http_config.getRequestHeaderSize()));
 
+            ServerConnector httpConnector = getServerConnector(serviceName, server, configuration, host, port, connectionIdleTime, numberOfAcceptors, numberOfSelectors, acceptQueueSize, new HttpConnectionFactory(http_config));
+
+            boolean useSSLOnly = configuration.getBoolean("service." + serviceName + ".https.useHttpsOnly", false);
 
             boolean isSSL = StringUtils.isNotBlank(keyStorePath) && StringUtils.isNotBlank(keyStorePassword);
             Connector[] connectors = null;
@@ -162,17 +163,25 @@ public enum JettyHttpServerFactory implements HttpServerFactory {
                 if(addTrustStoreSupport){
                     sslContextFactory.setTrustStorePath(trustStorePath);
                     sslContextFactory.setTrustStorePassword(trustStorePassword);
+                    sslContextFactory.setNeedClientAuth(true);
                 }
 
-                SslConnectionFactory sslConnectionFactory = new SslConnectionFactory(sslContextFactory, "HTTP/1.1");
-                ServerConnector sslConnector = getServerConnector(serviceName, server, configuration, sslHost, sslPort, connectionIdleTime, numberOfAcceptors, numberOfSelectors, acceptQueueSize);
-                Collection<ConnectionFactory> connectionFactories = new ArrayList<>(1);
-                connectionFactories.add(sslConnectionFactory);
-                sslConnector.setConnectionFactories(connectionFactories);
+                HttpConfiguration httpsConfig = new HttpConfiguration();
+                httpsConfig.setSecurePort(sslPort);
+                httpsConfig.setSecureScheme("https");
+                http_config.setRequestHeaderSize(configuration.getInt("service." + serviceName + ".http.requestHeaderSize", http_config.getRequestHeaderSize()));
 
-                connectors = new Connector[]{connector, sslConnector};
+
+                SslConnectionFactory sslConnectionFactory = new SslConnectionFactory(sslContextFactory, "HTTP/1.1");
+                ServerConnector sslConnector = getServerConnector(serviceName, server, configuration, sslHost, sslPort, connectionIdleTime, numberOfAcceptors, numberOfSelectors, acceptQueueSize, sslConnectionFactory, new HttpConnectionFactory(httpsConfig));
+
+                if (useSSLOnly) {
+                    connectors = new Connector[]{sslConnector};
+                } else {
+                    connectors = new Connector[]{httpConnector, sslConnector};
+                }
             } else {
-                connectors = new Connector[]{connector};
+                connectors = new Connector[]{httpConnector};
 
             }
 

@@ -1,8 +1,202 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<NamespaceDefinitions xsi:noNamespaceSchemaLocation="http://ch-infra.il.nds.com/cabResources/CCP_XML.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<NamespaceDefinition>
-		<NamespaceIdentifier version="TBD" name="TBD" />
-		
+<NamespaceDefinitions xsi:noNamespaceSchemaLocation="http://ch-infra.il.nds.com/cabResources/CCP_XML.xsd"
+                      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <NamespaceDefinition>
+        <NamespaceIdentifier version="TBD" name="TBD"/>
 
-	</NamespaceDefinition>
+        <ParameterType name="service.http.base" type="STRUCTURE" description="The default Http Server Structure"
+                       requiresRestart="false">
+            <StructureDefinition>
+                <StructureMemberDefinition name="http.availabilityFilter.isEnabled" type="BOOLEAN" advanced="true"
+                                           description="Determines whether the 'Availability Filter' is enabled or not">
+                    <DefaultValue>
+                        <PrimitiveValue value="true"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
+                <StructureMemberDefinition name="http.flowContextFilter.isEnabled" type="BOOLEAN" advanced="true"
+                                           description="Determines whether the 'FlowContextFilter' is enabled or not">
+                    <DefaultValue>
+                        <PrimitiveValue value="true"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
+                <StructureMemberDefinition name="http.errorHandlingFilter.isEnabled" type="BOOLEAN" advanced="true"
+                                           description="Determines whether the 'ErrorHandlerFilter' is enabled or not">
+                    <DefaultValue>
+                        <PrimitiveValue value="true"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
+                <StructureMemberDefinition name="http.pingFilter.isEnabled" type="BOOLEAN" advanced="true"
+                                           description="Determines whether the 'PingFilter' is enabled or not">
+                    <DefaultValue>
+                        <PrimitiveValue value="true"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
+                <StructureMemberDefinition name="http.pingFilter.enableLogging" type="BOOLEAN" advanced="true"
+                                           description="set to true to enable ping filter logging">
+                    <DefaultValue>
+                        <PrimitiveValue value="false"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
+                <StructureMemberDefinition name="http.requestValidityFilter.isEnabled" type="BOOLEAN" advanced="true"
+                                           description="Determines whether the 'RequestValidityFilter' is enabled or not">
+                    <DefaultValue>
+                        <PrimitiveValue value="true"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
+                <StructureMemberDefinition name="http.monitoringFilter.isEnabled" type="BOOLEAN" advanced="true"
+                                           description="Determines whether the 'MonitoringFilter' is enabled or not">
+                    <DefaultValue>
+                        <PrimitiveValue value="true"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
+                <StructureMemberDefinition name="http.monitoringFilter.className" type="STRING" advanced="true"
+                                           description="Enables option to replace the monitoring filter. This class must extend MonitoringFilter create by infra and sue the same constructor."
+                                           required="false"/>
+                <StructureMemberDefinition name="http.monitoringFilter.baseUri" type="STRING" isArray="true"
+                                           advanced="true"
+                                           description="A list of base Uri's . If the list is not empty the infrastructure  will try and match the base uri with the actual uri. if found the base uri will be the monitoring service/api name."
+                                           required="false"/>
+                <StructureMemberDefinition name="http.monitoringFilter.uniqueUriMonitoringEnabled" type="BOOLEAN"
+                                           advanced="true"
+                                           description="When enabled infrastructure will monitor each unique uri and http method combination as a unique service"
+                                           required="false">
+                    <DefaultValue>
+                        <PrimitiveValue value="false"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
+                <StructureMemberDefinition name="http.serviceDescription" type="STRING" advanced="true"
+                                           description="A description of the service used for monitoring purposes"/>
+                <StructureMemberDefinition name="http.numberOfAcceptors" type="INTEGER" advanced="true"
+                                           description="the number of acceptors (listener threads) that handle the server. It is advised not to set more than twice the number of cores.">
+                    <DefaultValue>
+                        <PrimitiveValue value="1"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
+                <StructureMemberDefinition name="http.numberOfSelectors" type="INTEGER" advanced="true"
+                                           description="the number of acceptors (listener threads) that handle the server. It is advised not to set more than twice the number of cores.">
+                    <DefaultValue>
+                        <PrimitiveValue value="-1"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
+                <StructureMemberDefinition name="http.acceptQueueSize" type="INTEGER" advanced="true"
+                                           description="The TCP layer Socket backlog. Used when writes are faster than reads.">
+                    <DefaultValue>
+                        <PrimitiveValue value="0"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
+                <StructureMemberDefinition name="http.minThreads" type="INTEGER" advanced="true"
+                                           description="minimal number of http server worker threads">
+                    <DefaultValue>
+                        <PrimitiveValue value="100"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
+                <StructureMemberDefinition name="http.maxThreads" type="INTEGER" advanced="true"
+                                           description="maximum number of http server worker threads">
+                    <DefaultValue>
+                        <PrimitiveValue value="1000"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
+                <StructureMemberDefinition name="http.port" type="INTEGER" description="http service port">
+                    <DefaultValue>
+                        <PrimitiveValue value="8080"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
+                <StructureMemberDefinition name="http.host" type="STRING" advanced="true"
+                                           description="http server host - useful when binding with specific NIC or for VIP support"
+                                           required="false"/>
+                <StructureMemberDefinition name="https.port" type="INTEGER" description="https service port">
+                    <DefaultValue>
+                        <PrimitiveValue value="8090"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
+                <StructureMemberDefinition name="https.host" type="STRING" advanced="true"
+                                           description="https server host - useful when binding with specific NIC or for VIP support"
+                                           required="false"/>
+                <StructureMemberDefinition name="https.useHttpsOnly" type="BOOLEAN" advanced="true"
+                                           description="when set to true and https data is set, server will only expose https interface"
+                                           required="false">
+                    <DefaultValue>
+                        <PrimitiveValue value="false"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
+                <StructureMemberDefinition name="http.connectionIdleTime" type="INTEGER" advanced="true"
+                                           description="idle time after which the connection will be closed"
+                                           unit="millis">
+                    <DefaultValue>
+                        <PrimitiveValue value="300000"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
+                <StructureMemberDefinition name="http.traceFilter.isEnabled" type="BOOLEAN" advanced="true"
+                                           description="Determines whether the 'TraceFilter' is enabled or not">
+                    <DefaultValue>
+                        <PrimitiveValue value="false"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
+                <StructureMemberDefinition name="http.traceFilter.maxBodyLength" type="INTEGER" advanced="true"
+                                           description=" maximum body length to be logged when using trace filter"
+                                           unit="bytes" required="false">
+                    <DefaultValue>
+                        <PrimitiveValue value="1024"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
+                <StructureMemberDefinition name="http.traceFilter.textContentTypes" type="STRING" advanced="true"
+                                           description=" text content types list - if there is no match between the content types in the list and the actual content received in a request - trace will not be logged"
+                                           isArray="true" required="false"/>
+                <StructureMemberDefinition name="http.traceFilter.printInHex" type="BOOLEAN" advanced="true"
+                                           description="when set to true binary data will be turned into hex."
+                                           required="false"/>
+                <StructureMemberDefinition name="http.requestValidityFilter.maxContentLength" type="INTEGER"
+                                           advanced="true"
+                                           description="maximum content length allowed (enforced by RequestValidityFilter)"
+                                           unit="bytes">
+                    <DefaultValue>
+                        <PrimitiveValue value="100000"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
+                <StructureMemberDefinition name="http.crossOriginFilter.isEnabled" type="BOOLEAN" advanced="true"
+                                           description="Determines whether the 'CrossOriginFilter' is enabled or not">
+                    <DefaultValue>
+                        <PrimitiveValue value="false"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
+                <StructureMemberDefinition name="http.crossOriginFilter.allowedOrigins" type="STRING" advanced="true"
+                                           description="list of origins that are allowed to access the resources. Default value is '*', meaning all origin"
+                                           isArray="true" required="false"/>
+                <StructureMemberDefinition name="http.crossOriginFilter.allowedMethods" type="STRING" advanced="true"
+                                           description="list of HTTP methods that are allowed to be used when accessing the resources"
+                                           isArray="true" required="false"/>
+                <StructureMemberDefinition name="http.crossOriginFilter.allowedHeaders" type="STRING" advanced="true"
+                                           description="list of HTTP headers that are allowed to be specified when accessing the resources"
+                                           isArray="true" required="false"/>
+                <StructureMemberDefinition name="http.crossOriginFilter.preflightMaxAge" type="INTEGER" advanced="true"
+                                           description="the number of seconds that preflight requests can be cached by the client"
+                                           unit="seconds" required="false"/>
+                <StructureMemberDefinition name="http.crossOriginFilter.allowCredentials" type="BOOLEAN" advanced="true"
+                                           description="indicating if the resource allows requests with credentials"
+                                           required="false"/>
+                <StructureMemberDefinition name="http.crossOriginFilter.exposedHeaders" type="STRING" advanced="true"
+                                           description="list of HTTP headers that are allowed to be exposed on the client"
+                                           isArray="true" required="false"/>
+                <StructureMemberDefinition name="http.crossOriginFilter.chainPreflight" type="BOOLEAN" advanced="true"
+                                           description="if true preflight requests are chained to their target resource for normal handling (as an OPTION request). Otherwise the filter will response to the preflight"
+                                           required="false"/>
+                <StructureMemberDefinition name="http.httpMethodFilter.isEnabled" type="BOOLEAN" advanced="true"
+                                           description="Determines whether the 'HttpMethodFilter' is enabled or not">
+                    <DefaultValue>
+                        <PrimitiveValue value="true"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
+                <StructureMemberDefinition name="http.httpMethodFilter.methods" type="STRING" advanced="true"
+                                           description="list of methods that are NOT allowed. By default TRACE method is included"
+                                           isArray="true" required="false"/>
+                <StructureMemberDefinition name="http.requestHeaderSize" type="INTEGER" advanced="true"
+                                           description="The max header size allowed for incoming requests">
+                    <DefaultValue>
+                        <PrimitiveValue value="6144"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
+            </StructureDefinition>
+
+        </ParameterType>
+    </NamespaceDefinition>
 </NamespaceDefinitions>
