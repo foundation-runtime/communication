@@ -136,7 +136,7 @@ public enum JettyHttpServerFactory implements HttpServerFactory {
             String host = configuration.getString("service." + serviceName + ".http.host", "0.0.0.0");
             int port = configuration.getInt("service." + serviceName + ".http.port", 8080);
             int connectionIdleTime = configuration.getInt("service." + serviceName + ".http.connectionIdleTime", 180000);
-            boolean isBlockingChannelConnector = configuration.getBoolean("service." + serviceName + ".http.isBlockingChannelConnector", false);
+//            boolean isBlockingChannelConnector = configuration.getBoolean("service." + serviceName + ".http.isBlockingChannelConnector", false);
             int numberOfAcceptors = configuration.getInt("service." + serviceName + ".http.numberOfAcceptors", 1);
             int numberOfSelectors = configuration.getInt("service." + serviceName + ".http.numberOfSelectors", -1);
             int acceptQueueSize = configuration.getInt("service." + serviceName + ".http.acceptQueueSize", 0);
