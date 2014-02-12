@@ -67,35 +67,52 @@ public class ApacheHttpClient extends AbstractHttpClient<HttpRequest, HttpRespon
         requestBuilder = requestBuilder.setSocketTimeout(metadata.getReadTimeout());
 
         boolean addSslSupport = StringUtils.isNotEmpty(metadata.getKeyStorePath()) && StringUtils.isNotEmpty(metadata.getKeyStorePassword());
+
+        boolean addTrustSupport = StringUtils.isNotEmpty(metadata.getTrustStorePath()) && StringUtils.isNotEmpty(metadata.getTrustStorePassword());
+
         SSLContext sslContext = null;
 
-        if (addSslSupport) {
+        try {
 
-            try {
-                KeyStore keyStore = KeyStore.getInstance("JKS");
+            String keystoreType = "JKS";
+            if (addSslSupport && addTrustSupport) {
+
+                KeyStore keyStore = KeyStore.getInstance(keystoreType);
                 keyStore.load(new FileInputStream(metadata.getKeyStorePath()), metadata.getKeyStorePassword().toCharArray());
 
-                boolean addTrustSupport = StringUtils.isNotEmpty(metadata.getTrustStorePath()) && StringUtils.isNotEmpty(metadata.getTrustStorePassword());
-                if (addTrustSupport) {
-                    KeyStore trustStore = KeyStore.getInstance("JKS");
-                    trustStore.load(new FileInputStream(metadata.getTrustStorePath()), metadata.getTrustStorePassword().toCharArray());
+                KeyStore trustStore = KeyStore.getInstance(keystoreType);
+                trustStore.load(new FileInputStream(metadata.getTrustStorePath()), metadata.getTrustStorePassword().toCharArray());
 
-                    sslContext = SSLContexts.custom()
-                            .useTLS()
-                            .loadTrustMaterial(keyStore)
-                            .loadTrustMaterial(trustStore)
-                            .build();
-                } else {
-                    sslContext = SSLContexts.custom()
-                            .useTLS()
-                            .loadTrustMaterial(keyStore)
-                            .build();
-                }
-            } catch (Exception e) {
-                LOGGER.error("can't set TLS Support. Error is: {}", e, e);
+                sslContext = SSLContexts.custom()
+                        .useTLS()
+                        .loadKeyMaterial(keyStore, metadata.getKeyStorePassword().toCharArray())
+                        .loadTrustMaterial(trustStore)
+                        .build();
+
+            } else if (addSslSupport) {
+                KeyStore keyStore = KeyStore.getInstance(keystoreType);
+                keyStore.load(new FileInputStream(metadata.getKeyStorePath()), metadata.getKeyStorePassword().toCharArray());
+
+                sslContext = SSLContexts.custom()
+                        .useTLS()
+                        .loadKeyMaterial(keyStore, metadata.getKeyStorePassword().toCharArray())
+                        .build();
+
+            } else if (addTrustSupport) {
+
+                KeyStore trustStore = KeyStore.getInstance(keystoreType);
+                trustStore.load(new FileInputStream(metadata.getTrustStorePath()), metadata.getTrustStorePassword().toCharArray());
+
+                sslContext = SSLContexts.custom()
+                        .useTLS()
+                        .loadTrustMaterial(trustStore)
+                        .build();
+
             }
 
 
+        } catch (Exception e) {
+            LOGGER.error("can't set TLS Support. Error is: {}", e, e);
         }
 
         httpClient = HttpClientBuilder.create()
