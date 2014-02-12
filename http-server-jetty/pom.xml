@@ -31,12 +31,12 @@
     <developers>
         <developer>
             <id>yogen</id>
-            <name>{your full name}</name>
+            <name>Yair Ogen</name>
             <email>yaogen@cisco.com</email>
             <organization>Cisco</organization>
             <organizationUrl>http://www.cisco.com</organizationUrl>
             <roles>
-                <role>{your role}</role>
+                <role>Developer</role>
             </roles>
         </developer>
     </developers>
