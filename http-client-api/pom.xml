@@ -41,7 +41,10 @@
         </developer>
     </developers>
     <scm>
-        <url>https://github.com/foundation-runtime/communication/http-client-api</url>
+        <connection>scm:git:ssh://github.com:foundation-runtime/communication.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com:foundation-runtime/communication.git</developerConnection>
+        <url>https://github.com/foundation-runtime/communication.git</url>
+        <tag>HEAD</tag>
     </scm>
     <organization>
         <name>Cisco</name>

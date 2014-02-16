@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd" xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd"
+         xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <parent>
-		<groupId>com.cisco.vss.foundation</groupId>
-		<artifactId>foundation-common-base</artifactId>
-		<version>0.0.0-2-SNAPSHOT</version>
+        <groupId>com.cisco.vss.foundation</groupId>
+        <artifactId>foundation-common-base</artifactId>
+        <version>0.0.0-2-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.cisco.vss.foundation</groupId>
@@ -41,7 +42,10 @@
         </developer>
     </developers>
     <scm>
-        <url>https://github.com/foundation-runtime/communication/http-server-api</url>
+        <connection>scm:git:ssh://github.com:foundation-runtime/communication.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com:foundation-runtime/communication.git</developerConnection>
+        <url>https://github.com/foundation-runtime/communication.git</url>
+        <tag>HEAD</tag>
     </scm>
     <organization>
         <name>Cisco</name>
@@ -80,5 +84,5 @@
             <artifactId>commons-codec</artifactId>
             <version>1.9</version>
         </dependency>
-    </dependencies>    
+    </dependencies>
 </project>
