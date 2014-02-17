@@ -21,7 +21,7 @@
         </license>
     </licenses>
     <issueManagement>
-        <system>{put your issue tracking system here - i.e. CQ or JIRA}
+        <system>Github
         </system>
         <url>{URL in JIRA or Product name in CQ}</url>
     </issueManagement>
