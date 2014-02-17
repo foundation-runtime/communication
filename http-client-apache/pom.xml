@@ -115,8 +115,8 @@
         </dependency>
         <dependency>
             <groupId>com.cisco.vss.foundation</groupId>
-            <artifactId>logging-lib</artifactId>
-            <version>${logging-lib-version}</version>
+            <artifactId>logging-log4j</artifactId>
+            <version>${logging-log4j-version}</version>
             <scope>test</scope>
         </dependency>
        <!-- <dependency>
