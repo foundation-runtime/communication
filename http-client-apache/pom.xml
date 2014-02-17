@@ -10,7 +10,7 @@
     <artifactId>http-client-apache</artifactId>
     <name>http-client-apache</name>
     <version>0.0.0-2-SNAPSHOT</version>
-    <description>This project is...</description>
+    <description>This project is the apache http client implementation library in the cisco vss foundation runtime</description>
     <url>https://github.com/foundation-runtime/communication/http-client-apache</url>
     <packaging>jar</packaging>
     <licenses>
@@ -31,12 +31,12 @@
     <developers>
         <developer>
             <id>yogen</id>
-            <name>{your full name}</name>
+            <name>Yair Ogen</name>
             <email>yaogen@cisco.com</email>
             <organization>Cisco</organization>
             <organizationUrl>http://www.cisco.com</organizationUrl>
             <roles>
-                <role>{your role}</role>
+                <role>Developer</role>
             </roles>
         </developer>
     </developers>

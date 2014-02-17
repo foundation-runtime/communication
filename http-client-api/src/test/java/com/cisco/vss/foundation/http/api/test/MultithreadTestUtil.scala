@@ -112,6 +112,9 @@ class ClientActor[S <: HttpRequest, R <: HttpResponse] extends Actor {
       val request = HttpRequest.newBuilder()
         .httpMethod(HttpMethod.POST)
         .uri("/test")
+        .header("key1","value1")
+        .header("key1","value1-1")
+//        .queryParams("")
         .contentType("text/html")
         .build();
       val response = m.client.executeWithLoadBalancer(request.asInstanceOf[S])

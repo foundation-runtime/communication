@@ -216,7 +216,11 @@ class BasicHttpTestUtil[S <: HttpRequest, R <: HttpResponse] {
 
     Thread.sleep(1000)
 
-    val request = HttpRequest.newBuilder().httpMethod(HttpMethod.POST).uri("/test").entity(port1.toString).build();
+    val request = HttpRequest.newBuilder()
+      .httpMethod(HttpMethod.POST)
+      .uri("/test")
+      .entity(port1.toString)
+      .build();
 
     var groupBy = Map[String, List[String]]()
 
