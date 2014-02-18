@@ -34,28 +34,20 @@ import java.util.Map;
 /**
  * Created by Yair Ogen on 1/16/14.
  */
-public class ApacheHttpClient extends AbstractHttpClient<HttpRequest, HttpResponse> {
+class ApacheHttpClient extends AbstractHttpClient<HttpRequest, HttpResponse> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ApacheHttpClient.class);
     private CloseableHttpClient httpClient = null;
 
-    public ApacheHttpClient(String apiName) {
-        super(apiName);
+
+    ApacheHttpClient(String apiName, Configuration configuration, boolean enableLoadBalancing) {
+        super(apiName, configuration, enableLoadBalancing);
         configureClient();
     }
 
-    public ApacheHttpClient(String apiName, Configuration configuration) {
-        super(apiName, configuration);
-        configureClient();
-    }
 
-    public ApacheHttpClient(String apiName, HighAvailabilityStrategy.STRATEGY_TYPE strategyType) {
-        super(apiName, strategyType);
-        configureClient();
-    }
-
-    public ApacheHttpClient(String apiName, HighAvailabilityStrategy.STRATEGY_TYPE strategyType, Configuration configuration) {
-        super(apiName, strategyType, configuration);
+    ApacheHttpClient(String apiName, HighAvailabilityStrategy.STRATEGY_TYPE strategyType, Configuration configuration, boolean enableLoadBalancing) {
+        super(apiName, strategyType, configuration, enableLoadBalancing);
         configureClient();
     }
 
@@ -125,7 +117,7 @@ public class ApacheHttpClient extends AbstractHttpClient<HttpRequest, HttpRespon
     }
 
     @Override
-    public HttpResponse execute(HttpRequest request) throws IOException {
+    public HttpResponse executeDirect(HttpRequest request) {
 
         HttpUriRequest httpUriRequest = null;
 
@@ -134,8 +126,12 @@ public class ApacheHttpClient extends AbstractHttpClient<HttpRequest, HttpRespon
 
         httpUriRequest = buildHttpUriRequest(request, joiner, requestUri);
 
-        CloseableHttpResponse response = httpClient.execute(httpUriRequest);
-        return new ApacheHttpResponse(response, requestUri);
+        try {
+            CloseableHttpResponse response = httpClient.execute(httpUriRequest);
+            return new ApacheHttpResponse(response, requestUri);
+        } catch (IOException e) {
+            throw new ClientException(e.toString(), e);
+        }
     }
 
     private HttpUriRequest buildHttpUriRequest(HttpRequest request, Joiner joiner, URI requestUri) {

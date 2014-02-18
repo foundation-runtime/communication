@@ -15,7 +15,7 @@ class BasicHttpTestUtil[S <: HttpRequest, R <: HttpResponse] {
 
   def basicGoogleFetch(httpClient: HttpClient[S, R]) {
     val request: HttpRequest = HttpRequest.newBuilder().httpMethod(HttpMethod.GET).uri("http://www.google.com").build();
-    val response: HttpResponse = httpClient.execute(request.asInstanceOf[S])
+    val response: HttpResponse = httpClient.executeDirect(request.asInstanceOf[S])
     if (response.isSuccess) {
       val result = response.getResponseAsString
       println(s"success:\n$result")

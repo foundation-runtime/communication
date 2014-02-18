@@ -12,21 +12,38 @@ import org.apache.commons.configuration.Configuration;
  */
 public class ApacheHttpClientFactory {
 
+    public static HttpClient<HttpRequest,ApacheHttpResponse> createHttpClient(String apiName, boolean enableLoadBalancing){
+        return createHttpClient(apiName, ConfigurationFactory.getConfiguration(), enableLoadBalancing);
+    }
+
     public static HttpClient<HttpRequest,ApacheHttpResponse> createHttpClient(String apiName){
         return createHttpClient(apiName, ConfigurationFactory.getConfiguration());
     }
 
-    public static HttpClient<HttpRequest,ApacheHttpResponse> createHttpClient(String apiName, Configuration configuration){
-        return createHttpClient(apiName, HighAvailabilityStrategy.STRATEGY_TYPE.ROUND_ROBIN, configuration);
+    public static HttpClient<HttpRequest,ApacheHttpResponse> createHttpClient(String apiName, Configuration configuration, boolean enableLoadBalancing){
+        return createHttpClient(apiName, HighAvailabilityStrategy.STRATEGY_TYPE.ROUND_ROBIN, configuration, enableLoadBalancing);
     }
 
+    public static HttpClient<HttpRequest,ApacheHttpResponse> createHttpClient(String apiName, Configuration configuration){
+        return createHttpClient(apiName, configuration, true);
+    }
+
+    public static HttpClient<HttpRequest,ApacheHttpResponse> createHttpClient(String apiName, HighAvailabilityStrategy.STRATEGY_TYPE highAvailabilityStrategyType){
+        return createHttpClient(apiName, highAvailabilityStrategyType, ConfigurationFactory.getConfiguration());
+    }
+
+
     public static HttpClient<HttpRequest,ApacheHttpResponse> createHttpClient(String apiName, HighAvailabilityStrategy.STRATEGY_TYPE highAvailabilityStrategyType, Configuration configuration){
+        return createHttpClient(apiName, highAvailabilityStrategyType, configuration, true);
+    }
+
+    public static HttpClient<HttpRequest,ApacheHttpResponse> createHttpClient(String apiName, HighAvailabilityStrategy.STRATEGY_TYPE highAvailabilityStrategyType, Configuration configuration, boolean enableLoadBalancing){
         try {
             HttpClient client = null;
             if(highAvailabilityStrategyType == null){
-                client = new ApacheHttpClient(apiName, configuration);
+                client = new ApacheHttpClient(apiName, configuration, enableLoadBalancing);
             }else{
-                client = new ApacheHttpClient(apiName, highAvailabilityStrategyType, configuration);
+                client = new ApacheHttpClient(apiName, highAvailabilityStrategyType, configuration, enableLoadBalancing);
             }
             return client;
         } catch (Exception e) {
@@ -35,7 +52,4 @@ public class ApacheHttpClientFactory {
 
     }
 
-    public static HttpClient<HttpRequest,ApacheHttpResponse> createHttpClient(String apiName, HighAvailabilityStrategy.STRATEGY_TYPE highAvailabilityStrategyType){
-        return createHttpClient(apiName, highAvailabilityStrategyType, ConfigurationFactory.getConfiguration());
-    }
 }

@@ -47,38 +47,7 @@ public abstract class AbstractHighAvailabilityStrategy<S extends HttpRequest> im
 		String errorMessage = "Failed to invoke  '" + apiName + "' " + hostPort;
 		String warnMessage = "Error occurred while invoking '" + apiName + "' " + hostPort;
 
-		// handle InvalidClassException - prevent retries - CQ: ULive00538051
-		if (throwable instanceof RemoteAccessException) {
-
-			Throwable root = null;
-
-			Throwable cause = throwable.getCause();
-
-			if (cause instanceof ServerError) {
-				root = new ClientException("Got a fatal error in the server.", cause);
-			} else if (cause instanceof RuntimeException) {
-				root = cause;
-			}
-
-			if (root != null) {
-				LOGGER.error(errorMessage, throwable);
-				throw new ClientException(root.toString(),root);
-			}
-
-		}
-
-		if (throwable instanceof RemoteInvocationFailureException) {
-			LOGGER.error(errorMessage, throwable);
-            throw new ClientException(throwable.getCause().toString(),throwable.getCause());
-		}
-
-		// workaround to resolve strange problem of lease being cast to a
-		// applicative response object in the dynamic proxy.
-		// cause could not be found hence this workaround to allow retries and
-		// eventually failover to a different server
-		if (throwable instanceof ClassCastException && throwable.getMessage().contains("java.rmi.dgc.Lease cannot be cast to")) {
-			LOGGER.debug("retrying in special case of 'java.rmi.dgc.Lease cannot be cast'");
-		} else if (throwable instanceof UnresolvedAddressException) {
+		if (throwable instanceof UnresolvedAddressException) {
 			LOGGER.debug("retrying in special case of 'UnresolvedAddressException'");
 		} else {
 
@@ -93,7 +62,7 @@ public abstract class AbstractHighAvailabilityStrategy<S extends HttpRequest> im
 			// if you caught NoActiveServersException but you are NOT
 			// firstInChain - then throw back error and don't try to reconnect
 			if (throwable instanceof NoActiveServersDeadEndException || throwable instanceof NoActiveServersIOException
-					|| (!(throwable instanceof RemoteAccessException) && !(throwable instanceof NoActiveServersException) && !(throwable instanceof IOException) && (throwable.getCause() != null && throwable.getCause() instanceof IOException) || (/*!firstInChain &&*/ throwable instanceof NoActiveServersException))) {
+					|| (!(throwable instanceof RemoteAccessException) && !(throwable instanceof NoActiveServersException) && !(throwable instanceof IOException) && (throwable.getCause() != null && throwable.getCause().getCause() != null && !(throwable.getCause().getCause() instanceof IOException)) && (throwable.getCause() != null && !(throwable.getCause() instanceof IOException)) || (/*!firstInChain &&*/ throwable instanceof NoActiveServersException))) {
 				LOGGER.error(errorMessage, throwable);
                 throw new ClientException(throwable.toString(),throwable);
 			}

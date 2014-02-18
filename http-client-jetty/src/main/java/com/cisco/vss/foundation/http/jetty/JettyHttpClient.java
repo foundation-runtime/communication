@@ -7,6 +7,7 @@ import com.cisco.vss.foundation.loadbalancer.HighAvailabilityStrategy;
 import com.cisco.vss.foundation.loadbalancer.InternalServerProxy;
 import com.cisco.vss.foundation.loadbalancer.RequestTimeoutException;
 import com.google.common.base.Joiner;
+import org.apache.commons.configuration.Configuration;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.api.ContentResponse;
@@ -31,12 +32,13 @@ public class JettyHttpClient<S extends HttpRequest, R extends HttpResponse> exte
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JettyHttpClient.class);
 
-    public JettyHttpClient(String apiName) {
-        super(apiName);
+    public JettyHttpClient(String apiName, Configuration configuration, boolean enableLoadBalancing) {
+        super(apiName, configuration, enableLoadBalancing);
         configureClient();
     }
-    public JettyHttpClient(String apiName, HighAvailabilityStrategy.STRATEGY_TYPE strategyType) {
-        super(apiName, strategyType);
+
+    public JettyHttpClient(String apiName, HighAvailabilityStrategy.STRATEGY_TYPE strategyType, Configuration configuration, boolean enableLoadBalancing) {
+        super(apiName, strategyType, configuration, enableLoadBalancing);
         configureClient();
     }
 
@@ -77,7 +79,7 @@ public class JettyHttpClient<S extends HttpRequest, R extends HttpResponse> exte
     }
 
     @Override
-    public HttpResponse execute(HttpRequest request) throws IOException{
+    public HttpResponse executeDirect(HttpRequest request){
 
         Request httpRequest = prepareRequest(request);
 

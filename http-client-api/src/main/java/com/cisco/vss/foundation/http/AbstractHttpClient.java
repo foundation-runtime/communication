@@ -31,21 +31,15 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
     protected String apiName = "HTTP";
     protected InternalServerProxyMetadata metadata;
     protected Configuration configuration;
+    protected boolean enableLoadBalancing = true;
 
-    public AbstractHttpClient(String apiName) {
-        this(apiName, HighAvailabilityStrategy.STRATEGY_TYPE.ROUND_ROBIN);
+    public AbstractHttpClient(String apiName, Configuration configuration, boolean enableLoadBalancing) {
+        this(apiName, HighAvailabilityStrategy.STRATEGY_TYPE.ROUND_ROBIN, configuration, enableLoadBalancing);
     }
 
-    public AbstractHttpClient(String apiName, Configuration configuration) {
-        this(apiName, HighAvailabilityStrategy.STRATEGY_TYPE.ROUND_ROBIN, configuration);
-    }
-
-    public AbstractHttpClient(String apiName, HighAvailabilityStrategy.STRATEGY_TYPE strategyType) {
-        this(apiName, strategyType, ConfigurationFactory.getConfiguration());
-    }
-
-    public AbstractHttpClient(String apiName, HighAvailabilityStrategy.STRATEGY_TYPE strategyType, Configuration configuration) {
+    public AbstractHttpClient(String apiName, HighAvailabilityStrategy.STRATEGY_TYPE strategyType, Configuration configuration, boolean enableLoadBalancing) {
         this.apiName = apiName;
+        this.enableLoadBalancing = enableLoadBalancing;
         if(configuration == null){
             this.configuration = ConfigurationFactory.getConfiguration();
         }else{
@@ -99,7 +93,7 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
                 request = updateRequestUri(request, serverProxy);
 
                 LOGGER.info("sending request: {}", request.getUri());
-                result = execute(request);
+                result = executeDirect(request);
                 LOGGER.info("got response: {}", result.getRequestedURI());
 //                if (lastKnownErrorThreadLocal.get() != null) {
 //                    lastCaugtException = handleException(serviceMethod, serverProxy, lastKnownErrorThreadLocal.get());
@@ -161,6 +155,15 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
 //    }
 
     public abstract void execute(S request, ResponseCallback<R> responseCallback, HighAvailabilityStrategy highAvailabilityStrategy, String apiName);
+
+    @Override
+    public R execute(S request) {
+        if(enableLoadBalancing){
+            return executeWithLoadBalancer(request);
+        }else{
+            return executeDirect(request);
+        }
+    }
 
     protected abstract void configureClient();
 

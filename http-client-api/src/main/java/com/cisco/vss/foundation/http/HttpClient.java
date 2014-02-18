@@ -9,7 +9,9 @@ import java.io.IOException;
  */
 public interface HttpClient<S extends HttpRequest, R extends HttpResponse> {
 
-    R execute(S request) throws IOException;
+    R execute(S request);
+
+    R executeDirect(S request);
 
     R executeWithLoadBalancer(S request);
 
