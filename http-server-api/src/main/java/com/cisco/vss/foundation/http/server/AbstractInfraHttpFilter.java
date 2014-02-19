@@ -22,13 +22,13 @@ public abstract class AbstractInfraHttpFilter implements Filter {
 
 	protected String serviceName = null;
 	private String enabledKey = null;
-	private static boolean filterConfigurationDynamicRefreshEnabled = ConfigurationFactory.getConfiguration().getBoolean("service.http.filterConfigurationDynamicRefreshEnabled", false);
+	private static boolean filterConfigurationDynamicRefreshEnabled = ConfigurationFactory.getConfiguration().getBoolean("http.filterConfigurationDynamicRefreshEnabled", false);
 	protected Map<String, String> filterConfigCache = new HashMap<String, String>();
 	private Configuration configuration = ConfigurationFactory.getConfiguration();
 
 	public AbstractInfraHttpFilter(String serviceName) {
 		this.serviceName = serviceName;
-		this.enabledKey = "service." + serviceName + "." + getKillSwitchFlag();
+		this.enabledKey = serviceName + "." + getKillSwitchFlag();
         String defaultValue = isEnabledByDefault() + "";
         boolean enabled = getConfigValue(enabledKey, Boolean.valueOf(defaultValue));
 

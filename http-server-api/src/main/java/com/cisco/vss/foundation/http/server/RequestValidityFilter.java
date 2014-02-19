@@ -12,7 +12,7 @@ import java.io.IOException;
 
 /**
  * Filter that filters too long requests. Default size is 100000 (100K). You can
- * override the default by using "service.http.maxContentLength" parameter in
+ * override the default by using "http.maxContentLength" parameter in
  * your config file.
  * 
  * @author Yair Ogen
@@ -28,8 +28,8 @@ public class RequestValidityFilter extends AbstractInfraHttpFilter {
 
 	@Override
 	public void doFilterImpl(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-//		final int contentLimit = ConfigurationFactory.getConfiguration().getInt("service." + serviceName + ".http.requestValidityFilter.maxContentLength", 100000);
-		final int contentLimit = Integer.parseInt(getConfigValue("service." + serviceName + ".http.requestValidityFilter.maxContentLength", "100000"));
+//		final int contentLimit = ConfigurationFactory.getConfiguration().getInt(serviceName + ".http.requestValidityFilter.maxContentLength", 100000);
+		final int contentLimit = Integer.parseInt(getConfigValue(serviceName + ".http.requestValidityFilter.maxContentLength", "100000"));
 		final int contentLength = request.getContentLength();
 		if (contentLength < -1 || contentLength > contentLimit) {
 			LOGGER.error("The content length of the request, {}, is larger than the max allowed - {}", contentLength, contentLimit);

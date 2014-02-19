@@ -5,7 +5,7 @@ import com.cisco.vss.foundation.http.api.test.{MultithreadTestUtil, BasicHttpTes
 import com.cisco.vss.foundation.http.HttpRequest
 import com.cisco.vss.foundation.http.jetty.{JettyHttpClientFactory, JettyHttpResponse}
 import org.slf4j.LoggerFactory
-import com.cisco.vss.foundation.loadbalancer.{HighAvailabilityStrategy, RequestTimeoutException, FailOverStrategy, NoActiveServersException}
+import com.cisco.vss.foundation.loadbalancer.{LoadBalancerStrategy, RequestTimeoutException, FailOverStrategy, NoActiveServersException}
 import com.cisco.vss.foundation.configuration.ConfigurationFactory
 
 /**
@@ -45,7 +45,7 @@ class JettyClientTest {
   @Test
   def realServerInvokePostFailOver() {
 
-    val clientFailOverTest = JettyHttpClientFactory.createHttpClient("clientFailOverTest", HighAvailabilityStrategy.STRATEGY_TYPE.FAIL_OVER)
+    val clientFailOverTest = JettyHttpClientFactory.createHttpClient("clientFailOverTest", LoadBalancerStrategy.STRATEGY_TYPE.FAIL_OVER)
     httpTestUtil.realServerInvokePostFailOver(clientFailOverTest)
 
   }

@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * This class holds all the metadata for a given client configuration. see wiki for more info.
  * Created by Yair Ogen on 1/20/14.
  */
 public class InternalServerProxyMetadata {
@@ -24,7 +25,7 @@ public class InternalServerProxyMetadata {
     private String keyStorePassword = "";
     private String trustStorePath = "";
     private String trustStorePassword = "";
-    private List<Pair<String, Integer>> hostAndPortPairs = new ArrayList<Pair<String, Integer>>(3);
+    private List<Pair<String, Integer>> hostAndPortPairs = null;
 
     public long getIdleTimeout() {
         return idleTimeout;

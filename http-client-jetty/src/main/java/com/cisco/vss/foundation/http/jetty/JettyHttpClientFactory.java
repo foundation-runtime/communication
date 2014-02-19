@@ -4,7 +4,7 @@ import com.cisco.vss.foundation.configuration.ConfigurationFactory;
 import com.cisco.vss.foundation.http.ClientException;
 import com.cisco.vss.foundation.http.HttpClient;
 import com.cisco.vss.foundation.http.HttpRequest;
-import com.cisco.vss.foundation.loadbalancer.HighAvailabilityStrategy;
+import com.cisco.vss.foundation.loadbalancer.LoadBalancerStrategy;
 import org.apache.commons.configuration.Configuration;
 
 /**
@@ -21,23 +21,23 @@ public class JettyHttpClientFactory {
     }
 
     public static HttpClient<HttpRequest,JettyHttpResponse> createHttpClient(String apiName, Configuration configuration, boolean enableLoadBalancing){
-        return createHttpClient(apiName, HighAvailabilityStrategy.STRATEGY_TYPE.ROUND_ROBIN, configuration, enableLoadBalancing);
+        return createHttpClient(apiName, LoadBalancerStrategy.STRATEGY_TYPE.ROUND_ROBIN, configuration, enableLoadBalancing);
     }
 
     public static HttpClient<HttpRequest,JettyHttpResponse> createHttpClient(String apiName, Configuration configuration){
         return createHttpClient(apiName, configuration, true);
     }
 
-    public static HttpClient<HttpRequest,JettyHttpResponse> createHttpClient(String apiName, HighAvailabilityStrategy.STRATEGY_TYPE highAvailabilityStrategyType){
+    public static HttpClient<HttpRequest,JettyHttpResponse> createHttpClient(String apiName, LoadBalancerStrategy.STRATEGY_TYPE highAvailabilityStrategyType){
         return createHttpClient(apiName, highAvailabilityStrategyType, ConfigurationFactory.getConfiguration());
     }
 
-    public static HttpClient<HttpRequest,JettyHttpResponse> createHttpClient(String apiName, HighAvailabilityStrategy.STRATEGY_TYPE highAvailabilityStrategyType, Configuration configuration){
+    public static HttpClient<HttpRequest,JettyHttpResponse> createHttpClient(String apiName, LoadBalancerStrategy.STRATEGY_TYPE highAvailabilityStrategyType, Configuration configuration){
         return createHttpClient(apiName, highAvailabilityStrategyType, configuration, true);
     }
 
 
-    public static HttpClient<HttpRequest,JettyHttpResponse> createHttpClient(String apiName, HighAvailabilityStrategy.STRATEGY_TYPE highAvailabilityStrategyType, Configuration configuration, boolean enableLoadBalancing){
+    public static HttpClient<HttpRequest,JettyHttpResponse> createHttpClient(String apiName, LoadBalancerStrategy.STRATEGY_TYPE highAvailabilityStrategyType, Configuration configuration, boolean enableLoadBalancing){
         ConfigurationFactory.getConfiguration();
         try {
             HttpClient client = null;

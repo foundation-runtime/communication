@@ -4,7 +4,7 @@
     <NamespaceDefinition>
         <NamespaceIdentifier version="TBD" name="TBD"/>
 
-        <ParameterType name="service.http.base" type="STRUCTURE" description="The default Http Server Structure"
+        <ParameterType name="http.base" type="STRUCTURE" description="The default Http Server Structure"
                        requiresRestart="false">
             <StructureDefinition>
                 <StructureMemberDefinition name="http.availabilityFilter.isEnabled" type="BOOLEAN" advanced="true"

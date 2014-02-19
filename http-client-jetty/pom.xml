@@ -4,13 +4,13 @@
     <parent>
         <groupId>com.cisco.vss.foundation</groupId>
         <artifactId>foundation-common-base</artifactId>
-        <version>0.0.0-2-SNAPSHOT</version>
+        <version>0.0.0-3-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.cisco.vss.foundation</groupId>
     <artifactId>http-client-jetty</artifactId>
     <name>http-client-jetty</name>
-    <version>0.0.0-2-SNAPSHOT</version>
+    <version>0.0.0-3-SNAPSHOT</version>
     <description>This project is the jetty http client implementation library in the cisco vss foundation runtime</description>
     <url>https://github.com/foundation-runtime/communication/http-client-jetty</url>
     <packaging>jar</packaging>

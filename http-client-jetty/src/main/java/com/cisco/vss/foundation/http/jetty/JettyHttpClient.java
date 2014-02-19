@@ -3,7 +3,7 @@ package com.cisco.vss.foundation.http.jetty;
 import com.cisco.vss.foundation.flowcontext.FlowContext;
 import com.cisco.vss.foundation.flowcontext.FlowContextFactory;
 import com.cisco.vss.foundation.http.*;
-import com.cisco.vss.foundation.loadbalancer.HighAvailabilityStrategy;
+import com.cisco.vss.foundation.loadbalancer.LoadBalancerStrategy;
 import com.cisco.vss.foundation.loadbalancer.InternalServerProxy;
 import com.cisco.vss.foundation.loadbalancer.RequestTimeoutException;
 import com.google.common.base.Joiner;
@@ -12,13 +12,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.api.ContentResponse;
 import org.eclipse.jetty.client.api.Request;
-import org.eclipse.jetty.client.api.Response;
 import org.eclipse.jetty.client.util.BytesContentProvider;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -37,7 +35,7 @@ public class JettyHttpClient<S extends HttpRequest, R extends HttpResponse> exte
         configureClient();
     }
 
-    public JettyHttpClient(String apiName, HighAvailabilityStrategy.STRATEGY_TYPE strategyType, Configuration configuration, boolean enableLoadBalancing) {
+    public JettyHttpClient(String apiName, LoadBalancerStrategy.STRATEGY_TYPE strategyType, Configuration configuration, boolean enableLoadBalancing) {
         super(apiName, strategyType, configuration, enableLoadBalancing);
         configureClient();
     }
@@ -97,9 +95,9 @@ public class JettyHttpClient<S extends HttpRequest, R extends HttpResponse> exte
     }
 
     @Override
-    public void execute(HttpRequest request, ResponseCallback responseCallback, HighAvailabilityStrategy highAvailabilityStrategy, String apiName) {
+    public void execute(HttpRequest request, ResponseCallback responseCallback, LoadBalancerStrategy loadBalancerStrategy, String apiName) {
 
-        InternalServerProxy serverProxy = highAvailabilityStrategy.getServerProxy(request);
+        InternalServerProxy serverProxy = loadBalancerStrategy.getServerProxy(request);
         Throwable lastCaugtException = null;
 
 
@@ -107,7 +105,7 @@ public class JettyHttpClient<S extends HttpRequest, R extends HttpResponse> exte
             // server proxy will be null if the configuration was not
             // configured properly
             // or if all the servers are passivated.
-            highAvailabilityStrategy.handleNullserverProxy(apiName, lastCaugtException);
+            loadBalancerStrategy.handleNullserverProxy(apiName, lastCaugtException);
         }
 
         request = updateRequestUri((S)request, serverProxy);
@@ -132,7 +130,7 @@ public class JettyHttpClient<S extends HttpRequest, R extends HttpResponse> exte
                 FlowContextFactory.addFlowContext(((S) tempRequest).getFlowContext());
             }
         });
-        httpRequest.send(new JettyCompleteListener(this, request, responseCallback, serverProxy, highAvailabilityStrategy, apiName));
+        httpRequest.send(new JettyCompleteListener(this, request, responseCallback, serverProxy, loadBalancerStrategy, apiName));
 
     }
 

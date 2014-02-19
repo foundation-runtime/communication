@@ -17,6 +17,9 @@ import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Constructor;
 import java.util.EnumSet;
 
+/**
+ * utility class to add common filters to a given jetty context handler
+ */
 public class HttpServerUtil {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(HttpServerUtil.class);
@@ -31,7 +34,7 @@ public class HttpServerUtil {
 		context.addFilter(new FilterHolder(new AvailabilityFilter(serviceName, threadPool)), "/*", EnumSet.allOf(DispatcherType.class));
 //		context.addFilter(new FilterHolder(new TraceFilter(serviceName)), "/*", EnumSet.allOf(DispatcherType.class));
 
-        if(ConfigurationFactory.getConfiguration().getBoolean("service." + serviceName + "http.pingFilter.isEnabled", true)){
+        if(ConfigurationFactory.getConfiguration().getBoolean(serviceName + "http.pingFilter.isEnabled", true)){
             context.addFilter(new FilterHolder(new PingFilter(serviceName)), "/*", EnumSet.allOf(DispatcherType.class));
         }else{
             context.addServlet(new ServletHolder(new PingServlet(serviceName)),"/probe");
@@ -46,7 +49,7 @@ public class HttpServerUtil {
 //	protected static void addMonitoringFilter(String serviceName, ThreadPool threadPool, ServletContextHandler context) {
 //		// read monitoring filter class name
 //		boolean monitoringFilterAdded = false;
-//		String monitoringFilterClassName = ConfigurationFactory.getConfiguration().getString("service." + serviceName + ".http.monitoringFilter.className", null);
+//		String monitoringFilterClassName = ConfigurationFactory.getConfiguration().getString(serviceName + ".http.monitoringFilter.className", null);
 //		if (StringUtils.isNotBlank(monitoringFilterClassName)) {
 //			try {
 //				Class<?> monitoringFilterClass = Class.forName(monitoringFilterClassName);
@@ -72,19 +75,6 @@ public class HttpServerUtil {
 //			context.addFilter(new FilterHolder(new MonitoringFilter(serviceName, threadPool)), "/*", EnumSet.allOf(DispatcherType.class));
 //		}
 //	}
-
-	public static QueuedThreadPool getDefaultThreadPool(String serviceName) {
-		Configuration configuration = ConfigurationFactory.getConfiguration();
-		QueuedThreadPool queuedThreadPool = new QueuedThreadPool();
-		int minThreads = configuration.getInt("service." + serviceName + ".http.minThreads", 100);
-		int maxThreads = configuration.getInt("service." + serviceName + ".http.maxThreads", 1000);
-		if (minThreads <= 0) {
-			throw new IllegalArgumentException("http server min number of threads must be greater than 0");
-		}
-		queuedThreadPool.setMaxThreads(maxThreads);
-		queuedThreadPool.setMinThreads(minThreads);
-		return queuedThreadPool;
-	}
 
 
 }

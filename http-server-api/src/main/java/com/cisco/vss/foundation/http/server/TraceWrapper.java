@@ -59,7 +59,7 @@ public class TraceWrapper {
 	
 	public static List<String> getContentTypes(String serviceName) {
 		List<String> types = new ArrayList<String>(5);
-		String baseKey = "service." + serviceName + ".http.traceFilter.textContentTypes";
+		String baseKey = serviceName + ".http.traceFilter.textContentTypes";
 		Configuration subset = ConfigurationFactory.getConfiguration().subset(baseKey);
 		Iterator<String> keys = subset.getKeys();
 		while(keys.hasNext()){

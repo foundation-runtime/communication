@@ -3,13 +3,13 @@
     <parent>
 		<groupId>com.cisco.vss.foundation</groupId>
 		<artifactId>foundation-common-base</artifactId>
-		<version>0.0.0-2-SNAPSHOT</version>
+		<version>0.0.0-3-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.cisco.vss.foundation</groupId>
     <artifactId>http-server-jetty</artifactId>
     <name>http-server-jetty</name>
-    <version>0.0.0-2-SNAPSHOT</version>
+    <version>0.0.0-3-SNAPSHOT</version>
     <packaging>jar</packaging>
     <description>This project is the http jetty server implementation library in the cisco vss foundation runtime</description>
     <url>https://github.com/foundation-runtime/communication/http-server-jetty</url>
@@ -98,7 +98,7 @@
         <dependency>
             <groupId>com.cisco.vss.foundation</groupId>
             <artifactId>http-client-apache</artifactId>
-            <version>0.0.0-2-SNAPSHOT</version>
+            <version>0.0.0-3-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
         <dependency>

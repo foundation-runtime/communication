@@ -31,7 +31,7 @@ public class HttpMethodFilter extends AbstractInfraHttpFilter {
 	
 	private void updateAllowedMethodsFromConfig(String serviceName) {
 		Configuration configuration = ConfigurationFactory.getConfiguration();
-		Configuration subset = configuration.subset("service." + serviceName + ".http.httpMethodFilter.methods");
+		Configuration subset = configuration.subset(serviceName + ".http.httpMethodFilter.methods");
 		@SuppressWarnings("unchecked")
 		Iterator<String> keys = subset.getKeys();
 		while (keys.hasNext()) {

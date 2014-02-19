@@ -21,23 +21,24 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
+ * Abstract implementation common to all known HttpClient implementations
  * Created by Yair Ogen on 1/16/14.
  */
 public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpResponse> implements HttpClient<S, R> {
 
     public static final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractHttpClient.class);
-    protected HighAvailabilityStrategy highAvailabilityStrategy = new RoundRobinStrategy();
+    protected LoadBalancerStrategy loadBalancerStrategy = new RoundRobinStrategy();
     protected String apiName = "HTTP";
     protected InternalServerProxyMetadata metadata;
     protected Configuration configuration;
     protected boolean enableLoadBalancing = true;
 
     public AbstractHttpClient(String apiName, Configuration configuration, boolean enableLoadBalancing) {
-        this(apiName, HighAvailabilityStrategy.STRATEGY_TYPE.ROUND_ROBIN, configuration, enableLoadBalancing);
+        this(apiName, LoadBalancerStrategy.STRATEGY_TYPE.ROUND_ROBIN, configuration, enableLoadBalancing);
     }
 
-    public AbstractHttpClient(String apiName, HighAvailabilityStrategy.STRATEGY_TYPE strategyType, Configuration configuration, boolean enableLoadBalancing) {
+    public AbstractHttpClient(String apiName, LoadBalancerStrategy.STRATEGY_TYPE strategyType, Configuration configuration, boolean enableLoadBalancing) {
         this.apiName = apiName;
         this.enableLoadBalancing = enableLoadBalancing;
         if(configuration == null){
@@ -45,12 +46,12 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
         }else{
             this.configuration = configuration;
         }
-        highAvailabilityStrategy = fromHighAvailabilityStrategyType(strategyType);
+        loadBalancerStrategy = fromHighAvailabilityStrategyType(strategyType);
         createServerListFromConfig();
-        CabConfigurationListenerRegistry.addCabConfigurationListener(new HighAvailabilityConfigurationListener());
+        CabConfigurationListenerRegistry.addCabConfigurationListener(new LoadBalancerConfigurationListener());
     }
 
-    private HighAvailabilityStrategy fromHighAvailabilityStrategyType(HighAvailabilityStrategy.STRATEGY_TYPE strategyType){
+    private LoadBalancerStrategy fromHighAvailabilityStrategyType(LoadBalancerStrategy.STRATEGY_TYPE strategyType){
         switch (strategyType) {
             case FAIL_OVER:
                 return new FailOverStrategy();
@@ -76,7 +77,7 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
 
             try {
                 readWriteLock.readLock().lock();
-                serverProxy = highAvailabilityStrategy.getServerProxy(request);
+                serverProxy = loadBalancerStrategy.getServerProxy(request);
             } finally {
                 readWriteLock.readLock().unlock();
             }
@@ -85,7 +86,7 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
                 // server proxy will be null if the configuration was not
                 // configured properly
                 // or if all the servers are passivated.
-                highAvailabilityStrategy.handleNullserverProxy(apiName, lastCaugtException);
+                loadBalancerStrategy.handleNullserverProxy(apiName, lastCaugtException);
             }
 
             try {
@@ -105,7 +106,7 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
                 successfullyInvoked = true;
 
             } catch (Throwable e) {
-                lastCaugtException = highAvailabilityStrategy.handleException(apiName, serverProxy, e);
+                lastCaugtException = loadBalancerStrategy.handleException(apiName, serverProxy, e);
             }
         } while (!successfullyInvoked);
 
@@ -145,16 +146,16 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
 
     @Override
     public void executeWithLoadBalancer(S request, ResponseCallback<R> responseCallback) {
-        execute(request, responseCallback, highAvailabilityStrategy, apiName);
+        execute(request, responseCallback, loadBalancerStrategy, apiName);
     }
 
 //    @Override
-//    public void setHighAvailabilityStrategy(HighAvailabilityStrategy highAvailabilityStrategy) {
-//        this.highAvailabilityStrategy = highAvailabilityStrategy;
+//    public void setHighAvailabilityStrategy(LoadBalancerStrategy loadBalancerStrategy) {
+//        this.loadBalancerStrategy = loadBalancerStrategy;
 //        createServerListFromConfig();
 //    }
 
-    public abstract void execute(S request, ResponseCallback<R> responseCallback, HighAvailabilityStrategy highAvailabilityStrategy, String apiName);
+    public abstract void execute(S request, ResponseCallback<R> responseCallback, LoadBalancerStrategy loadBalancerStrategy, String apiName);
 
     @Override
     public R execute(S request) {
@@ -180,18 +181,18 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
 
         // based on the data collected from the config file - updates the server
         // list
-        AbstractHighAvailabilityStrategy.readWriteLock.writeLock().lock();
+        AbstractLoadBalancerStrategy.readWriteLock.writeLock().lock();
         try {
             serversList = updateServerListBasedOnConfig(serversList, metadata);
         } finally {
-            AbstractHighAvailabilityStrategy.readWriteLock.writeLock().unlock();
+            AbstractLoadBalancerStrategy.readWriteLock.writeLock().unlock();
         }
 
         if (serversList.isEmpty()) {
             LOGGER.debug("No hosts defined for api: \"" + apiName + "\". Please check your config files!");
         }
 
-        highAvailabilityStrategy.setServerProxies(serversList);
+        loadBalancerStrategy.setServerProxies(serversList);
 
     }
 
@@ -202,21 +203,21 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
         final Iterator<String> keysIterator = subset.getKeys();
 
         // read default values
-        int readTimeout = subset.getInt("http." + HighAvailabilityConstants.READ_TIME_OUT, HighAvailabilityConstants.DEFAULT_READ_TIMEOUT);
-        int connectTimeout = subset.getInt("http." + HighAvailabilityConstants.CONNECT_TIME_OUT, HighAvailabilityConstants.DEFAULT_CONNECT_TIMEOUT);
-        long waitingTime = subset.getLong("http." + HighAvailabilityConstants.WAITING_TIME, HighAvailabilityConstants.DEFAULT_WAITING_TIME);
-        int numberOfAttempts = subset.getInt("http." + HighAvailabilityConstants.NUMBER_OF_ATTEMPTS, HighAvailabilityConstants.DEFAULT_NUMBER_OF_ATTEMPTS);
-        long retryDelay = subset.getLong("http." + HighAvailabilityConstants.RETRY_DELAY, HighAvailabilityConstants.DEFAULT_RETRY_DELAY);
+        int readTimeout = subset.getInt("http." + LoadBalancerConstants.READ_TIME_OUT, LoadBalancerConstants.DEFAULT_READ_TIMEOUT);
+        int connectTimeout = subset.getInt("http." + LoadBalancerConstants.CONNECT_TIME_OUT, LoadBalancerConstants.DEFAULT_CONNECT_TIMEOUT);
+        long waitingTime = subset.getLong("http." + LoadBalancerConstants.WAITING_TIME, LoadBalancerConstants.DEFAULT_WAITING_TIME);
+        int numberOfAttempts = subset.getInt("http." + LoadBalancerConstants.NUMBER_OF_ATTEMPTS, LoadBalancerConstants.DEFAULT_NUMBER_OF_ATTEMPTS);
+        long retryDelay = subset.getLong("http." + LoadBalancerConstants.RETRY_DELAY, LoadBalancerConstants.DEFAULT_RETRY_DELAY);
 
-        long idleTimeout = subset.getLong("http." + HighAvailabilityConstants.IDLE_TIME_OUT, HighAvailabilityConstants.DEFAULT_IDLE_TIMEOUT);
-        int maxConnectionsPerAddress = subset.getInt("http." + HighAvailabilityConstants.MAX_CONNECTIONS_PER_ADDRESS, HighAvailabilityConstants.DEFAULT_MAX_CONNECTIONS_PER_ADDRESS);
-        int maxConnectionsTotal = subset.getInt("http." + HighAvailabilityConstants.MAX_CONNECTIONS_TOTAL, HighAvailabilityConstants.DEFAULT_MAX_CONNECTIONS_TOTAL);
-        int maxQueueSizePerAddress = subset.getInt("http." + HighAvailabilityConstants.MAX_QUEUE_PER_ADDRESS, HighAvailabilityConstants.DEFAULT_MAX_QUEUE_PER_ADDRESS);
+        long idleTimeout = subset.getLong("http." + LoadBalancerConstants.IDLE_TIME_OUT, LoadBalancerConstants.DEFAULT_IDLE_TIMEOUT);
+        int maxConnectionsPerAddress = subset.getInt("http." + LoadBalancerConstants.MAX_CONNECTIONS_PER_ADDRESS, LoadBalancerConstants.DEFAULT_MAX_CONNECTIONS_PER_ADDRESS);
+        int maxConnectionsTotal = subset.getInt("http." + LoadBalancerConstants.MAX_CONNECTIONS_TOTAL, LoadBalancerConstants.DEFAULT_MAX_CONNECTIONS_TOTAL);
+        int maxQueueSizePerAddress = subset.getInt("http." + LoadBalancerConstants.MAX_QUEUE_PER_ADDRESS, LoadBalancerConstants.DEFAULT_MAX_QUEUE_PER_ADDRESS);
 
-        String keyStorePath = subset.getString("http." + HighAvailabilityConstants.KEYSTORE_PATH, "");
-        String keyStorePassword = subset.getString("http." + HighAvailabilityConstants.KEYSTORE_PASSWORD, "");
-        String trustStorePath = subset.getString("http." + HighAvailabilityConstants.TRUSTSTORE_PATH, "");
-        String trustStorePassword = subset.getString("http." + HighAvailabilityConstants.TRUSTSTORE_PASSWORD, "");
+        String keyStorePath = subset.getString("http." + LoadBalancerConstants.KEYSTORE_PATH, "");
+        String keyStorePassword = subset.getString("http." + LoadBalancerConstants.KEYSTORE_PASSWORD, "");
+        String trustStorePath = subset.getString("http." + LoadBalancerConstants.TRUSTSTORE_PATH, "");
+        String trustStorePassword = subset.getString("http." + LoadBalancerConstants.TRUSTSTORE_PASSWORD, "");
 
 
         final List<String> keys = new ArrayList<String>();
@@ -232,7 +233,7 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
 
         for (String key : keys) {
 
-            if (key.contains(HighAvailabilityConstants.HOST)) {
+            if (key.contains(LoadBalancerConstants.HOST)) {
 
                 String host = subset.getString(key);
 
@@ -240,7 +241,7 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
                 if (StringUtils.isNotEmpty(host)) {
                     host = host.trim();
                 }
-                final String portKey = key.replace(HighAvailabilityConstants.HOST, HighAvailabilityConstants.PORT);
+                final String portKey = key.replace(LoadBalancerConstants.HOST, LoadBalancerConstants.PORT);
                 if (subset.containsKey(portKey)) {
                     int port = subset.getInt(portKey);
                     // save host and port for future creation of server list
@@ -288,14 +289,17 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
         return serversList;
     }
 
-    public class HighAvailabilityConfigurationListener implements CabConfigurationListener {
+    /**
+     * Listener for re-loading the internal list in case of dynamic configuration changes.
+     */
+    public class LoadBalancerConfigurationListener implements CabConfigurationListener {
 
         @Override
         public void configurationChanged() {
 
             LOGGER.debug("configuration has changed");
 
-            List<InternalServerProxy> serverProxies = highAvailabilityStrategy.getServerProxies();
+            List<InternalServerProxy> serverProxies = loadBalancerStrategy.getServerProxies();
             // List<InternalServerProxy> serverProxies = serverProxies2;
             InternalServerProxyMetadata metadata = loadServersMetadataConfiguration();
 
@@ -333,21 +337,21 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
             }
 
             try {
-                AbstractHighAvailabilityStrategy.readWriteLock.writeLock().lock();
-                if (highAvailabilityStrategy.getServerProxies() == null) {
-                    // highAvailabilityStrategy was reloaded during
+                AbstractLoadBalancerStrategy.readWriteLock.writeLock().lock();
+                if (loadBalancerStrategy.getServerProxies() == null) {
+                    // loadBalancerStrategy was reloaded during
                     // configuration change.
                     // probably because there is a strategy parameter in
                     // ConfigurationFactory.getConfiguration().
-                    // we need to reset highAvailabilityStrategy parameters
-                    highAvailabilityStrategy.setServerProxies(newServerProxies);
+                    // we need to reset loadBalancerStrategy parameters
+                    loadBalancerStrategy.setServerProxies(newServerProxies);
                 } else {
                     // just update the existing reference
-                    highAvailabilityStrategy.getServerProxies().clear();
-                    highAvailabilityStrategy.getServerProxies().addAll(newServerProxies);
+                    loadBalancerStrategy.getServerProxies().clear();
+                    loadBalancerStrategy.getServerProxies().addAll(newServerProxies);
                 }
             } finally {
-                AbstractHighAvailabilityStrategy.readWriteLock.writeLock().unlock();
+                AbstractLoadBalancerStrategy.readWriteLock.writeLock().unlock();
             }
 
         }

@@ -31,8 +31,8 @@ public class PingFilter extends AbstractInfraHttpFilter {
 	public void doFilterImpl(final ServletRequest request, final ServletResponse response, final FilterChain chain) throws IOException, ServletException {
 //		LOGGER.trace("Starting ping filter");
 //        Configuration configuration = ConfigurationFactory.getConfiguration();
-//        boolean enableLogging = configuration.getBoolean("service." + serviceName + "http.pingFilter.enableLogging",false);
-        boolean enableLogging = Boolean.valueOf(getConfigValue("service." + serviceName + "http.pingFilter.enableLogging","false"));
+//        boolean enableLogging = configuration.getBoolean(serviceName + "http.pingFilter.enableLogging",false);
+        boolean enableLogging = Boolean.valueOf(getConfigValue(serviceName + "http.pingFilter.enableLogging","false"));
 		final HttpServletRequest httpRequest = (HttpServletRequest) request;
 		if (null == httpRequest.getHeader(PING_HEADER)) {
 			// if not ping request - do nothing, just forward through the chain

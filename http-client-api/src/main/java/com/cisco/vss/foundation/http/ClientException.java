@@ -1,6 +1,7 @@
 package com.cisco.vss.foundation.http;
 
 /**
+ * generic runtime exception that wrapps most of the errors that can be thrown by a HttpClient
  * Created by Yair Ogen on 1/14/14.
  */
 public class ClientException extends RuntimeException {

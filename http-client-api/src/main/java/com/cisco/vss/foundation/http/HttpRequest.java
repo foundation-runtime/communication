@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.Map;
 
 /**
+ * Representation of a Http Request. This class is immutable. you should build it using the builder.
  * Created by Yair Ogen on 12/30/13.
  */
 public class HttpRequest {
@@ -104,6 +105,9 @@ public class HttpRequest {
                 '}';
     }
 
+    /**
+     * The builder for the HttpRequest
+     */
     public static class Builder {
 
         private HttpRequest request = new HttpRequest();

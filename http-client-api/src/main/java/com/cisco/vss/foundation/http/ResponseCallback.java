@@ -1,6 +1,7 @@
 package com.cisco.vss.foundation.http;
 
 /**
+ * Interface to be used by users of the async API. It defines the callback methods that are invoked when an asynchronous request is completed.
  * Created by Yair Ogen on 1/6/14.
  */
 public interface ResponseCallback<R extends HttpResponse> {

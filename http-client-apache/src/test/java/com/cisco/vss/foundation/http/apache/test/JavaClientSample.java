@@ -2,14 +2,13 @@ package com.cisco.vss.foundation.http.apache.test;
 
 import com.cisco.vss.foundation.http.*;
 import com.cisco.vss.foundation.http.apache.ApacheHttpClientFactory;
-import com.cisco.vss.foundation.loadbalancer.FailOverStrategy;
-import com.cisco.vss.foundation.loadbalancer.HighAvailabilityStrategy;
+import com.cisco.vss.foundation.http.apache.ApacheHttpResponse;
+import com.cisco.vss.foundation.loadbalancer.LoadBalancerStrategy;
 import com.cisco.vss.foundation.loadbalancer.NoActiveServersException;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.net.URI;
 
 /**
  * Created by Yair Ogen on 1/21/14.
@@ -39,7 +38,7 @@ public class JavaClientSample {
 
     @Test
     public void testClient2() throws IOException {
-        HttpClient clientTest = ApacheHttpClientFactory.createHttpClient("clientTest", HighAvailabilityStrategy.STRATEGY_TYPE.FAIL_OVER);
+        HttpClient clientTest = ApacheHttpClientFactory.createHttpClient("clientTest", LoadBalancerStrategy.STRATEGY_TYPE.FAIL_OVER);
         HttpRequest request = HttpRequest.newBuilder()
                 .httpMethod(HttpMethod.GET)
                 .uri("http://www.google.com")
@@ -48,5 +47,26 @@ public class JavaClientSample {
         String responseAsString = response.getResponseAsString();
         Assert.assertTrue(responseAsString.contains("<!doctype html>"));
         System.out.println(responseAsString);
+
+
+        clientTest.executeWithLoadBalancer(request, new MyResponseHandler());
+
+    }
+
+    private static class MyResponseHandler implements ResponseCallback<ApacheHttpResponse>{
+        @Override
+        public void completed(ApacheHttpResponse response) {
+            String responseAsString = response.getResponseAsString();
+        }
+
+        @Override
+        public void failed(Throwable e) {
+
+        }
+
+        @Override
+        public void cancelled() {
+
+        }
     }
 }

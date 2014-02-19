@@ -4,7 +4,7 @@ import org.slf4j.LoggerFactory
 import org.junit.Test
 import com.cisco.vss.foundation.http.HttpRequest
 import com.cisco.vss.foundation.http.apache.{ApacheHttpClientFactory, ApacheHttpResponse}
-import com.cisco.vss.foundation.loadbalancer.{HighAvailabilityStrategy, RequestTimeoutException, NoActiveServersException}
+import com.cisco.vss.foundation.loadbalancer.{LoadBalancerStrategy, RequestTimeoutException, NoActiveServersException}
 import com.cisco.vss.foundation.http.api.test.{MultithreadTestUtil, BasicHttpTestUtil}
 import org.apache.commons.configuration.{Configuration, PropertiesConfiguration}
 
@@ -51,7 +51,7 @@ class TestApacheClient {
   @Test
   def realServerInvokePostFailOver() {
 
-    val clientFailOverTest = ApacheHttpClientFactory.createHttpClient("clientFailOverTest", HighAvailabilityStrategy.STRATEGY_TYPE.FAIL_OVER, propsConfiguration)
+    val clientFailOverTest = ApacheHttpClientFactory.createHttpClient("clientFailOverTest", LoadBalancerStrategy.STRATEGY_TYPE.FAIL_OVER, propsConfiguration)
     httpTestUtil.realServerInvokePostFailOver(clientFailOverTest)
 
   }

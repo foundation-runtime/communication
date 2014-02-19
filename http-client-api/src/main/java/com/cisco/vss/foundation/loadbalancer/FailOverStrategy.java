@@ -16,7 +16,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *
  * @author Yair Ogen
  */
-public class FailOverStrategy<S extends HttpRequest> extends AbstractHighAvailabilityStrategy<S> {
+public class FailOverStrategy<S extends HttpRequest> extends AbstractLoadBalancerStrategy<S> {
 
     private static final long serialVersionUID = 6806126762594591923L;
 

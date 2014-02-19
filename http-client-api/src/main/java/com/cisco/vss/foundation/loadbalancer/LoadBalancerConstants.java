@@ -6,7 +6,7 @@ package com.cisco.vss.foundation.loadbalancer;
 /**
  * @author Yair Ogen
  */
-public final class HighAvailabilityConstants {
+public final class LoadBalancerConstants {
 
     // configuration parameters constants.
     public static final String HOST = "host";
@@ -87,7 +87,7 @@ public final class HighAvailabilityConstants {
     public static final String MAX_QUEUE_PER_ADDRESS = "http.maxQueueSizePerAddress";
     public static final int DEFAULT_MAX_QUEUE_PER_ADDRESS = 1000;
 
-    private HighAvailabilityConstants() {
+    private LoadBalancerConstants() {
         // prevent instantiation
     }
 }

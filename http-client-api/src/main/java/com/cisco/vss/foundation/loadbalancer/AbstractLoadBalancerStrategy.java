@@ -1,19 +1,14 @@
 package com.cisco.vss.foundation.loadbalancer;
 
-import com.cisco.vss.foundation.configuration.ConfigurationFactory;
 import com.cisco.vss.foundation.http.ClientException;
 import com.cisco.vss.foundation.http.HttpRequest;
-import org.apache.commons.configuration.Configuration;
 import org.apache.log4j.Logger;
 import org.springframework.remoting.RemoteAccessException;
-import org.springframework.remoting.RemoteInvocationFailureException;
 
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.nio.channels.UnresolvedAddressException;
-import java.rmi.ServerError;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
@@ -21,12 +16,12 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * 
  * @author Yair Ogen
  */
-public abstract class AbstractHighAvailabilityStrategy<S extends HttpRequest> implements HighAvailabilityStrategy<S> {
+public abstract class AbstractLoadBalancerStrategy<S extends HttpRequest> implements LoadBalancerStrategy<S> {
 
 	private static final long serialVersionUID = -4787963395573781601L;
 
 
-	protected static final Logger LOGGER = Logger.getLogger(AbstractHighAvailabilityStrategy.class);
+	protected static final Logger LOGGER = Logger.getLogger(AbstractLoadBalancerStrategy.class);
 
 	protected List<InternalServerProxy> serverProxies;
 
@@ -51,7 +46,7 @@ public abstract class AbstractHighAvailabilityStrategy<S extends HttpRequest> im
 			LOGGER.debug("retrying in special case of 'UnresolvedAddressException'");
 		} else {
 
-//			final boolean firstInChain = ConfigurationFactory.getConfiguration().getBoolean(HighAvailabilityConstants.DEFAULT_FIRST_IN_CHAIN);
+//			final boolean firstInChain = ConfigurationFactory.getConfiguration().getBoolean(LoadBalancerConstants.DEFAULT_FIRST_IN_CHAIN);
 
 			// don't try and find another active server if:
 			// 1. the exception you caught is NoActiveServersDeadEndException
@@ -130,7 +125,7 @@ public abstract class AbstractHighAvailabilityStrategy<S extends HttpRequest> im
 		// if you are the first in chain and you don't have ana available server
 		// throw this new exception so the loop of trying to find an active
 		// server will end.
-//		final boolean firstInChain = ConfigurationFactory.getConfiguration().getBoolean(HighAvailabilityConstants.DEFAULT_FIRST_IN_CHAIN);
+//		final boolean firstInChain = ConfigurationFactory.getConfiguration().getBoolean(LoadBalancerConstants.DEFAULT_FIRST_IN_CHAIN);
 //		if (firstInChain) {
 //			throw new NoActiveServersDeadEndException(noActiveServersException.getMessage(), lastCaugtException);
 //		}

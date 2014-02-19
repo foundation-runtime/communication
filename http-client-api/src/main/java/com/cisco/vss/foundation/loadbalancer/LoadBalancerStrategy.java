@@ -12,7 +12,7 @@ import java.util.List;
  *
  * @author Yair Ogen
  */
-public interface HighAvailabilityStrategy<S extends HttpRequest> extends Serializable {
+public interface LoadBalancerStrategy<S extends HttpRequest> extends Serializable {
 	
 	static final ThreadLocal<Throwable> lastKnownErrorThreadLocal = new ThreadLocal<Throwable>();
 

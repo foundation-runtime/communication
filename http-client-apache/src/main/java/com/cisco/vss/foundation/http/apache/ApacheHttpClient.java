@@ -1,8 +1,7 @@
 package com.cisco.vss.foundation.http.apache;
 
-import com.cisco.vss.foundation.configuration.ConfigurationFactory;
 import com.cisco.vss.foundation.http.*;
-import com.cisco.vss.foundation.loadbalancer.HighAvailabilityStrategy;
+import com.cisco.vss.foundation.loadbalancer.LoadBalancerStrategy;
 import com.google.common.base.Joiner;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.lang3.StringUtils;
@@ -13,7 +12,6 @@ import org.apache.http.conn.ssl.SSLContexts;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.DefaultConnectionKeepAliveStrategy;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,11 +21,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.security.KeyManagementException;
 import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
 import java.util.Collection;
 import java.util.Map;
 
@@ -46,7 +40,7 @@ class ApacheHttpClient extends AbstractHttpClient<HttpRequest, HttpResponse> {
     }
 
 
-    ApacheHttpClient(String apiName, HighAvailabilityStrategy.STRATEGY_TYPE strategyType, Configuration configuration, boolean enableLoadBalancing) {
+    ApacheHttpClient(String apiName, LoadBalancerStrategy.STRATEGY_TYPE strategyType, Configuration configuration, boolean enableLoadBalancing) {
         super(apiName, strategyType, configuration, enableLoadBalancing);
         configureClient();
     }
@@ -208,7 +202,7 @@ class ApacheHttpClient extends AbstractHttpClient<HttpRequest, HttpResponse> {
     }
 
     @Override
-    public void execute(HttpRequest request, ResponseCallback<HttpResponse> responseCallback, HighAvailabilityStrategy highAvailabilityStrategy, String apiName) {
+    public void execute(HttpRequest request, ResponseCallback<HttpResponse> responseCallback, LoadBalancerStrategy loadBalancerStrategy, String apiName) {
         throw new UnsupportedOperationException();
     }
 }

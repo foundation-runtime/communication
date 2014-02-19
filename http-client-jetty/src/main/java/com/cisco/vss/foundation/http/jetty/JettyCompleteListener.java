@@ -2,7 +2,7 @@ package com.cisco.vss.foundation.http.jetty;
 
 import com.cisco.vss.foundation.http.HttpRequest;
 import com.cisco.vss.foundation.http.ResponseCallback;
-import com.cisco.vss.foundation.loadbalancer.HighAvailabilityStrategy;
+import com.cisco.vss.foundation.loadbalancer.LoadBalancerStrategy;
 import com.cisco.vss.foundation.loadbalancer.InternalServerProxy;
 import org.eclipse.jetty.client.HttpContentResponse;
 import org.eclipse.jetty.client.api.Response;
@@ -11,7 +11,6 @@ import org.eclipse.jetty.client.util.BufferingResponseListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.InputStream;
 import java.net.URI;
 
 /**
@@ -23,16 +22,16 @@ public class JettyCompleteListener extends BufferingResponseListener {
     private JettyHttpClient jettyHttpClient;
     private ResponseCallback<JettyHttpResponse> responseCallback;
     private InternalServerProxy serverProxy;
-    private HighAvailabilityStrategy highAvailabilityStrategy;
+    private LoadBalancerStrategy loadBalancerStrategy;
     private String apiName;
     private HttpRequest request;
 
 
-    public JettyCompleteListener(JettyHttpClient jettyHttpClient, HttpRequest request, ResponseCallback<JettyHttpResponse> responseCallback, InternalServerProxy serverProxy, HighAvailabilityStrategy highAvailabilityStrategy, String apiName) {
+    public JettyCompleteListener(JettyHttpClient jettyHttpClient, HttpRequest request, ResponseCallback<JettyHttpResponse> responseCallback, InternalServerProxy serverProxy, LoadBalancerStrategy loadBalancerStrategy, String apiName) {
         this.jettyHttpClient = jettyHttpClient;
         this.responseCallback = responseCallback;
         this.serverProxy = serverProxy;
-        this.highAvailabilityStrategy = highAvailabilityStrategy;
+        this.loadBalancerStrategy = loadBalancerStrategy;
         this.apiName = apiName;
         this.request = request;
     }
@@ -43,14 +42,14 @@ public class JettyCompleteListener extends BufferingResponseListener {
         URI uri = result.getRequest().getURI();
         if (failure != null) {
             try {
-                highAvailabilityStrategy.handleException(apiName, serverProxy, failure);
+                loadBalancerStrategy.handleException(apiName, serverProxy, failure);
             } catch (Exception e) {
                 LOGGER.error("Error running request {}. Error is: {}", uri, e);
                 responseCallback.failed(e);
             }
 
             try {
-                jettyHttpClient.execute(request, responseCallback, highAvailabilityStrategy, apiName);
+                jettyHttpClient.execute(request, responseCallback, loadBalancerStrategy, apiName);
             } catch (Throwable e) {
                 result.getRequest().abort(e);
                 responseCallback.failed(e);

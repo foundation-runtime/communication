@@ -5,10 +5,34 @@ package com.cisco.vss.foundation.http.server;
  */
 public interface HttpThreadPool {
 
+    /**
+     * set the max number of threads on the pool
+     * @param maxThreads
+     */
     void setMaxThreads(int maxThreads);
+
+    /**
+     * get the max number of threads on the pool
+     * @return
+     */
     int getMaxThreads();
-    void setMinThreads(int minThreads);
+
+    /**
+     * set the min number of threads on the pool
+     * @param minThreads
+     */
+   void setMinThreads(int minThreads);
+
+    /**
+     * get the min number of threads on the pool
+     * @return
+     */
     int getMinThreads();
+
+    /**
+     * return true if the server doesn't have enough threads to process a request
+     * @return
+     */
     boolean isLowOnThreads();
 
 }

@@ -21,7 +21,7 @@ public class PingServlet extends HttpServlet {
     private boolean enableLogging = false;
 
     public PingServlet(String serviceName) {
-        enableLogging = ConfigurationFactory.getConfiguration().getBoolean("service." + serviceName + "http.pingFilter.enableLogging", false);
+        enableLogging = ConfigurationFactory.getConfiguration().getBoolean(serviceName + "http.pingFilter.enableLogging", false);
     }
 
     @Override

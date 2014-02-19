@@ -14,7 +14,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * 
  * @author Yair Ogen
  */
-public class RoundRobinStrategy<S extends HttpRequest> extends AbstractHighAvailabilityStrategy<S> {
+public class RoundRobinStrategy<S extends HttpRequest> extends AbstractLoadBalancerStrategy<S> {
 
 	private static final long serialVersionUID = 6806126762594591923L;
     private AtomicInteger nextIndex = new AtomicInteger(0);
