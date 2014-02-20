@@ -19,8 +19,7 @@ import org.slf4j.LoggerFactory;
 import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
-import java.util.EnumSet;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -54,7 +53,14 @@ public enum JettyHttpServerFactory implements HttpServerFactory {
     public void startHttpServer(String serviceName, ListMultimap<String, Servlet> servlets) {
 
         ArrayListMultimap<String, Filter> filterMap = ArrayListMultimap.create();
-        startHttpServer(serviceName, servlets, filterMap);
+        startHttpServer(serviceName, servlets, filterMap, Collections.<EventListener>emptyList());
+    }
+
+    @Override
+    public void startHttpServer(String serviceName, ListMultimap<String, Servlet> servlets, List<EventListener> eventListeners) {
+        ArrayListMultimap<String, Filter> filterMap = ArrayListMultimap.create();
+        startHttpServer(serviceName, servlets, filterMap,eventListeners);
+
     }
 
 
@@ -74,6 +80,13 @@ public enum JettyHttpServerFactory implements HttpServerFactory {
 
         startHttpServer(serviceName, servlets, filters, null, null);
     }
+
+    @Override
+    public void startHttpServer(String serviceName, ListMultimap<String, Servlet> servlets, ListMultimap<String, Filter> filters, List<EventListener> eventListeners) {
+        startHttpServer(serviceName, servlets, filters, eventListeners, "", "", "", "");
+    }
+
+
 
 
     /**
@@ -140,7 +153,12 @@ public enum JettyHttpServerFactory implements HttpServerFactory {
      * @param trustStorePassword - the trust store password
      */
     @Override
-    public void startHttpServer(String serviceName, ListMultimap<String, Servlet> servlets, ListMultimap<String, Filter> filters, String keyStorePath, String keyStorePassword, String trustStorePath, String trustStorePassword) {
+    public void startHttpServer(String serviceName, ListMultimap<String, Servlet> servlets, ListMultimap<String, Filter> filters, String keyStorePath, String keyStorePassword, String trustStorePath, String trustStorePassword){
+        startHttpServer(serviceName, servlets, filters, Collections.<EventListener>emptyList(), keyStorePath, keyStorePassword, trustStorePath, trustStorePassword);
+    }
+
+    @Override
+    public void startHttpServer(String serviceName, ListMultimap<String, Servlet> servlets, ListMultimap<String, Filter> filters, List<EventListener> eventListeners, String keyStorePath, String keyStorePassword, String trustStorePath, String trustStorePassword) {
         if (servers.get(serviceName) != null) {
             throw new UnsupportedOperationException("you must first stop stop server: " + serviceName + " before you want to start it again!");
         }
@@ -150,7 +168,13 @@ public enum JettyHttpServerFactory implements HttpServerFactory {
         JettyHttpThreadPool jettyHttpThreadPool = new JettyHttpThreadPool(serviceName);
 
         for (Map.Entry<String, Servlet> entry : servlets.entries()) {
+
             ServletContextHandler context = new ServletContextHandler();
+
+            if (eventListeners!= null && !eventListeners.isEmpty()){
+                context.setEventListeners(eventListeners.toArray(new EventListener[0]));
+            }
+
             context.addServlet(new ServletHolder(entry.getValue()), entry.getKey());
 
 
@@ -254,6 +278,8 @@ public enum JettyHttpServerFactory implements HttpServerFactory {
         ArrayListMultimap<String, Filter> filterMap = ArrayListMultimap.create();
         startHttpServer(serviceName, servlets, filterMap, keyStorePath, keyStorePassword, trustStorePath, trustStorePassword);
     }
+
+
 
     /**
      * stop the http server
