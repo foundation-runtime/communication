@@ -1,7 +1,7 @@
 package com.cisco.vss.foundation.http;
 
-import com.cisco.vss.foundation.configuration.CabConfigurationListener;
-import com.cisco.vss.foundation.configuration.CabConfigurationListenerRegistry;
+import com.cisco.vss.foundation.configuration.FoundationConfigurationListener;
+import com.cisco.vss.foundation.configuration.FoundationConfigurationListenerRegistry;
 import com.cisco.vss.foundation.configuration.ConfigurationFactory;
 import com.cisco.vss.foundation.loadbalancer.*;
 import com.google.common.collect.Lists;
@@ -48,7 +48,7 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
         }
         loadBalancerStrategy = fromHighAvailabilityStrategyType(strategyType);
         createServerListFromConfig();
-        CabConfigurationListenerRegistry.addCabConfigurationListener(new LoadBalancerConfigurationListener());
+        FoundationConfigurationListenerRegistry.addFoundationConfigurationListener(new LoadBalancerConfigurationListener());
     }
 
     private LoadBalancerStrategy fromHighAvailabilityStrategyType(LoadBalancerStrategy.STRATEGY_TYPE strategyType){
@@ -292,7 +292,7 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
     /**
      * Listener for re-loading the internal list in case of dynamic configuration changes.
      */
-    public class LoadBalancerConfigurationListener implements CabConfigurationListener {
+    public class LoadBalancerConfigurationListener implements FoundationConfigurationListener {
 
         @Override
         public void configurationChanged() {

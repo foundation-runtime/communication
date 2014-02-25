@@ -3,8 +3,7 @@
  */
 package com.cisco.vss.foundation.http.apache.test;
 
-import com.cisco.vss.foundation.configuration.CabConfigurationListenerRegistry;
-import com.cisco.vss.foundation.configuration.ConfigurationFactory;
+import com.cisco.vss.foundation.configuration.FoundationConfigurationListenerRegistry;
 import org.apache.commons.configuration.reloading.FileChangedReloadingStrategy;
 
 /**
@@ -19,7 +18,7 @@ public class CABFileChangedReloadingStrategy extends FileChangedReloadingStrateg
 	@Override
 	public void reloadingPerformed() {
 		super.reloadingPerformed();
-		CabConfigurationListenerRegistry.fireConfigurationChangedEvent();
+		FoundationConfigurationListenerRegistry.fireConfigurationChangedEvent();
 	}
 
 }
