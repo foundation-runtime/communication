@@ -2,12 +2,12 @@
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd"
          xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <parent>
-        <groupId>com.cisco.vss.foundation</groupId>
+        <groupId>com.cisco.oss.foundation</groupId>
         <artifactId>foundation-common-base</artifactId>
         <version>0.0.0-3-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.cisco.vss.foundation</groupId>
+    <groupId>com.cisco.oss.foundation</groupId>
     <artifactId>http-client-jetty</artifactId>
     <name>http-client-jetty</name>
     <version>0.0.0-3-SNAPSHOT</version>
@@ -87,25 +87,25 @@
     </build>
     <dependencies>
         <dependency>
-            <groupId>com.cisco.vss.foundation</groupId>
+            <groupId>com.cisco.oss.foundation</groupId>
             <artifactId>http-client-api</artifactId>
             <version>${http-client-api-version}</version>
         </dependency>
         <dependency>
-            <groupId>com.cisco.vss.foundation</groupId>
+            <groupId>com.cisco.oss.foundation</groupId>
             <artifactId>http-client-api</artifactId>
             <version>${http-client-api-version}</version>
             <scope>test</scope>
             <classifier>tests</classifier>
         </dependency>
         <dependency>
-            <groupId>com.cisco.vss.foundation</groupId>
+            <groupId>com.cisco.oss.foundation</groupId>
             <artifactId>logging-log4j</artifactId>
             <version>${logging-log4j-version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.cisco.vss.foundation</groupId>
+            <groupId>com.cisco.oss.foundation</groupId>
             <artifactId>configuration-lib</artifactId>
             <version>${configuration-lib-version}</version>
             <scope>test</scope>
@@ -140,7 +140,7 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.cisco.vss.foundation</groupId>
+            <groupId>com.cisco.oss.foundation</groupId>
             <artifactId>http-client-apache</artifactId>
             <version>${http-client-api-version}</version>
             <scope>test</scope>

@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd" xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <parent>
-		<groupId>com.cisco.vss.foundation</groupId>
+		<groupId>com.cisco.oss.foundation</groupId>
 		<artifactId>foundation-common-base</artifactId>
 		<version>0.0.0-3-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.cisco.vss.foundation</groupId>
+    <groupId>com.cisco.oss.foundation</groupId>
     <artifactId>http-client-api</artifactId>
     <name>http-client-api</name>
     <version>0.0.0-3-SNAPSHOT</version>
@@ -98,12 +98,12 @@
     </build>
     <dependencies>
         <dependency>
-            <groupId>com.cisco.vss.foundation</groupId>
+            <groupId>com.cisco.oss.foundation</groupId>
             <artifactId>configuration-api</artifactId>
             <version>${configuration-api-version}</version>
         </dependency>
         <dependency>
-            <groupId>com.cisco.vss.foundation</groupId>
+            <groupId>com.cisco.oss.foundation</groupId>
             <artifactId>commons</artifactId>
             <version>${commons-version}</version>
         </dependency>

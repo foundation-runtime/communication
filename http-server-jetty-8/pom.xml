@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd" xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <parent>
-		<groupId>com.cisco.vss.foundation</groupId>
+		<groupId>com.cisco.oss.foundation</groupId>
 		<artifactId>foundation-common-base</artifactId>
 		<version>0.0.0-3-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.cisco.vss.foundation</groupId>
+    <groupId>com.cisco.oss.foundation</groupId>
     <artifactId>http-server-jetty-8</artifactId>
     <name>http-server-jetty-8</name>
     <version>0.0.0-3-SNAPSHOT</version>
@@ -86,7 +86,7 @@
     </build>
     <dependencies>
         <dependency>
-            <groupId>com.cisco.vss.foundation</groupId>
+            <groupId>com.cisco.oss.foundation</groupId>
             <artifactId>http-server-api</artifactId>
             <version>${http-server-api-version}</version>
             <exclusions>
@@ -97,24 +97,24 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>com.cisco.vss.foundation</groupId>
+            <groupId>com.cisco.oss.foundation</groupId>
             <artifactId>logging-api</artifactId>
             <version>${logging-api-version}</version>
         </dependency>
         <dependency>
-            <groupId>com.cisco.vss.foundation</groupId>
+            <groupId>com.cisco.oss.foundation</groupId>
             <artifactId>http-client-apache</artifactId>
             <version>0.0.0-3-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.cisco.vss.foundation</groupId>
+            <groupId>com.cisco.oss.foundation</groupId>
             <artifactId>logging-log4j</artifactId>
             <version>${logging-log4j-version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.cisco.vss.foundation</groupId>
+            <groupId>com.cisco.oss.foundation</groupId>
             <artifactId>configuration-lib</artifactId>
             <version>${configuration-lib-version}</version>
             <scope>test</scope>
