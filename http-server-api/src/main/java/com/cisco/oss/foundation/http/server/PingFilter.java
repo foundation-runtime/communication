@@ -16,7 +16,8 @@
 
 package com.cisco.oss.foundation.http.server;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -36,7 +37,7 @@ import java.io.IOException;
 public class PingFilter extends AbstractInfraHttpFilter {
 
 	private static final String PING_HEADER = "NDS-Proxy-Ping";
-	private final static Logger LOGGER = Logger.getLogger(PingFilter.class);
+	private final static Logger LOGGER = LoggerFactory.getLogger(PingFilter.class);
 	
 	public PingFilter(String serviceName) {
 		super(serviceName);

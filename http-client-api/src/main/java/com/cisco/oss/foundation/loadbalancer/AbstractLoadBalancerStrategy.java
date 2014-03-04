@@ -18,7 +18,8 @@ package com.cisco.oss.foundation.loadbalancer;
 
 import com.cisco.oss.foundation.http.ClientException;
 import com.cisco.oss.foundation.http.HttpRequest;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.remoting.RemoteAccessException;
 
 import java.io.IOException;
@@ -37,7 +38,7 @@ public abstract class AbstractLoadBalancerStrategy<S extends HttpRequest> implem
 	private static final long serialVersionUID = -4787963395573781601L;
 
 
-	protected static final Logger LOGGER = Logger.getLogger(AbstractLoadBalancerStrategy.class);
+	protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractLoadBalancerStrategy.class);
 
 	protected List<InternalServerProxy> serverProxies;
 
@@ -102,7 +103,7 @@ public abstract class AbstractLoadBalancerStrategy<S extends HttpRequest> implem
 
 			final RequestTimeoutException requestTimeoutException = new RequestTimeoutException("Error occurred while invoking the api: " + apiName, throwable.getCause());
 
-			LOGGER.warn(requestTimeoutException);
+			LOGGER.warn(requestTimeoutException.toString(), requestTimeoutException);
 
 			throw requestTimeoutException;
 		}

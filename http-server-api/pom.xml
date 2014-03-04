@@ -96,6 +96,11 @@
             <version>${configuration-api-version}</version>
         </dependency>
         <dependency>
+            <groupId>com.cisco.oss.foundation</groupId>
+            <artifactId>logging-api</artifactId>
+            <version>${logging-api-version}</version>
+        </dependency>
+        <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
             <version>1.9</version>
