@@ -19,9 +19,9 @@ package com.cisco.oss.foundation.http;
 /**
  * The basic interface to foundation http clients.
  * This interface allows you to choose between the following options:
- * </br>1. execute a request directly using executeDirect - assumes a fully constructed url
- * </br>2. execute a request with LoadBalancer using executeWithLoadBalancer - assumes a partially constructed uri
- * </br>3. execute a request directly or with load balancing using execute - decision is based on the 'enableLoadBalancing' flag in the Httpclient factories.
+ * <br/>1. execute a request directly using executeDirect - assumes a fully constructed url
+ * <br/>2. execute a request with LoadBalancer using executeWithLoadBalancer - assumes a partially constructed uri
+ * <br/>3. execute a request directly or with load balancing using execute - decision is based on the 'enableLoadBalancing' flag in the Httpclient factories.
  *
  * This class uses Generics to bind to specific HttpRequest and HttpResponse types. The actual binding is done via the Client factory implementations.
  * Refer to wiki to see possible configurations for clients.
