@@ -17,7 +17,7 @@
 package com.cisco.oss.foundation.http.server;
 
 import com.cisco.oss.foundation.configuration.ConfigurationFactory;
-import org.apache.log4j.Logger;
+import org.slf4j.*;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -32,7 +32,7 @@ import java.io.IOException;
  */
 public class PingServlet extends HttpServlet {
 
-    private final static Logger LOGGER = Logger.getLogger(PingServlet.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(PingServlet.class);
 
     private boolean enableLogging = false;
 
