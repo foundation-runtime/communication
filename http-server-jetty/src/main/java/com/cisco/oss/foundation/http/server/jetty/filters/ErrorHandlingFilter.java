@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package com.cisco.oss.foundation.http.server.jetty;
+package com.cisco.oss.foundation.http.server.jetty.filters;
 
 import com.cisco.oss.foundation.http.server.AbstractInfraHttpFilter;
 import org.eclipse.jetty.io.EofException;

@@ -32,7 +32,7 @@ import java.util.concurrent.CountDownLatch
 class ServerTest {
 
   @Test
-  def testSimpleServer(){
+  def testSimpleServer() {
 
     RunTestServer.runServer()
     val numOfIter = 20
@@ -40,7 +40,7 @@ class ServerTest {
 
     for (i <- 1 to numOfIter) {
 
-      future{
+      future {
         FlowContextFactory.createFlowContext()
 
         LoggerFactory.getLogger(getClass).info("sending request: {}", i)
@@ -64,6 +64,42 @@ class ServerTest {
     }
 
     countDown.await
+
+    RunTestServer.stopServer()
+
+  }
+
+  @Test
+  def testTrace() {
+
+    RunTestServer.runServer()
+    val numOfIter = 5
+    val countDown = new CountDownLatch(numOfIter)
+
+    val client = ApacheHttpClientFactory.createHttpClient("clientTest")
+    for (i <- 1 to numOfIter) {
+      val index = i
+      future {
+
+        val JSON = "{\n  \"blueprint\": {\n    \"tiers\": [\n      {\n        \"generic\": {\n          \"name\": \"upm\",\n          \"order\": 1,\n          \"nodeCount\": 4,\n          \"reverseProxy\": false,\n          \"dns\": false,\n          \"node\": {\n            \"region\": \"us-es\",\n            \"swapFile\": false,\n            \"minDisk\": 10,\n            \"minCores\": 4,\n            \"minRam\": 1024,\n            \"osType\": \"Red Hat\",\n            \"osVersion\": 6.5,\n            \"networks\": [\n              {\n                \"name\": \"internal\",\n                \"ports\": [\n                  6060,\n                  6061\n                ]\n              }\n            ]\n          },\n          \"modules\": [\n            {\n              \"name\": \"cisco_upm\",\n              \"version\": \"5.0.5\",\n              \"configuration\": {\n                \"hiera\": {\n                  \"values\": [\n                    {\n                      \"name\": \"foo1\",\n                      \"value\": \"bar1\"\n                    },\n                    {\n                      \"name\": \"foo2\",\n                      \"value\": \"bar2\"\n                    }\n                  ]\n                },\n                \"ccp\": {\n                  \"baseConfig\": \"/docs/samples/config.properties\",\n                  \"sumpplement\": [\n                    {\n                      \"name\": \"name1\",\n                      \"value\": \"value1\"\n                    },\n                    {\n                      \"name\": \"name2\",\n                      \"value\": \"value2\"\n                    }\n                  ]\n                }\n              }\n            }\n          ]\n        }\n      },\n      {\n        \"generic\": {\n          \"name\": \"pps\",\n          \"order\": 1,\n          \"nodeCount\": 3,\n          \"reverseProxy\": false,\n          \"dns\": false,\n          \"node\": {\n            \"region\": \"us-es\",\n            \"swapFile\": false,\n            \"minDisk\": 10,\n            \"minCores\": 4,\n            \"minRam\": 1024,\n            \"osType\": \"Red Hat\",\n            \"osVersion\": 6.5,\n            \"networks\": [\n              {\n                \"name\": \"internal\",\n                \"ports\": [\n                  6060,\n                  6061\n                ]\n              }\n            ]\n          },\n          \"modules\": [\n            {\n              \"name\": \"cisco_pps\",\n              \"version\": \"5.0.5\",\n              \"configuration\": {\n                \"hiera\": {\n                  \"values\": [\n                    {\n                      \"name\": \"foo1\",\n                      \"value\": \"bar1\"\n                    },\n                    {\n                      \"name\": \"foo2\",\n                      \"value\": \"bar2\"\n                    }\n                  ]\n                },\n                \"ccp\": {\n                  \"baseConfig\": \"/docs/samples/config.properties\",\n                  \"sumpplement\": [\n                    {\n                      \"name\": \"name1\",\n                      \"value\": \"value1\"\n                    },\n                    {\n                      \"name\": \"name2\",\n                      \"value\": \"value2\"\n                    }\n                  ]\n                }\n              }\n            }\n          ]\n        }\n      },\n      {\n        \"mongodb\": {\n          \"name\": \"mongo-cluster\",\n          \"order\": 2,\n          \"shardCount\": 3,\n          \"nodesInReplica\": 3,\n          \"mongod-node\": {\n            \"region\": \"us-es\",\n            \"swapFile\": false,\n            \"minDisk\": 10,\n            \"minCores\": 4,\n            \"minRam\": 1024,\n            \"osType\": \"Red Hat\",\n            \"osVersion\": 6.5,\n            \"networks\": [\n              {\n                \"name\": \"internal\",\n                \"ports\": [\n                  6060,\n                  6061\n                ]\n              }\n            ]\n          },\n          \"mongoc-node\": {\n            \"region\": \"us-es\",\n            \"swapFile\": false,\n            \"minDisk\": 10,\n            \"minCores\": 4,\n            \"minRam\": 1024,\n            \"osType\": \"Red Hat\",\n            \"osVersion\": 6.5,\n            \"networks\": [\n              {\n                \"name\": \"internal\",\n                \"ports\": [\n                  6060,\n                  6061\n                ]\n              }\n            ]\n          }\n        }\n      },\n      {\n        \"hornetq\": {\n          \"order\": 3,\n          \"node\": {\n            \"region\": \"us-es\",\n            \"swapFile\": false,\n            \"minDisk\": 10,\n            \"minCores\": 4,\n            \"minRam\": 1024,\n            \"osType\": \"Red Hat\",\n            \"osVersion\": 6.5,\n            \"networks\": [\n              {\n                \"name\": \"internal\",\n                \"ports\": [\n                  6060,\n                  6061\n                ]\n              }\n            ]\n          }\n        }\n      }\n    ]\n  }\n}"
+        //    println (JSON)
+        FlowContextFactory.createFlowContext()
+
+
+        if(i % 2 == 0){
+          client.executeWithLoadBalancer(HttpRequest.newBuilder().uri("/test").httpMethod(HttpMethod.PUT).entity("testing new message").build())
+        }else{
+          client.executeWithLoadBalancer(HttpRequest.newBuilder().uri("/test").httpMethod(HttpMethod.PUT).entity(JSON).build())
+        }
+        countDown.countDown()
+      }
+
+
+    }
+
+    countDown.await
+
+    RunTestServer.stopServer
 
   }
 

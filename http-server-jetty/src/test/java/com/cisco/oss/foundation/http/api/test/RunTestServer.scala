@@ -36,6 +36,10 @@ object RunTestServer {
     JettyHttpServerFactory.INSTANCE.startHttpServer("serverTest", servlets)
   }
 
+  def stopServer(){
+    JettyHttpServerFactory.INSTANCE.stopHttpServer("serverTest")
+  }
+
 }
 
 class ServletTester extends HttpServlet{
@@ -44,41 +48,52 @@ class ServletTester extends HttpServlet{
 
 
   override def service(req: HttpServletRequest, resp: HttpServletResponse) = {
-    val fc = req.getHeader("FLOW_CONTEXT")
-    FlowContextFactory.deserializeNativeFlowContext(fc)
+//    val fc = req.getHeader("FLOW_CONTEXT")
+//    FlowContextFactory.deserializeNativeFlowContext(fc)
     super.service(req,resp)
   }
 
   override def doGet(req: HttpServletRequest, resp: HttpServletResponse): Unit = {
     LOGGER.info("doGet");
     resp.getWriter.write("dummy response")
+    resp.setStatus(200);
   }
 
   override def doPost(req: HttpServletRequest, resp: HttpServletResponse): Unit = {
 //    LOGGER.info("doPost");
     LOGGER.info("request: {}; content-type: {}; content: {}", req.getRequestURL, req.getContentType, getBody(req));
     resp.getWriter.write(req.getHeader("Host"))
+    resp.setStatus(200);
   }
 
   override def doPut(req: HttpServletRequest, resp: HttpServletResponse): Unit = {
     val body = getBody(req)
     LOGGER.info("doPut: {}", body);
     resp.getWriter.write(body)
+    resp.getWriter.close();
+    resp.setStatus(200);
 //    Thread.sleep(2500)
   }
   def getBody(request: HttpServletRequest):String = {
 
-    var body:String = null;
-    val stringBuilder = new StringBuilder();
-    var bufferedReader:BufferedReader = null;
+    var body:String = ""
+    val stringBuilder = new StringBuilder
+    var bufferedReader:BufferedReader = null
 
 //    try {
-      val inputStream = request.getInputStream();
+      val inputStream = request.getInputStream
+    val builder = new StringBuilder
       if (inputStream != null) {
-        bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-        return bufferedReader.readLine()
+        bufferedReader = new BufferedReader(new InputStreamReader(inputStream))
+        var line = bufferedReader.readLine
+        while (line != null){
+          builder.append(line)
+          line = bufferedReader.readLine
+        }
+
       }
-    return "";
+    inputStream.close
+    return builder.toString
 
   }
 }

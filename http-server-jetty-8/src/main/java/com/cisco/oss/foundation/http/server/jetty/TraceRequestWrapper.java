@@ -48,7 +48,7 @@ public class TraceRequestWrapper extends HttpServletRequestWrapper {
 	private final String bodySuffix;
 	public static final int DEFAULT_BUF_SIZE = 1024 * 4;
 	// private final static Logger LOGGER =
-	// Logger.getLogger(TraceRequestWrapper.class);
+	// LoggerFactroy.getLogger(TraceRequestWrapper.class);
 	private final byte[] body;
 	private List<String> contentTypes = null;
 	private String serviceName;

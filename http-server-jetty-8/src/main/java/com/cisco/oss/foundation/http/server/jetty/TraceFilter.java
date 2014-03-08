@@ -17,7 +17,7 @@
 package com.cisco.oss.foundation.http.server.jetty;
 
 import com.cisco.oss.foundation.http.server.AbstractInfraHttpFilter;
-import org.apache.log4j.Logger;
+import org.slf4j.*;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -40,7 +40,7 @@ import java.io.IOException;
 public class TraceFilter extends AbstractInfraHttpFilter {
 
 	private int bodyLimit = 1024;
-	private final static Logger LOGGER = Logger.getLogger(TraceFilter.class);
+	private final static Logger LOGGER = LoggerFactory.getLogger(TraceFilter.class);
 
 	public TraceFilter(String serviceName) {
 		super(serviceName);

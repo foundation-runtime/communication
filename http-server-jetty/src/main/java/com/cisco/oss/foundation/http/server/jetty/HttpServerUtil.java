@@ -18,19 +18,16 @@ package com.cisco.oss.foundation.http.server.jetty;
 
 import com.cisco.oss.foundation.configuration.ConfigurationFactory;
 import com.cisco.oss.foundation.http.server.*;
-import org.apache.commons.configuration.Configuration;
-import org.apache.commons.lang.StringUtils;
+import com.cisco.oss.foundation.http.server.jetty.filters.CrossOriginFilter;
+import com.cisco.oss.foundation.http.server.jetty.filters.ErrorHandlingFilter;
+import com.cisco.oss.foundation.http.server.jetty.filters.TraceFilter;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.eclipse.jetty.util.thread.QueuedThreadPool;
-import org.eclipse.jetty.util.thread.ThreadPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.DispatcherType;
-import javax.servlet.http.HttpServletRequest;
-import java.lang.reflect.Constructor;
 import java.util.EnumSet;
 
 /**
@@ -48,7 +45,7 @@ public class HttpServerUtil {
 		context.addFilter(new FilterHolder(new HttpMethodFilter(serviceName)), "/*", EnumSet.allOf(DispatcherType.class));
 		context.addFilter(new FilterHolder(new RequestValidityFilter(serviceName)), "/*", EnumSet.allOf(DispatcherType.class));
 		context.addFilter(new FilterHolder(new AvailabilityFilter(serviceName, threadPool)), "/*", EnumSet.allOf(DispatcherType.class));
-//		context.addFilter(new FilterHolder(new TraceFilter(serviceName)), "/*", EnumSet.allOf(DispatcherType.class));
+		context.addFilter(new FilterHolder(new TraceFilter(serviceName)), "/*", EnumSet.allOf(DispatcherType.class));
 
         if(ConfigurationFactory.getConfiguration().getBoolean(serviceName + "http.pingFilter.isEnabled", true)){
             context.addFilter(new FilterHolder(new PingFilter(serviceName)), "/*", EnumSet.allOf(DispatcherType.class));
