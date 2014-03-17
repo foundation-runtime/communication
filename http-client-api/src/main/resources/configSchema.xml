@@ -78,6 +78,11 @@
                     </DefaultValue>
                 </StructureMemberDefinition>
                 <StructureMemberDefinition name="http.monitoringBaseUri" type="STRING" isArray="true" advanced="true" description="A list of base Uri's . If the list is not empty the infrastructure will try and match the base uri with the actual uri. if found the base uri will be the monitoring service/api name." required="false" />
+                <StructureMemberDefinition name="http.exposeStatisticsToMonitor" type="BOOLEAN" advanced="true" description="Set to true if you wnt to monitor client connections." required="false">
+                    <DefaultValue>
+                        <PrimitiveValue value="true"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
                 <StructureMemberDefinition name="http.keyStorePath" type="STRING" advanced="true" description="the path to the keystore file." required="false" />
                 <StructureMemberDefinition name="http.keyStorePassword" type="STRING" advanced="true" description="the password to the keystore file." required="false" />
                 <StructureMemberDefinition name="http.trustStorePath" type="STRING" advanced="true" description="the path to the trust-store file." required="false" />

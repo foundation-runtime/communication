@@ -16,10 +16,15 @@
 
 package com.cisco.oss.foundation.http;
 
+import com.cisco.oss.foundation.configuration.ConfigUtil;
 import com.cisco.oss.foundation.configuration.FoundationConfigurationListener;
 import com.cisco.oss.foundation.configuration.FoundationConfigurationListenerRegistry;
 import com.cisco.oss.foundation.configuration.ConfigurationFactory;
 import com.cisco.oss.foundation.loadbalancer.*;
+import com.cisco.oss.foundation.monitoring.CommunicationInfo;
+import com.cisco.oss.foundation.monitoring.RMIMonitoringAgent;
+import com.cisco.oss.foundation.monitoring.serverconnection.ServerConnectionDetails;
+import com.cisco.oss.foundation.string.utils.BoyerMoore;
 import com.google.common.collect.Lists;
 import com.netflix.util.Pair;
 import org.apache.commons.configuration.Configuration;
@@ -29,10 +34,8 @@ import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -46,12 +49,19 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractHttpClient.class);
     protected LoadBalancerStrategy loadBalancerStrategy = new RoundRobinStrategy();
     protected String apiName = "HTTP";
+    protected boolean exposeStatisticsToMonitor = false;
+    private static Map<String, List<BoyerMoore>> boyersMap = new ConcurrentHashMap<String, List<BoyerMoore>>();
+
     protected InternalServerProxyMetadata metadata;
     protected Configuration configuration;
     protected boolean enableLoadBalancing = true;
 
     public AbstractHttpClient(String apiName, Configuration configuration, boolean enableLoadBalancing) {
         this(apiName, LoadBalancerStrategy.STRATEGY_TYPE.ROUND_ROBIN, configuration, enableLoadBalancing);
+        exposeStatisticsToMonitor = getExposeStatisticsToMonitor();
+        if(exposeStatisticsToMonitor){
+            RMIMonitoringAgent.getInstance().register();
+        }
     }
 
     public AbstractHttpClient(String apiName, LoadBalancerStrategy.STRATEGY_TYPE strategyType, Configuration configuration, boolean enableLoadBalancing) {
@@ -61,6 +71,10 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
             this.configuration = ConfigurationFactory.getConfiguration();
         }else{
             this.configuration = configuration;
+        }
+        exposeStatisticsToMonitor = getExposeStatisticsToMonitor();
+        if(exposeStatisticsToMonitor){
+            RMIMonitoringAgent.getInstance().register(this.configuration);
         }
         loadBalancerStrategy = fromHighAvailabilityStrategyType(strategyType);
         createServerListFromConfig();
@@ -110,8 +124,23 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
                 request = updateRequestUri(request, serverProxy);
 
                 LOGGER.info("sending request: {}", request.getUri());
+                if (exposeStatisticsToMonitor) {
+                    ServerConnectionDetails connectionDetails = new ServerConnectionDetails(apiName, "HTTP:" + request.getHttpMethod(), request.getUri().getHost(), -1, request.getUri().getPort());
+                    CommunicationInfo.getCommunicationInfo().transactionStarted(connectionDetails, getMonioringApiName(request));
+                }
                 result = executeDirect(request);
                 LOGGER.info("got response: {}", result.getRequestedURI());
+                if (exposeStatisticsToMonitor) {
+                    ServerConnectionDetails connectionDetails = new ServerConnectionDetails(apiName, "HTTP:" + request.getHttpMethod(), request.getUri().getHost(), -1, request.getUri().getPort());
+
+                    int responseStatus = result.getStatus();
+
+                    if (responseStatus >= 100 && responseStatus < 400) {
+                        CommunicationInfo.getCommunicationInfo().transactionFinished(connectionDetails, getApiName(), false, "");
+                    } else {
+                        CommunicationInfo.getCommunicationInfo().transactionFinished(connectionDetails, getApiName(), true, responseStatus + "");
+                    }
+                }
 //                if (lastKnownErrorThreadLocal.get() != null) {
 //                    lastCaugtException = handleException(serviceMethod, serverProxy, lastKnownErrorThreadLocal.get());
 //                } else {
@@ -372,6 +401,58 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
 
         }
 
+    }
+
+    private boolean getExposeStatisticsToMonitor() {
+        boolean monitor = configuration.getBoolean(apiName + "http.exposeStatisticsToMonitor", true);
+        return monitor;
+    }
+
+    protected String getMonioringApiName(S request) {
+
+        if (apiName != null) {
+
+            if (!boyersMap.containsKey(apiName)) {
+
+                List<BoyerMoore> boyers = populateBoyersList();
+                if (boyers != null) {
+                    boyersMap.put(apiName, boyers);
+                }
+            }
+
+            List<BoyerMoore> boyers = boyersMap.get(apiName);
+            if (boyers != null && !boyers.isEmpty()) {
+                String uri = request.getUri().toString();
+                for (BoyerMoore boyerMoore : boyers) {
+                    int match = boyerMoore.search(uri);
+                    if (match >= 0) {
+                        return boyerMoore.getPattern();
+                    }
+                }
+
+            }
+
+        }
+
+        return request.getUri().toString();
+    }
+
+    private List<BoyerMoore> populateBoyersList() {
+        List<BoyerMoore> boyers = new ArrayList<BoyerMoore>();
+        Map<String, String> parseSimpleArrayAsMap = ConfigUtil.parseSimpleArrayAsMap(configuration, apiName + ".http.monitoringBaseUri");
+        List<String> keys = new ArrayList<String>(parseSimpleArrayAsMap.keySet());
+//		Collections.sort(keys);
+        Collections.sort(keys,new Comparator<String>() {
+            // Overriding the compare method to sort the age
+            public int compare(String str1, String str2) {
+                return Integer.parseInt(str1) - Integer.parseInt(str2);
+            }
+        });
+        for (String key : keys) {
+            String baseUri = parseSimpleArrayAsMap.get(key);
+            boyers.add(new BoyerMoore(baseUri));
+        }
+        return boyers;
     }
 
 }
