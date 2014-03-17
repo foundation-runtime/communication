@@ -50,14 +50,14 @@ public class MonitoringFilter extends AbstractInfraHttpFilter {
         port = ConfigurationFactory.getConfiguration().getInt(serviceName + ".http.port", 8080);
         serviceDetails = new ServiceDetails(description, serviceName, "HTTP", port);
         this.threadPool = threadPool;
-        uniqueUriMonitoringEnabled = ConfigurationFactory.getConfiguration().getBoolean("service." + serviceName + ".http.monitoringFilter.uniqueUriMonitoringEnabled", false);
+        uniqueUriMonitoringEnabled = ConfigurationFactory.getConfiguration().getBoolean(serviceName + ".http.monitoringFilter.uniqueUriMonitoringEnabled", false);
         if (!uniqueUriMonitoringEnabled) {
             populateBoyersList();
         }
     }
 
     private void populateBoyersList() {
-        Map<String, String> parseSimpleArrayAsMap = ConfigUtil.parseSimpleArrayAsMap("service." + serviceName + ".http.monitoringFilter.baseUri");
+        Map<String, String> parseSimpleArrayAsMap = ConfigUtil.parseSimpleArrayAsMap(serviceName + ".http.monitoringFilter.baseUri");
         List<String> keys = new ArrayList<String>(parseSimpleArrayAsMap.keySet());
 //		Collections.sort(keys);
         Collections.sort(keys, new Comparator<String>() {
