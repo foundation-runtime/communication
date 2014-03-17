@@ -51,4 +51,9 @@ public interface HttpThreadPool {
      */
     boolean isLowOnThreads();
 
+    /**
+     * Get the current number of threads used
+     */
+    int getThreads();
+
 }

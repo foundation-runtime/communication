@@ -26,6 +26,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
@@ -54,8 +55,8 @@ public class FlowContextFilter extends AbstractInfraHttpFilter {
 		} catch (Exception e) {
 			LOGGER.warn("problem setting flow context filter: " + e, e);
 		}
-		chain.doFilter(request, response);
-		
+        ((HttpServletResponse)response).setHeader(HttpServerFactory.FLOW_CONTEXT_HEADER, FlowContextFactory.serializeNativeFlowContext());
+        chain.doFilter(request, response);	
 	}
 
 	

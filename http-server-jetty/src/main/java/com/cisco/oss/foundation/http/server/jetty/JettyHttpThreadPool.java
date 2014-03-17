@@ -93,4 +93,9 @@ public class JettyHttpThreadPool implements HttpThreadPool{
     public boolean isLowOnThreads() {
         return threadPool.isLowOnThreads();
     }
+
+    @Override
+    public int getThreads() {
+        return threadPool.getThreads();
+    }
 }

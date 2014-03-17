@@ -63,6 +63,7 @@ class ServletTester extends HttpServlet{
 //    LOGGER.info("doPost");
     LOGGER.info("request: {}; content-type: {}; content: {}", req.getRequestURL, req.getContentType, getBody(req));
     resp.getWriter.write(req.getHeader("Host"))
+    resp.setHeader("Header1","Value1");
     resp.setStatus(200);
   }
 

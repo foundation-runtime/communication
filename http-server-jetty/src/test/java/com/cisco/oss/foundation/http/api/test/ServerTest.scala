@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory
 import scala.concurrent._
 import ExecutionContext.Implicits.global
 import java.util.concurrent.CountDownLatch
+import com.cisco.oss.foundation.http.server.HttpServerFactory
 
 /**
  * Created by Yair Ogen on 2/9/14.
@@ -98,6 +99,9 @@ class ServerTest {
     }
 
     countDown.await
+
+    val resp = client.executeWithLoadBalancer(HttpRequest.newBuilder().uri("/test").httpMethod(HttpMethod.POST).entity("").build())
+    println(resp.getHeaders.get(HttpServerFactory.FLOW_CONTEXT_HEADER))
 
     RunTestServer.stopServer
 

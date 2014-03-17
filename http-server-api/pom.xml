@@ -105,5 +105,10 @@
             <artifactId>commons-codec</artifactId>
             <version>1.9</version>
         </dependency>
+        <dependency>
+            <groupId>com.cisco.oss.foundation</groupId>
+            <artifactId>monitoring-jmx-lib</artifactId>
+            <version>${monitoring-jmx-lib-version}</version>
+        </dependency>
     </dependencies>
 </project>

@@ -44,6 +44,7 @@ public class HttpServerUtil {
 
 		context.addFilter(new FilterHolder(new FlowContextFilter(serviceName)), "/*", EnumSet.allOf(DispatcherType.class));
 		context.addFilter(new FilterHolder(new ErrorHandlingFilter(serviceName)), "/*", EnumSet.allOf(DispatcherType.class));
+        context.addFilter(new FilterHolder(new MonitoringFilter(serviceName, threadPool)), "/*", EnumSet.allOf(DispatcherType.class));
 //		addMonitoringFilter(serviceName, threadPool, context);
 		context.addFilter(new FilterHolder(new HttpMethodFilter(serviceName)), "/*", EnumSet.allOf(DispatcherType.class));
 		context.addFilter(new FilterHolder(new RequestValidityFilter(serviceName)), "/*", EnumSet.allOf(DispatcherType.class));
