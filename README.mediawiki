@@ -1,1 +1,1 @@
-You can read the user guide in [[Home|our Wiki]].
+You can read the user guide in [[../../wiki/Home|our Wiki]].
