@@ -1,3 +1,3 @@
 Communication
 =============
-This is an auto-generated README file.
+you can read the user guide in [[our wiki|Home]].
