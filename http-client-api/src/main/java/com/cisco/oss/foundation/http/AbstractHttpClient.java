@@ -124,21 +124,20 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
                 request = updateRequestUri(request, serverProxy);
 
                 LOGGER.info("sending request: {}", request.getUri());
+                ServerConnectionDetails connectionDetails = new ServerConnectionDetails(apiName, "HTTP:" + request.getHttpMethod(), request.getUri().getHost(), -1, request.getUri().getPort());
                 if (exposeStatisticsToMonitor) {
-                    ServerConnectionDetails connectionDetails = new ServerConnectionDetails(apiName, "HTTP:" + request.getHttpMethod(), request.getUri().getHost(), -1, request.getUri().getPort());
                     CommunicationInfo.getCommunicationInfo().transactionStarted(connectionDetails, getMonioringApiName(request));
                 }
                 result = executeDirect(request);
                 LOGGER.info("got response: {}", result.getRequestedURI());
                 if (exposeStatisticsToMonitor) {
-                    ServerConnectionDetails connectionDetails = new ServerConnectionDetails(apiName, "HTTP:" + request.getHttpMethod(), request.getUri().getHost(), -1, request.getUri().getPort());
 
                     int responseStatus = result.getStatus();
 
                     if (responseStatus >= 100 && responseStatus < 400) {
-                        CommunicationInfo.getCommunicationInfo().transactionFinished(connectionDetails, getApiName(), false, "");
+                        CommunicationInfo.getCommunicationInfo().transactionFinished(connectionDetails, getMonioringApiName(request), false, "");
                     } else {
-                        CommunicationInfo.getCommunicationInfo().transactionFinished(connectionDetails, getApiName(), true, responseStatus + "");
+                        CommunicationInfo.getCommunicationInfo().transactionFinished(connectionDetails, getMonioringApiName(request), true, responseStatus + "");
                     }
                 }
 //                if (lastKnownErrorThreadLocal.get() != null) {
