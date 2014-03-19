@@ -20,13 +20,13 @@
     <parent>
         <groupId>com.cisco.oss.foundation</groupId>
         <artifactId>foundation-common-base</artifactId>
-        <version>0.0.0-3-SNAPSHOT</version>
+        <version>0.0.0-5</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.cisco.oss.foundation</groupId>
     <artifactId>http-client-jetty</artifactId>
     <name>http-client-jetty</name>
-    <version>0.0.0-3-SNAPSHOT</version>
+    <version>0.0.0-5-SNAPSHOT</version>
     <description>This project is the jetty http client implementation library in the cisco vss foundation runtime</description>
     <url>https://github.com/foundation-runtime/communication/http-client-jetty</url>
     <packaging>jar</packaging>
@@ -58,8 +58,8 @@
         </developer>
     </developers>
     <scm>
-        <connection>scm:git:ssh://github.com:foundation-runtime/communication.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com:foundation-runtime/communication.git</developerConnection>
+        <connection>scm:git:git@github.com:foundation-runtime/communication.git</connection>
+        <developerConnection>scm:git:git@github.com:foundation-runtime/communication.git</developerConnection>
         <url>https://github.com/foundation-runtime/communication.git</url>
         <tag>HEAD</tag>
     </scm>
@@ -72,11 +72,6 @@
             <plugins/>
         </pluginManagement>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-release-plugin</artifactId>
-                <version>2.0</version>
-            </plugin>
             <plugin>
                 <groupId>org.scala-tools</groupId>
                 <artifactId>maven-scala-plugin</artifactId>
