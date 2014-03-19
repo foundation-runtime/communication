@@ -106,8 +106,8 @@
             <artifactId>http-client-api</artifactId>
             <version>${http-client-api-version}</version>
             <scope>test</scope>
-            <!--<classifier>tests</classifier>-->
-            <type>test-jar</type>
+            <classifier>tests</classifier>
+            <!--<type>test-jar</type>-->
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
