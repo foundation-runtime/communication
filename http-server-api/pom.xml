@@ -15,8 +15,7 @@
   ~  limitations under the License.
   -->
 
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd"
-         xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <parent>
         <groupId>com.cisco.oss.foundation</groupId>
         <artifactId>foundation-common-base</artifactId>
@@ -26,7 +25,7 @@
     <groupId>com.cisco.oss.foundation</groupId>
     <artifactId>http-server-api</artifactId>
     <name>http-server-api</name>
-    <version>0.0.0-5-SNAPSHOT</version>
+    <version>0.0.0-6-SNAPSHOT</version>
     <description>This project is the http server api library in the cisco vss foundation runtime</description>
     <url>https://github.com/foundation-runtime/communication/http-server-api</url>
     <packaging>jar</packaging>
@@ -43,7 +42,7 @@
         <url>{URL in JIRA or Product name in CQ}</url>
     </issueManagement>
     <mailingLists>
-        <mailingList/>
+        <mailingList />
     </mailingLists>
     <developers>
         <developer>
@@ -69,7 +68,7 @@
     </organization>
     <build>
         <pluginManagement>
-            <plugins/>
+            <plugins />
         </pluginManagement>
         <plugins>
         </plugins>
