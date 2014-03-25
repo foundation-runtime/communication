@@ -19,9 +19,7 @@ package com.cisco.oss.foundation.http.apache;
 import com.cisco.oss.foundation.http.ClientException;
 import com.cisco.oss.foundation.http.HttpResponse;
 import com.google.common.collect.ImmutableListMultimap;
-import com.google.common.collect.Multimap;
 import org.apache.http.Header;
-import org.apache.http.HeaderElement;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.util.EntityUtils;
 

@@ -71,6 +71,7 @@
             <plugins />
         </pluginManagement>
         <plugins>
+<!--
             <plugin>
                 <groupId>org.scala-tools</groupId>
                 <artifactId>maven-scala-plugin</artifactId>
@@ -105,63 +106,14 @@
                     </execution>
                 </executions>
             </plugin>
+-->
         </plugins>
     </build>
     <dependencies>
         <dependency>
             <groupId>com.cisco.oss.foundation</groupId>
-            <artifactId>configuration-api</artifactId>
-            <version>${configuration-api-version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.cisco.oss.foundation</groupId>
             <artifactId>commons</artifactId>
             <version>${commons-version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.netflix.netflix-commons</groupId>
-            <artifactId>netflix-commons-util</artifactId>
-            <version>0.1.1</version>
-        </dependency>
-        <dependency>
-            <groupId>com.twitter</groupId>
-            <artifactId>jsr166e</artifactId>
-            <version>1.0.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.cisco.oss.foundation</groupId>
-            <artifactId>monitoring-jmx-lib</artifactId>
-            <version>${monitoring-jmx-lib-version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.scala-lang</groupId>
-            <artifactId>scala-library</artifactId>
-            <version>2.10.3</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-server</artifactId>
-            <version>${jetty-version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-servlet</artifactId>
-            <version>${jetty-version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-servlets</artifactId>
-            <version>${jetty-version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.typesafe.akka</groupId>
-            <artifactId>akka-actor_2.10</artifactId>
-            <version>2.2.4</version>
-            <scope>test</scope>
         </dependency>
     </dependencies>	
 </project>

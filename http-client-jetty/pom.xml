@@ -98,13 +98,13 @@
     <dependencies>
         <dependency>
             <groupId>com.cisco.oss.foundation</groupId>
-            <artifactId>http-client-api</artifactId>
-            <version>${http-client-api-version}</version>
+            <artifactId>http-client-common</artifactId>
+            <version>0.0.0-6-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.cisco.oss.foundation</groupId>
-            <artifactId>http-client-api</artifactId>
-            <version>${http-client-api-version}</version>
+            <artifactId>http-client-common</artifactId>
+            <version>0.0.0-6-SNAPSHOT</version>
             <scope>test</scope>
             <classifier>tests</classifier>
         </dependency>
@@ -149,12 +149,12 @@
             <version>${jetty-version}</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
+        <!--<dependency>
             <groupId>com.cisco.oss.foundation</groupId>
             <artifactId>http-client-apache</artifactId>
             <version>${http-client-api-version}</version>
             <scope>test</scope>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>com.typesafe.akka</groupId>
             <artifactId>akka-actor_2.10</artifactId>
