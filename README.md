@@ -15,4 +15,4 @@ Following is the list of release references to the different libraries managed u
 [http-server-jetty](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.cisco.oss.foundation%22%20AND%20a%3A%22http-server-jetty%22)  
 [http-server-jetty-8](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.cisco.oss.foundation%22%20AND%20a%3A%22http-server-jetty-8%22)  
 
-Nightly Builds can be found [here](https://oss.sonatype.org/content/repositories/snapshots/com/cisco/oss/foundation/)
+**Nightly Builds** can be found [here](https://oss.sonatype.org/content/repositories/snapshots/com/cisco/oss/foundation/)
