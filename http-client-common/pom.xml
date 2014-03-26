@@ -56,6 +56,9 @@
             </roles>
         </developer>
     </developers>
+    <properties>
+        <http-client-api-version>0.0.0-6</http-client-api-version>
+    </properties>
     <scm>
         <connection>scm:git:git@github.com:foundation-runtime/communication.git</connection>
         <developerConnection>scm:git:git@github.com:foundation-runtime/communication.git</developerConnection>
@@ -120,7 +123,7 @@
         <dependency>
             <groupId>com.cisco.oss.foundation</groupId>
             <artifactId>http-client-api</artifactId>
-            <version>0.0.0-6</version>
+            <version>${http-client-api-version}</version>
         </dependency>
         <dependency>
             <groupId>com.cisco.oss.foundation</groupId>
