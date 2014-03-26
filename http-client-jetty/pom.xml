@@ -25,7 +25,7 @@
     <groupId>com.cisco.oss.foundation</groupId>
     <artifactId>http-client-jetty</artifactId>
     <name>http-client-jetty</name>
-    <version>0.0.0-6-SNAPSHOT</version>
+    <version>0.0.0-6</version>
     <description>This project is the jetty http client implementation library in the cisco vss foundation runtime</description>
     <url>https://github.com/foundation-runtime/communication/http-client-jetty</url>
     <packaging>jar</packaging>
@@ -60,7 +60,7 @@
         <connection>scm:git:git@github.com:foundation-runtime/communication.git</connection>
         <developerConnection>scm:git:git@github.com:foundation-runtime/communication.git</developerConnection>
         <url>https://github.com/foundation-runtime/communication.git</url>
-        <tag>HEAD</tag>
+        <tag>http-client-jetty-0.0.0-6</tag>
     </scm>
     <organization>
         <name>Cisco</name>
