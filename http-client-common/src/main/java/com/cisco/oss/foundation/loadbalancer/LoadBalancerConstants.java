@@ -35,6 +35,7 @@ public final class LoadBalancerConstants {
     public static final String WAITING_TIME = "waitingTime";
     public static final String NUMBER_OF_ATTEMPTS= "numberOfAttempts";
     public static final String RETRY_DELAY = "retryDelay";
+    public static final String FOLLOW_REDIRECTS = "followRedirects";
     //    public static final String REP_EXST_BIND = "replaceExistingBinding";
     public static final String SERVICE_NAME = "serviceName";
     //    public static final String PORT_RANGE = "portRange";

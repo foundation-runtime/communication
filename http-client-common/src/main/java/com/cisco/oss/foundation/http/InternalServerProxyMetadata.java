@@ -43,6 +43,12 @@ public class InternalServerProxyMetadata {
     private String trustStorePassword = "";
     private List<Pair<String, Integer>> hostAndPortPairs = null;
 
+    public boolean isFollowRedirects() {
+        return followRedirects;
+    }
+
+    private boolean followRedirects = false;
+
     public long getIdleTimeout() {
         return idleTimeout;
     }
@@ -87,7 +93,7 @@ public class InternalServerProxyMetadata {
         return waitingTime;
     }
 
-    public InternalServerProxyMetadata(int readTimeout, int connectTimeout, long idleTimeout, int maxConnectionsPerAddress, int maxConnectionsTotal, int maxQueueSizePerAddress, long waitingTime, int numberOfRetries, long retryDelay, List<Pair<String, Integer>> hostAndPortPairs, String keyStorePath, String keyStorePassword,String trustStorePath,String trustStorePassword) {
+    public InternalServerProxyMetadata(int readTimeout, int connectTimeout, long idleTimeout, int maxConnectionsPerAddress, int maxConnectionsTotal, int maxQueueSizePerAddress, long waitingTime, int numberOfRetries, long retryDelay, List<Pair<String, Integer>> hostAndPortPairs, String keyStorePath, String keyStorePassword,String trustStorePath,String trustStorePassword, boolean followRedirects) {
         this.readTimeout = readTimeout;
         this.connectTimeout = connectTimeout;
         this.idleTimeout = idleTimeout;
@@ -98,6 +104,7 @@ public class InternalServerProxyMetadata {
         this.numberOfRetries = numberOfRetries;
         this.retryDelay = retryDelay;
         this.hostAndPortPairs = hostAndPortPairs;
+        this.followRedirects = followRedirects;
     }
 
     public int getNumberOfRetries() {

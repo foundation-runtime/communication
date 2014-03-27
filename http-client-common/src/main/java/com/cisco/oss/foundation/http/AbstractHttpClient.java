@@ -55,6 +55,7 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
     protected InternalServerProxyMetadata metadata;
     protected Configuration configuration;
     protected boolean enableLoadBalancing = true;
+    protected boolean followRedirects = false;
 
     public AbstractHttpClient(String apiName, Configuration configuration, boolean enableLoadBalancing) {
         this(apiName, LoadBalancerStrategy.STRATEGY_TYPE.ROUND_ROBIN, configuration, enableLoadBalancing);
@@ -78,6 +79,7 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
         }
         loadBalancerStrategy = fromHighAvailabilityStrategyType(strategyType);
         createServerListFromConfig();
+        followRedirects = metadata.isFollowRedirects();
         FoundationConfigurationListenerRegistry.addFoundationConfigurationListener(new LoadBalancerConfigurationListener());
     }
 
@@ -257,6 +259,7 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
         int maxConnectionsPerAddress = subset.getInt("http." + LoadBalancerConstants.MAX_CONNECTIONS_PER_ADDRESS, LoadBalancerConstants.DEFAULT_MAX_CONNECTIONS_PER_ADDRESS);
         int maxConnectionsTotal = subset.getInt("http." + LoadBalancerConstants.MAX_CONNECTIONS_TOTAL, LoadBalancerConstants.DEFAULT_MAX_CONNECTIONS_TOTAL);
         int maxQueueSizePerAddress = subset.getInt("http." + LoadBalancerConstants.MAX_QUEUE_PER_ADDRESS, LoadBalancerConstants.DEFAULT_MAX_QUEUE_PER_ADDRESS);
+        boolean followRedirects = subset.getBoolean("http." + LoadBalancerConstants.FOLLOW_REDIRECTS, false);
 
         String keyStorePath = subset.getString("http." + LoadBalancerConstants.KEYSTORE_PATH, "");
         String keyStorePassword = subset.getString("http." + LoadBalancerConstants.KEYSTORE_PASSWORD, "");
@@ -295,7 +298,7 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
 
         }
 
-        InternalServerProxyMetadata metadata = new InternalServerProxyMetadata(readTimeout, connectTimeout, idleTimeout, maxConnectionsPerAddress, maxConnectionsTotal, maxQueueSizePerAddress, waitingTime, numberOfAttempts, retryDelay, hostAndPortPairs, keyStorePath, keyStorePassword, trustStorePath, trustStorePassword);
+        InternalServerProxyMetadata metadata = new InternalServerProxyMetadata(readTimeout, connectTimeout, idleTimeout, maxConnectionsPerAddress, maxConnectionsTotal, maxQueueSizePerAddress, waitingTime, numberOfAttempts, retryDelay, hostAndPortPairs, keyStorePath, keyStorePassword, trustStorePath, trustStorePassword, followRedirects);
 //        metadata.getHostAndPortPairs().addAll(hostAndPortPairs);
 //        metadata.setReadTimeout(readTimeout);
 //        metadata.setConnectTimeout(connectTimeout);

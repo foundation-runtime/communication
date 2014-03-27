@@ -117,13 +117,18 @@ class ApacheHttpClient extends AbstractHttpClient<HttpRequest, HttpResponse> {
             LOGGER.error("can't set TLS Support. Error is: {}", e, e);
         }
 
-        httpClient = HttpClientBuilder.create()
+        HttpClientBuilder httpClientBuilder = HttpClientBuilder.create()
                 .setMaxConnPerRoute(metadata.getMaxConnectionsPerAddress())
                 .setMaxConnTotal(metadata.getMaxConnectionsTotal())
                 .setDefaultRequestConfig(requestBuilder.build())
                 .setKeepAliveStrategy(new InfraConnectionKeepAliveStrategy(metadata.getIdleTimeout()))
-                .setSslcontext(sslContext)
-                .build();
+                .setSslcontext(sslContext);
+
+        if(!followRedirects){
+            httpClientBuilder.disableRedirectHandling();
+        }
+
+        httpClient = httpClientBuilder.build();
     }
 
     @Override

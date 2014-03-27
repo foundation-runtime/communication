@@ -57,7 +57,7 @@
         </developer>
     </developers>
     <properties>
-        <http-client-common-version>0.0.0-6</http-client-common-version>
+        <http-client-common-version>0.0.0-7-SNAPSHOT</http-client-common-version>
     </properties>
     <scm>
         <connection>scm:git:git@github.com:foundation-runtime/communication.git</connection>
