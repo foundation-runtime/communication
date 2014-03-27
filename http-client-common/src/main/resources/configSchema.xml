@@ -83,6 +83,11 @@
                         <PrimitiveValue value="true"/>
                     </DefaultValue>
                 </StructureMemberDefinition>
+                <StructureMemberDefinition name="http.followRedirects" type="BOOLEAN" advanced="true" description="Set to true if you client to redirected to a new location in response to an HTTP response received from the target." required="false">
+                    <DefaultValue>
+                        <PrimitiveValue value="false"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
                 <StructureMemberDefinition name="http.keyStorePath" type="STRING" advanced="true" description="the path to the keystore file." required="false" />
                 <StructureMemberDefinition name="http.keyStorePassword" type="STRING" advanced="true" description="the password to the keystore file." required="false" />
                 <StructureMemberDefinition name="http.trustStorePath" type="STRING" advanced="true" description="the path to the trust-store file." required="false" />
