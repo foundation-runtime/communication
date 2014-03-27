@@ -83,6 +83,7 @@ public class JettyHttpClient<S extends HttpRequest, R extends HttpResponse> exte
         httpClient.setIdleTimeout(metadata.getIdleTimeout());
         httpClient.setMaxConnectionsPerDestination(metadata.getMaxConnectionsPerAddress());
         httpClient.setMaxRequestsQueuedPerDestination(metadata.getMaxQueueSizePerAddress());
+        httpClient.setFollowRedirects(followRedirects);
 
         try {
             httpClient.start();
