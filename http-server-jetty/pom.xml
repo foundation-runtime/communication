@@ -15,11 +15,12 @@
   ~  limitations under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <parent>
-		<groupId>com.cisco.oss.foundation</groupId>
-		<artifactId>foundation-common-base</artifactId>
-		<version>0.0.0-5</version>
+        <groupId>com.cisco.oss.foundation</groupId>
+        <artifactId>foundation-common-base</artifactId>
+        <version>0.0.0-5</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.cisco.oss.foundation</groupId>
@@ -27,7 +28,8 @@
     <name>http-server-jetty</name>
     <version>0.0.0-6-SNAPSHOT</version>
     <packaging>jar</packaging>
-    <description>This project is the http jetty server implementation library in the cisco vss foundation runtime</description>
+    <description>This project is the http jetty server implementation library in the cisco vss foundation runtime
+    </description>
     <url>https://github.com/foundation-runtime/communication/http-server-jetty</url>
     <licenses>
         <license>
@@ -42,7 +44,7 @@
         <url>{URL in JIRA or Product name in CQ}</url>
     </issueManagement>
     <mailingLists>
-        <mailingList />
+        <mailingList/>
     </mailingLists>
     <developers>
         <developer>
@@ -56,6 +58,10 @@
             </roles>
         </developer>
     </developers>
+    <properties>
+        <logging-log4j-version>0.0.0-6-SNAPSHOT</logging-log4j-version>
+        <logging-api-version>0.0.0-6-SNAPSHOT</logging-api-version>
+    </properties>
     <scm>
         <connection>scm:git:git@github.com:foundation-runtime/communication.git</connection>
         <developerConnection>scm:git:git@github.com:foundation-runtime/communication.git</developerConnection>
@@ -68,10 +74,10 @@
     </organization>
     <build>
         <pluginManagement>
-            <plugins />
+            <plugins/>
         </pluginManagement>
         <plugins>
-           <plugin>
+            <plugin>
                 <groupId>org.scala-tools</groupId>
                 <artifactId>maven-scala-plugin</artifactId>
                 <version>2.15.2</version>
@@ -96,6 +102,11 @@
         </plugins>
     </build>
     <dependencies>
+        <dependency>
+            <groupId>com.cisco.oss.foundation</groupId>
+            <artifactId>monitoring-api</artifactId>
+            <version>0.0.0-6-SNAPSHOT</version>
+        </dependency>
         <dependency>
             <groupId>com.cisco.oss.foundation</groupId>
             <artifactId>http-server-api</artifactId>
@@ -145,5 +156,70 @@
             <version>2.10.3</version>
             <scope>test</scope>
         </dependency>
-    </dependencies>    
+        <dependency>
+            <groupId>org.glassfish.jersey.containers.glassfish</groupId>
+            <artifactId>jersey-gf-cdi</artifactId>
+            <version>2.6</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.core</groupId>
+            <artifactId>jersey-common</artifactId>
+            <version>2.6</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.core</groupId>
+            <artifactId>jersey-server</artifactId>
+            <version>2.6</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.core</groupId>
+            <artifactId>jersey-client</artifactId>
+            <version>2.6</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.ext</groupId>
+            <artifactId>jersey-servlet-portability</artifactId>
+            <version>2.6</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.containers</groupId>
+            <artifactId>jersey-container-servlet</artifactId>
+            <version>2.6</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.scalatest</groupId>
+            <artifactId>scalatest_2.10</artifactId>
+            <version>2.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>javax.enterprise</groupId>
+            <artifactId>cdi-api</artifactId>
+            <version>1.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>javax.transaction</groupId>
+            <artifactId>javax.transaction-api</artifactId>
+            <version>1.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
+            <version>2.3</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.joda</groupId>
+            <artifactId>joda-convert</artifactId>
+            <version>1.2</version>
+        </dependency>
+    </dependencies>
 </project>
