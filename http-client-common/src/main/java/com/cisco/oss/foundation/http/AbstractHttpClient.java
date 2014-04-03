@@ -406,7 +406,7 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
     }
 
     private boolean getExposeStatisticsToMonitor() {
-        boolean monitor = configuration.getBoolean(apiName + "http.exposeStatisticsToMonitor", true);
+        boolean monitor = configuration.getBoolean(apiName + ".http.exposeStatisticsToMonitor", true);
         return monitor;
     }
 

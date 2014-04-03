@@ -26,6 +26,7 @@ import java.util.concurrent.{CountDownLatch, ConcurrentHashMap, CopyOnWriteArray
 import java.lang.String
 import scala.collection.JavaConversions._
 import scala.collection.mutable
+import org.apache.commons.configuration.Configuration
 
 /**
  * Created by Yair Ogen on 1/23/14.
@@ -85,8 +86,11 @@ class AsyncTestUtil[S <: HttpRequest, R <: HttpResponse] {
 
   }
 
-
   def realServerInvokePostRoudRobin(clientRoundRobinTest: HttpClient[S, R]) {
+    realServerInvokePostRoudRobin(clientRoundRobinTest, ConfigurationFactory.getConfiguration)
+  }
+
+  def realServerInvokePostRoudRobin(clientRoundRobinTest: HttpClient[S, R], configuration:Configuration) {
 
     val port1 = 13345
     val port2 = 13346
@@ -196,7 +200,7 @@ class AsyncTestUtil[S <: HttpRequest, R <: HttpResponse] {
       props.store(new FileOutputStream(new File(configURL.getFile)), "")
 
       Thread.sleep(4000)
-      ConfigurationFactory.getConfiguration.getBoolean("configuration.dynamicConfigReload.enabled")
+      configuration.getBoolean("configuration.dynamicConfigReload.enabled")
 
 
       RounRobinStats.results = new CopyOnWriteArrayList[String]()

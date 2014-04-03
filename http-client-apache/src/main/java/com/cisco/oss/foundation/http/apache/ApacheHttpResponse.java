@@ -34,11 +34,11 @@ import java.util.Map;
  */
 public class ApacheHttpResponse implements HttpResponse {
 
-    private CloseableHttpResponse httpResponse = null;
+    private org.apache.http.HttpResponse httpResponse = null;
     private URI requestUri = null;
 
-    public ApacheHttpResponse(CloseableHttpResponse closeableHttpResponse, URI requestUri) {
-        this.httpResponse = closeableHttpResponse;
+    public ApacheHttpResponse(org.apache.http.HttpResponse httpResponse, URI requestUri) {
+        this.httpResponse = httpResponse;
         this.requestUri = requestUri;
     }
 
@@ -122,7 +122,9 @@ public class ApacheHttpResponse implements HttpResponse {
     @Override
     public void close() {
         try {
-            httpResponse.close();
+            if(httpResponse instanceof CloseableHttpResponse){
+                ((CloseableHttpResponse)httpResponse).close();
+            }
         } catch (IOException e) {
             throw new ClientException(e.toString(), e);
         }

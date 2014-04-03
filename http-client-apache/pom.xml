@@ -118,6 +118,11 @@
             <version>4.3.1</version>
         </dependency>
         <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpasyncclient</artifactId>
+            <version>4.0.1</version>
+        </dependency>
+        <dependency>
             <groupId>com.cisco.oss.foundation</groupId>
             <artifactId>logging-api</artifactId>
             <version>${logging-api-version}</version>
