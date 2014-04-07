@@ -21,7 +21,11 @@ import com.cisco.oss.foundation.http.apache.ApacheHttpClientFactory;
 import com.cisco.oss.foundation.http.apache.ApacheHttpResponse;
 import com.cisco.oss.foundation.loadbalancer.LoadBalancerStrategy;
 import com.cisco.oss.foundation.loadbalancer.NoActiveServersException;
+import org.apache.commons.configuration.ConfigurationException;
+import org.apache.commons.configuration.PropertiesConfiguration;
 import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -29,7 +33,19 @@ import java.io.IOException;
 /**
  * Created by Yair Ogen on 1/21/14.
  */
+@Ignore
 public class JavaClientSample {
+
+    static PropertiesConfiguration propsConfiguration = null;
+
+    @BeforeClass
+    public static void init(){
+        try {
+            propsConfiguration = new PropertiesConfiguration(TestApacheClient.class.getResource("/config.properties"));
+        } catch (ConfigurationException e) {
+            e.printStackTrace();
+        }
+    }
 
     @Test (expected = NoActiveServersException.class)
     public void testClient(){
@@ -54,7 +70,7 @@ public class JavaClientSample {
 
     @Test
     public void testClient2() throws IOException {
-        HttpClient clientTest = ApacheHttpClientFactory.createHttpClient("clientTest", LoadBalancerStrategy.STRATEGY_TYPE.FAIL_OVER);
+        HttpClient clientTest = ApacheHttpClientFactory.createHttpClient("clientTest", LoadBalancerStrategy.STRATEGY_TYPE.FAIL_OVER, propsConfiguration);
         HttpRequest request = HttpRequest.newBuilder()
                 .httpMethod(HttpMethod.GET)
                 .uri("http://www.google.com")
