@@ -24,6 +24,7 @@ import com.cisco.oss.foundation.http.server.jetty.JettyHttpServerFactory
 import com.google.common.collect.{ArrayListMultimap}
 import javax.servlet.Servlet
 import org.slf4j.LoggerFactory
+import java.util.Date
 
 /**
  * Created by Yair Ogen on 1/20/14.
@@ -63,6 +64,7 @@ class ServletTester extends HttpServlet{
   override def doPut(req: HttpServletRequest, resp: HttpServletResponse): Unit = {
     val body = getBody(req)
     LOGGER.info("doPut: {}", body);
+    resp.setDateHeader("Date", (new Date).getTime)
     resp.getWriter.write(body)
 //    Thread.sleep(2500)
   }

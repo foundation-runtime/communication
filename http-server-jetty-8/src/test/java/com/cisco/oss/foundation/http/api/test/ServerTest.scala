@@ -17,7 +17,7 @@
 package com.cisco.oss.foundation.http.api.test
 
 import org.junit.Assert._
-import org.junit.Test
+import org.junit.{Assert, Test}
 import com.cisco.oss.foundation.http.apache.ApacheHttpClientFactory
 import com.cisco.oss.foundation.http.{HttpMethod, HttpRequest}
 import com.cisco.oss.foundation.flowcontext.FlowContextFactory
@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory
 import scala.concurrent._
 import ExecutionContext.Implicits.global
 import java.util.concurrent.CountDownLatch
+import scala.collection.JavaConversions._
 
 /**
  * Created by Yair Ogen on 2/9/14.
@@ -50,6 +51,10 @@ class ServerTest {
         val request = HttpRequest.newBuilder().uri("/test").httpMethod(HttpMethod.PUT).entity(i.toString).build()
 
         val response = client.executeWithLoadBalancer(request)
+
+        Assert.assertNotNull(response.getHeaders.get("Date"))
+        println(s"***${(response.getHeaders.get("Date")).mkString(",")}***")
+
 
         LoggerFactory.getLogger(getClass).info("got response: {}", i)
 
