@@ -16,9 +16,9 @@
 
 package com.cisco.oss.foundation.http;
 
-import com.netflix.util.Pair;
 
-import java.util.ArrayList;
+import org.apache.commons.lang3.tuple.Pair;
+
 import java.util.List;
 
 /**

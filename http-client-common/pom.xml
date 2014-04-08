@@ -131,10 +131,10 @@
             <artifactId>configuration-api</artifactId>
             <version>${configuration-api-version}</version>
         </dependency>
-       <dependency>
-            <groupId>com.netflix.netflix-commons</groupId>
-            <artifactId>netflix-commons-util</artifactId>
-            <version>0.1.1</version>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.3.1</version>
         </dependency>
         <dependency>
             <groupId>com.twitter</groupId>

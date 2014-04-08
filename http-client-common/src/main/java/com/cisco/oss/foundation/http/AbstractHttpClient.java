@@ -26,9 +26,9 @@ import com.cisco.oss.foundation.monitoring.RMIMonitoringAgent;
 import com.cisco.oss.foundation.monitoring.serverconnection.ServerConnectionDetails;
 import com.cisco.oss.foundation.string.utils.BoyerMoore;
 import com.google.common.collect.Lists;
-import com.netflix.util.Pair;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -292,7 +292,7 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
                 if (subset.containsKey(portKey)) {
                     int port = subset.getInt(portKey);
                     // save host and port for future creation of server list
-                    hostAndPortPairs.add(new Pair<String, Integer>(host, port));
+                    hostAndPortPairs.add(Pair.of(host, port));
                 }
             }
 
@@ -326,8 +326,8 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
         // list.
         for (Pair<String, Integer> hostPort : metadata.getHostAndPortPairs()) {
 
-            final String hostEntry = hostPort.first();
-            final int portEntry = hostPort.second();
+            final String hostEntry = hostPort.getKey();
+            final int portEntry = hostPort.getValue();
 
             final InternalServerProxy internalServerProxy = createInternalServerProxy(metadata, hostEntry, portEntry);
             serversList.add(internalServerProxy);
@@ -355,8 +355,8 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
             List<Pair<String, Integer>> hostAndPortPairs = metadata.getHostAndPortPairs();
             for (Pair<String, Integer> hostPort : hostAndPortPairs) {
 
-                String newHost = hostPort.first();
-                int newPort = hostPort.second();
+                String newHost = hostPort.getKey();
+                int newPort = hostPort.getValue();
 
                 boolean handled = false;
 
