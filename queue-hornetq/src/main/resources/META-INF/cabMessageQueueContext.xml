@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright 2014 Cisco Systems, Inc.
+  ~
+  ~  Licensed under the Apache License, Version 2.0 (the "License");
+  ~  you may not use this file except in compliance with the License.
+  ~  You may obtain a copy of the License at
+  ~
+  ~  http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  -->
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans-3.0.xsd"
+       default-init-method="startup" default-destroy-method="shutdown"
+       default-lazy-init="true">
+
+    <import resource="classpath:/META-INF/configurationContext.xml"/>
+
+    <!-- enable the configuration of transactional behavior based on annotations -->
+    <!--<tx:annotation-driven transaction-manager="jmsTxManager"/>-->
+
+    <!-- Common beans -->
+    <bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+        <property name="connectionFactory" ref="singleConnectionFactory"/>
+        <!-- <property name="connectionFactory" ref="#{ ${service.queue.type} == 'AMQ' ? 'AMQConnectionFactory' : (${service.queue.security.isEnabled} == 'true' ? 'HornetQConnectionFactoryWithAuthentication' : 'HornetQConnectionFactoryWithoutAuthentication') }" /> -->
+        <property name="timeToLive" value="${service.queue.messageExpirationTime}"/>
+        <property name="sessionTransacted" value="true"/>
+    </bean>
+
+  <!--  <bean id="jmsTxManager" class="org.springframework.jms.connection.JmsTransactionManager">
+        <constructor-arg ref="${service.queue.type}ConnectionFactory"/>
+    </bean>-->
+
+    <bean id="singleConnectionFactory" class="org.springframework.jms.connection.SingleConnectionFactory">
+        <constructor-arg ref="${service.queue.type}ConnectionFactory" />
+        <property name="reconnectOnException" value="true"/>
+    </bean>
+
+    <!-- HornetQ beans -->
+    <bean id="jndiTemplate" class="com.cisco.vss.foundation.queue.hq.JndiTemplateFactory"/>
+
+    <bean id="HornetQConnectionFactory" class="com.cisco.vss.foundation.queue.hq.InfraHQConnectionFactory"/>
+
+    <bean id="HornetQConnectionFactoryWithAuthentication"
+          class="org.springframework.jms.connection.UserCredentialsConnectionFactoryAdapter">
+        <property name="targetConnectionFactory" ref="HornetQConnectionFactoryWithoutAuthentication" />
+        <property name="username" value="${service.queue.security.userName}"/>
+        <property name="password" value="${service.queue.security.password}"/>
+    </bean>
+
+    <bean id="HornetQConnectionFactoryWithoutAuthentication" class="org.springframework.jndi.JndiObjectFactoryBean">
+        <property name="jndiTemplate" ref="jndiTemplate"/>
+        <property name="jndiName" value="ConnectionFactory"/>
+        <property name="proxyInterface" value="javax.jms.ConnectionFactory"/>
+        <property name="lookupOnStartup" value="false"/>
+    </bean>
+
+    <bean id="producer" class="com.cisco.vss.foundation.queue.hq.HQProducer" />
+
+    <bean id="topicConsumer" abstract="true"
+          class="com.cisco.vss.foundation.queue.hq.TopicConsumer"/>
+
+    <bean id="queueConsumer" abstract="true"
+          class="com.cisco.vss.foundation.queue.hq.QueueConsumer"/>
+
+    <bean id="topicConsumerManager" abstract="true"
+          class="com.cisco.vss.foundation.queue.management.TopicManagerListener"/>
+
+    <bean id="queueConsumerManager" abstract="true"
+          class="com.cisco.vss.foundation.queue.management.QueueManagerListener"/>
+</beans>
