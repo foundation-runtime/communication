@@ -30,6 +30,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
+ * A HornetQ consumer wrapper. NOTE: This class is thread safe although wraps HornetQ ClientConsumer
+ * which is not thread safe. The internal implementation is to provide a single threaded consumer instance by using ThreadLocal
+ * so this class can be used in a multi-threaded environment.
  * Created by Yair Ogen on 24/04/2014.
  */
 class HornetQMessageConsumer implements MessageConsumer {
@@ -124,13 +127,6 @@ class HornetQMessageConsumer implements MessageConsumer {
         }
 
         return realQueueName;
-
-
-//        try {
-//            HornetQMessagingFactory.getSession().createQueue(subscribedTo, queueName, filter, isDurable);
-//        } catch (HornetQException e) {
-//            throw new QueueException("Can't create queue: " + queueName + ". Error: " + e, e);
-//        }
 
     }
 

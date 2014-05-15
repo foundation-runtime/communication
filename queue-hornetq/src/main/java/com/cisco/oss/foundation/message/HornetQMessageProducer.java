@@ -30,6 +30,9 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 
 /**
+ * A HornetQ producer wrapper. NOTE: This class is thread safe although wraps HornetQ ClientProducer
+ * which is not thread safe. The internal implementation is to provide a single threaded producer instance by using ThreadLocal
+ * so this class can be used in a multi-threaded environment.
  * Created by Yair Ogen on 24/04/2014.
  */
 class HornetQMessageProducer implements MessageProducer {
@@ -81,15 +84,10 @@ class HornetQMessageProducer implements MessageProducer {
             queueExists = false;
         }
 
-        if (!queueExists) {
-            boolean isDurable = subset.getBoolean("queue.isDurable", true);
-
-//            try {
-//                HornetQMessagingFactory.getSession().createQueue(realQueueName, realQueueName, null, isDurable);
-//            } catch (HornetQException e) {
-//                throw new QueueException("Can't create queue: " + realQueueName + ". Error: " + e, e);
-//            }
-        }
+//        if (!queueExists) {
+//            boolean isDurable = subset.getBoolean("queue.isDurable", true);
+//
+//        }
 
         return realQueueName;
     }

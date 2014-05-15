@@ -16,6 +16,10 @@
 
 package com.cisco.oss.foundation.message;
 
+/**
+ * constants file
+ * Created by Yair Ogen
+ */
 public class QueueConstants {
 
 	public static final String QUEUE_PREFIX="service.queue";

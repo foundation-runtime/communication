@@ -23,6 +23,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * The hornetq implementation for the goundation Message interface
+ * This is the class users will get when receiving messages using the hornetq flavor
  * Created by Yair Ogen on 24/04/2014.
  */
 public class HornetQMessage implements Message {

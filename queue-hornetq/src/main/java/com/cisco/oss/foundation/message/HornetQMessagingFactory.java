@@ -32,6 +32,8 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
+ * This is the main API tp be used to instantiate new consumers and producers.
+ * This class supports a Per Thread lifecycle for HornetQ session, consumers and producers
  * Created by Yair Ogen on 24/04/2014.
  */
 public class HornetQMessagingFactory {
@@ -39,7 +41,6 @@ public class HornetQMessagingFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(HornetQMessagingFactory.class);
     private static final Set<ClientSession> sessions = new HashSet<ClientSession>();
     public static ThreadLocal<ClientSession> sessionThreadLocal = new ThreadLocal<ClientSession>();
-    //    private static ClientSessionFactory nettyFactory = null;
     private static ServerLocator serverLocator = null;
     private static Map<String, MessageConsumer> consumers = new ConcurrentHashMap<String, MessageConsumer>();
     private static Map<String, MessageProducer> producers = new ConcurrentHashMap<String, MessageProducer>();
@@ -70,10 +71,18 @@ public class HornetQMessagingFactory {
         });
     }
 
+
+    /**
+     * create a new session if one doesn't already exist in the ThreadLocal
+     *
+     * @return a new hornetq session
+     */
     public static ClientSession getSession() {
         if (sessionThreadLocal.get() == null) {
             try {
-                LOGGER.info("creating session");
+                LOGGER.info("creating a new session");
+
+                //session is created with auto-commit and auto-ack set to true
                 ClientSession hornetQSession = serverLocator.createSessionFactory().createSession(true, true);
                 hornetQSession.start();
                 sessionThreadLocal.set(hornetQSession);
@@ -86,6 +95,10 @@ public class HornetQMessagingFactory {
         return sessionThreadLocal.get();
     }
 
+    /**
+     * build once the hornetq service locator.
+     * this is where we read the ost port list from configuration
+     */
     private static void init() {
         try {
 //            nettyFactory = HornetQClient.createServerLocatorWithoutHA(new TransportConfiguration(NettyConnectorFactory.class.getName())).createSessionFactory();
@@ -128,6 +141,17 @@ public class HornetQMessagingFactory {
 
     }
 
+    /**
+     * create a new consumer if one doesn't already exist in the ThreadLocal
+     * the consumer will bonded to an address with a queue-name as defined in the configuration.
+     * the configuration subset is defined by finding a subset starting with the given consumer name.
+     * E.g. consumer name = consumer1
+     * Config:
+     * consumer1.queue.name=consumer1
+     * consumer1.queue.filter=key1='value2'
+     * consumer1.queue.isSubscription=true
+     * consumer1.queue.subscribedTo=myExample
+     */
     public static MessageConsumer createConsumer(String consumerName) {
         if (!consumers.containsKey(consumerName)) {
             consumers.put(consumerName, new HornetQMessageConsumer(consumerName));
@@ -136,6 +160,14 @@ public class HornetQMessagingFactory {
     }
 
 
+    /**
+     * create a new producer if one doesn't already exist in the ThreadLocal
+     * the producer will be bonded to an address with an address-name as defined in the configuration.
+     * the configuration subset is defined by finding a subset starting with the given producer name.
+     * E.g. producer name = example
+     * Config:
+     * example.queue.name=myExample
+     */
     public static MessageProducer createProducer(String producerName) {
         if (!producers.containsKey(producerName)) {
             producers.put(producerName, new HornetQMessageProducer(producerName));

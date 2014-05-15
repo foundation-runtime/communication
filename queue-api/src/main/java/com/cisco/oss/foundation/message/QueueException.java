@@ -16,11 +16,12 @@
 
 package com.cisco.oss.foundation.message;
 
+/**
+ * Generic RuntimeException for possible queue related exceptions
+ * Created by Yair Ogen
+ */
 public class QueueException extends RuntimeException {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 3681660394330306229L;
 
 	public QueueException() {

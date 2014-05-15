@@ -22,6 +22,7 @@ import org.hornetq.api.core.HornetQException;
 import org.hornetq.api.core.client.ClientMessage;
 
 /**
+ * Basic abstract handler that exposes the foundation message handler but also implements silently the hornetq message handler
  * Created by Yair Ogen on 24/04/2014.
  */
 public abstract class AbstractHornetQMessageHandler implements MessageHandler, org.hornetq.api.core.client.MessageHandler {
