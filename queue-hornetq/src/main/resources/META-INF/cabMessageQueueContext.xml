@@ -45,9 +45,9 @@
     </bean>
 
     <!-- HornetQ beans -->
-    <bean id="jndiTemplate" class="com.cisco.vss.foundation.queue.hq.JndiTemplateFactory"/>
+    <bean id="jndiTemplate" class="com.cisco.oss.foundation.queue.hq.JndiTemplateFactory"/>
 
-    <bean id="HornetQConnectionFactory" class="com.cisco.vss.foundation.queue.hq.InfraHQConnectionFactory"/>
+    <bean id="HornetQConnectionFactory" class="com.cisco.oss.foundation.queue.hq.InfraHQConnectionFactory"/>
 
     <bean id="HornetQConnectionFactoryWithAuthentication"
           class="org.springframework.jms.connection.UserCredentialsConnectionFactoryAdapter">
@@ -63,17 +63,17 @@
         <property name="lookupOnStartup" value="false"/>
     </bean>
 
-    <bean id="producer" class="com.cisco.vss.foundation.queue.hq.HQProducer" />
+    <bean id="producer" class="com.cisco.oss.foundation.queue.hq.HQProducer" />
 
     <bean id="topicConsumer" abstract="true"
-          class="com.cisco.vss.foundation.queue.hq.TopicConsumer"/>
+          class="com.cisco.oss.foundation.queue.hq.TopicConsumer"/>
 
     <bean id="queueConsumer" abstract="true"
-          class="com.cisco.vss.foundation.queue.hq.QueueConsumer"/>
+          class="com.cisco.oss.foundation.queue.hq.QueueConsumer"/>
 
     <bean id="topicConsumerManager" abstract="true"
-          class="com.cisco.vss.foundation.queue.management.TopicManagerListener"/>
+          class="com.cisco.oss.foundation.queue.management.TopicManagerListener"/>
 
     <bean id="queueConsumerManager" abstract="true"
-          class="com.cisco.vss.foundation.queue.management.QueueManagerListener"/>
+          class="com.cisco.oss.foundation.queue.management.QueueManagerListener"/>
 </beans>

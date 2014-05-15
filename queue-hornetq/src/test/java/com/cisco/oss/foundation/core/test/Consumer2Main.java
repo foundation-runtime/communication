@@ -14,12 +14,12 @@
  *  limitations under the License.
  */
 
-package com.cisco.vss.foundation.core.test;
+package com.cisco.oss.foundation.core.test;
 
-import com.cisco.vss.foundation.message.AbstractHornetQMessageHandler;
-import com.cisco.vss.foundation.message.HornetQMessagingFactory;
-import com.cisco.vss.foundation.message.Message;
-import com.cisco.vss.foundation.message.MessageConsumer;
+import com.cisco.oss.foundation.message.AbstractHornetQMessageHandler;
+import com.cisco.oss.foundation.message.HornetQMessagingFactory;
+import com.cisco.oss.foundation.message.Message;
+import com.cisco.oss.foundation.message.MessageConsumer;
 
 /**
  * Created by Yair Ogen on 23/04/2014.

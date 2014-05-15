@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package com.cisco.vss.foundation.message;
+package com.cisco.oss.foundation.message;
 
 import org.hornetq.api.core.client.ClientMessage;
 import org.hornetq.core.message.impl.MessageImpl;

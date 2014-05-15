@@ -14,9 +14,9 @@
  *  limitations under the License.
  */
 
-package com.cisco.vss.foundation.core.test;
+package com.cisco.oss.foundation.core.test;
 
-import com.cisco.vss.foundation.message.*;
+import com.cisco.oss.foundation.message.*;
 import com.twitter.jsr166e.LongAdder;
 import org.junit.Assert;
 import org.junit.Ignore;

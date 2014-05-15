@@ -14,19 +14,23 @@
  *  limitations under the License.
  */
 
-package com.cisco.vss.foundtion.threading.test;
+package com.cisco.oss.foundation.core.test;
+
+import org.hornetq.api.core.TransportConfiguration;
+import org.hornetq.api.core.client.*;
+import org.hornetq.core.remoting.impl.invm.InVMConnectorFactory;
+import org.hornetq.core.server.embedded.EmbeddedHornetQ;
+
+/**
+ * Created by Yair Ogen on 23/04/2014.
+ */
+public class QueueServer {
+
+    public static void main(String[] args) throws Exception{
+
+        EmbeddedHornetQ embedded = new EmbeddedHornetQ();
+        embedded.start();
 
 
-import com.cisco.vss.foundation.queue.management.MessageIdentifier;
-
-public class MessageIdentifierT implements MessageIdentifier {
-
-	@Override
-	public String getIdentifier(Object message) {
-		if(!( message instanceof MessageT)){
-			return null;
-		}
-		return String.valueOf(((MessageT)message).identifier);
-	}
-
+    }
 }

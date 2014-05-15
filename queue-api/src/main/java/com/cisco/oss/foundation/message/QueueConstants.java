@@ -14,25 +14,15 @@
  *  limitations under the License.
  */
 
-package com.cisco.vss.foundtion.threading.hornetq.test;
+package com.cisco.oss.foundation.message;
 
-import java.util.ArrayList;
-import java.util.List;
+public class QueueConstants {
 
+	public static final String QUEUE_PREFIX="service.queue";
+	public static final String QUEUE_CONNECTION = QUEUE_PREFIX + ".connections";
+	public static final String QUEUE_HOST="host";
+	public static final String QUEUE_PORT="port";
+	public static final String QUEUE_JMX_PORT = "jmxPort";
+    public static final String FLOW_CONTEXT_HEADER = "FLOW_CONTEXT";
 
-public class HornetqMessageContainer {
-
-	private static List<MessageT> hornetqTestMessageList = new ArrayList<MessageT>();
-	
-	public synchronized static void addTestMessage(MessageT message){
-		hornetqTestMessageList.add(message);
-	}
-	
-	public synchronized static List<MessageT> getTestMessageList(){
-		return hornetqTestMessageList;
-	}
-	
-	public synchronized static void clearTestMessageList(){
-		hornetqTestMessageList = new ArrayList<MessageT>();;
-	}
 }

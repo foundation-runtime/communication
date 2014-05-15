@@ -14,12 +14,29 @@
  *  limitations under the License.
  */
 
-package com.cisco.vss.foundtion.threading.test;
+package com.cisco.oss.foundation.message;
 
-public class MessageT {
+public class QueueException extends RuntimeException {
 
-	public long threadId;
-	public int identifier;
-	public long startTime;
-	public long endTime;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 3681660394330306229L;
+
+	public QueueException() {
+		super();
+	}
+
+	public QueueException(String message, Throwable cause) {
+		super(message, cause);
+	}
+
+	public QueueException(String message) {
+		super(message);
+	}
+
+	public QueueException(Throwable cause) {
+		super(cause);
+	}
+
 }

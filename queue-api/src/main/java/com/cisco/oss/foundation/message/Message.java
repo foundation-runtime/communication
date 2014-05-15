@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package com.cisco.vss.foundation.message;
+package com.cisco.oss.foundation.message;
 
 import java.util.Map;
 

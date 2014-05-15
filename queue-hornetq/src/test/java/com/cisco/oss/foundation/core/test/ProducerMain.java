@@ -14,10 +14,10 @@
  *  limitations under the License.
  */
 
-package com.cisco.vss.foundation.core.test;
+package com.cisco.oss.foundation.core.test;
 
-import com.cisco.vss.foundation.message.HornetQMessagingFactory;
-import com.cisco.vss.foundation.message.MessageProducer;
+import com.cisco.oss.foundation.message.HornetQMessagingFactory;
+import com.cisco.oss.foundation.message.MessageProducer;
 import org.apache.commons.lang3.CharUtils;
 import org.hornetq.api.core.TransportConfiguration;
 import org.hornetq.api.core.client.*;
@@ -39,10 +39,10 @@ public class ProducerMain {
 
             byte[] bytes = new byte[10];
             System.in.read(bytes);
-            producer.sendMessage("hello: " + new String(bytes));
-//            Map<String,Object> props = new HashMap<String,Object>();
-//            props.put("key1","value2");
-//            producer.sendMessage("hello: " + new String(bytes), props);
+//            producer.sendMessage("hello: " + new String(bytes));
+            Map<String,Object> props = new HashMap<String,Object>();
+            props.put("key1","value2");
+            producer.sendMessage("hello: " + new String(bytes), props);
 
         }
 

@@ -14,19 +14,18 @@
  *  limitations under the License.
  */
 
-package com.cisco.vss.foundtion.threading.hornetq.test;
+package com.cisco.oss.foundation.core.test;
 
+import com.cisco.oss.foundation.message.AbstractHornetQMessageHandler;
+import com.cisco.oss.foundation.message.Message;
 
-import com.cisco.vss.foundation.queue.management.MessageIdentifier;
+/**
+ * Created by Yair Ogen on 24/04/2014.
+ */
+public class TestHornetQHandler extends AbstractHornetQMessageHandler {
 
-public class MessageIdentifierT implements MessageIdentifier {
-
-	@Override
-	public String getIdentifier(Object message) {
-		if(!( message instanceof MessageT)){
-			return null;
-		}
-		return String.valueOf(((MessageT)message).identifier);
-	}
-
+    @Override
+    public void onMessage(Message message) {
+        System.out.println(message.getPayloadAsString());
+    }
 }

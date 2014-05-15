@@ -14,12 +14,10 @@
  *  limitations under the License.
  */
 
-package com.cisco.vss.foundation.message;
+package com.cisco.oss.foundation.message;
 
 import com.cisco.oss.foundation.configuration.ConfigurationFactory;
 import com.cisco.oss.foundation.flowcontext.FlowContextFactory;
-import com.cisco.vss.foundation.queue.QueueConstants;
-import com.cisco.vss.foundation.queue.QueueException;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.lang3.StringUtils;
 import org.hornetq.api.core.HornetQException;

@@ -1,20 +1,19 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <parent>
-        <groupId>com.nds.cab.build</groupId>
-        <artifactId>base</artifactId>
-        <version>3.0.6-1</version>
+        <groupId>com.cisco.oss.foundation</groupId>
+        <artifactId>foundation-common-base</artifactId>
+        <version>0.0.0-5</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.cisco.vss.foundation.queue</groupId>
+    <groupId>com.cisco.oss.foundation.queue</groupId>
     <artifactId>queue-hornetq</artifactId>
     <name>queue-hornetq</name>
     <version>1.0.0-9-SNAPSHOT</version>
     <description>This project is a hornetq implementation for the queue-api library.</description>
     <url>http://maven-doc.nds.com/maven_sites/${project.groupId}/${project.artifactId}/${project.version}</url>
     <issueManagement>
-        <system>TBD</system>
-        <url />
+        <system>Github</system>
     </issueManagement>
     <mailingLists>
         <mailingList />
@@ -23,7 +22,7 @@
         <developer>
             <id>yaogen</id>
             <name>Yair Ogen</name>
-            <email>yogen@nds.com</email>
+            <email>yaogen@cisco.com</email>
             <organization>Cisco</organization>
             <organizationUrl>http://www.cisco.com</organizationUrl>
             <roles>
@@ -32,10 +31,10 @@
         </developer>
     </developers>
     <scm>
-        <connection>scm:svn:http://savana.il.nds.com/repos/ch_repo/trunk/vss/foundation/queue-hornetq</connection>
-        <developerConnection>scm:svn:http://savana.il.nds.com/repos/ch_repo/trunk/vss/foundation/queue-hornetq
-        </developerConnection>
-        <url>http://savana.il.nds.com/repos/ch_repo/trunk/vss/foundation/queue-hornetq</url>
+        <connection>scm:git:git@github.com:foundation-runtime/communication.git</connection>
+        <developerConnection>scm:git:git@github.com:foundation-runtime/communication.git</developerConnection>
+        <url>https://github.com/foundation-runtime/communication.git</url>
+        <tag>HEAD</tag>
     </scm>
     <organization>
         <name>Cisco</name>
@@ -43,29 +42,8 @@
     </organization>
     <build>
         <pluginManagement>
-            <plugins>
-                <plugin>
-                    <artifactId>maven-enforcer-plugin</artifactId>
-                    <version>1.1.1</version>
-                    <dependencies>
-                        <dependency>
-                            <groupId>com.nds.cab.build</groupId>
-                            <artifactId>cab-enforcer-rules</artifactId>
-                            <version>2.1.0-1</version>
-                        </dependency>
-                    </dependencies>
-                </plugin>
-            </plugins>
         </pluginManagement>
         <plugins>
-            <plugin>
-                <artifactId>maven-release-plugin</artifactId>
-                <configuration>
-                    <tagBase>
-                        http://savana.il.nds.com/repos/ch_repo/tags/vss/foundation/queue-hornetq
-                    </tagBase>
-                </configuration>
-            </plugin>
         </plugins>
     </build>
     <dependencies>
@@ -89,13 +67,6 @@
             <artifactId>spring-jms</artifactId>
             <version>4.0.0.RELEASE</version>
         </dependency>
-        <!--<dependency>
-            <groupId>org.apache.geronimo.specs</groupId>
-            <artifactId>geronimo-jms_1.1_spec</artifactId>
-            <version>1.1.1</version>
-            <type>jar</type>
-            <scope>compile</scope>
-        </dependency>-->
         <dependency>
             <groupId>org.hornetq</groupId>
             <artifactId>hornetq-server</artifactId>
@@ -112,52 +83,11 @@
             <artifactId>hornetq-jms-client</artifactId>
             <version>2.4.1.Final</version>
         </dependency>
-        <!--<dependency>
-            <groupId>org.jboss.naming</groupId>
-            <artifactId>jnp-client</artifactId>
-            <version>5.0.5.Final</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.jboss.logging</groupId>
-                    <artifactId>jboss-logging-spi</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>-->
         <dependency>
             <groupId>org.jboss.logmanager</groupId>
             <artifactId>log4j-jboss-logmanager</artifactId>
             <version>1.1.0.Final</version>
         </dependency>
-        <!--<dependency>
-            <groupId>org.hornetq</groupId>
-            <artifactId>hornetq-core</artifactId>
-            <version>2.2.21.Final-NDS_2</version>
-        </dependency>
-        <dependency>
-            <groupId>org.hornetq</groupId>
-            <artifactId>hornetq-logging</artifactId>
-            <version>2.2.21.Final</version>
-        </dependency>
-        <dependency>
-            <groupId>org.hornetq</groupId>
-            <artifactId>hornetq-jms</artifactId>
-            <version>2.2.21.Final</version>
-        </dependency>-->
-       <!-- <dependency>
-            <groupId>jboss</groupId>
-            <artifactId>jnp-client</artifactId>
-            <version>4.0.2</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.logging</groupId>
-            <artifactId>jboss-logging-log4j</artifactId>
-            <version>2.1.2.GA</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.netty</groupId>
-            <artifactId>netty</artifactId>
-            <version>3.2.6.Final</version>
-        </dependency>-->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -183,12 +113,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.nds.cab.monitor</groupId>
-            <artifactId>mamaclient</artifactId>
-            <version>0.0.8</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>com.cisco.oss.foundation</groupId>
             <artifactId>http-client-jetty</artifactId>
             <version>0.0.0-5</version>
@@ -207,23 +131,5 @@
             <classifier>tests</classifier>
             <scope>test</scope>
         </dependency>
-        <!--<dependency>
-            <groupId>com.nds.cab.build</groupId>
-            <artifactId>cab-enforcer-rules</artifactId>
-            <version>2.0.1-1</version>
-        </dependency>-->
     </dependencies>
-    <distributionManagement>
-        <site>
-            <id>NDS Site</id>
-            <url>scp://maven-doc.nds.com/cifs/maven_sites/${project.groupId}/${project.artifactId}/${project.version}
-            </url>
-        </site>
-        <snapshotRepository>
-            <id>NDS Snapshots</id>
-            <name>NDS Snapshot Repository</name>
-            <uniqueVersion>true</uniqueVersion>
-            <url>http://maven-repo.nds.com/content/repositories/cisco_vcs-f_snapshots/</url>
-        </snapshotRepository>
-    </distributionManagement>
 </project>

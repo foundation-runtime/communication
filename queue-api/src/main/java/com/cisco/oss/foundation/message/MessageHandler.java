@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package com.cisco.vss.foundation.message;
+package com.cisco.oss.foundation.message;
 
 /**
  * Basic interface for asynchronous call-back that are activated whenever new messages arrive.

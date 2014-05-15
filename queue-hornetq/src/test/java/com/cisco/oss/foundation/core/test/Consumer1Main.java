@@ -14,9 +14,9 @@
  *  limitations under the License.
  */
 
-package com.cisco.vss.foundation.core.test;
+package com.cisco.oss.foundation.core.test;
 
-import com.cisco.vss.foundation.message.*;
+import com.cisco.oss.foundation.message.*;
 
 /**
  * Created by Yair Ogen on 23/04/2014.

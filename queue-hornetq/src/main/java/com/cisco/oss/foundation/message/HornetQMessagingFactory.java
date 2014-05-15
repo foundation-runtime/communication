@@ -14,10 +14,9 @@
  *  limitations under the License.
  */
 
-package com.cisco.vss.foundation.message;
+package com.cisco.oss.foundation.message;
 
 import com.cisco.oss.foundation.configuration.ConfigUtil;
-import com.cisco.vss.foundation.queue.QueueException;
 import com.google.common.collect.Lists;
 import org.hornetq.api.core.HornetQException;
 import org.hornetq.api.core.TransportConfiguration;
