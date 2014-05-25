@@ -51,7 +51,7 @@ public class HttpServerUtil {
 		context.addFilter(new FilterHolder(new AvailabilityFilter(serviceName, threadPool)), "/*", EnumSet.allOf(DispatcherType.class));
 		context.addFilter(new FilterHolder(new TraceFilter(serviceName)), "/*", EnumSet.allOf(DispatcherType.class));
 
-        if(ConfigurationFactory.getConfiguration().getBoolean(serviceName + "http.pingFilter.isEnabled", true)){
+        if(ConfigurationFactory.getConfiguration().getBoolean(serviceName + ".http.pingFilter.isEnabled", true)){
             context.addFilter(new FilterHolder(new PingFilter(serviceName)), "/*", EnumSet.allOf(DispatcherType.class));
         }else{
             context.addServlet(new ServletHolder(new PingServlet(serviceName)),"/probe");
