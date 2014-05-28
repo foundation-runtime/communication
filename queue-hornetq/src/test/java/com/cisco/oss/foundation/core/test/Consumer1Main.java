@@ -16,13 +16,16 @@
 
 package com.cisco.oss.foundation.core.test;
 
-import com.cisco.oss.foundation.message.*;
+import com.cisco.oss.foundation.message.AbstractHornetQMessageHandler;
+import com.cisco.oss.foundation.message.HornetQMessagingFactory;
+import com.cisco.oss.foundation.message.Message;
+import com.cisco.oss.foundation.message.MessageConsumer;
 
 /**
  * Created by Yair Ogen on 23/04/2014.
  */
 public class Consumer1Main {
-
+    
     public static void main(String[] args) throws Exception {
 
         Thread t = new Thread(new Runnable() {
@@ -45,8 +48,6 @@ public class Consumer1Main {
 
         System.in.read();
 
-
-
-
     }
+
 }

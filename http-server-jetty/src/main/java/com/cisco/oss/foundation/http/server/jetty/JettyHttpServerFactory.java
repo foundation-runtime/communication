@@ -24,7 +24,6 @@ import com.google.common.collect.ListMultimap;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jetty.server.*;
-import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -179,13 +178,14 @@ public enum JettyHttpServerFactory implements HttpServerFactory {
             throw new UnsupportedOperationException("you must first stop stop server: " + serviceName + " before you want to start it again!");
         }
 
-        ContextHandlerCollection handler = new ContextHandlerCollection();
+//        ContextHandlerCollection handler = new ContextHandlerCollection();
+
+        ServletContextHandler context = new ServletContextHandler();
 
         JettyHttpThreadPool jettyHttpThreadPool = new JettyHttpThreadPool(serviceName);
 
         for (Map.Entry<String, Servlet> entry : servlets.entries()) {
 
-            ServletContextHandler context = new ServletContextHandler();
 
             if (eventListeners!= null && !eventListeners.isEmpty()){
                 context.setEventListeners(eventListeners.toArray(new EventListener[0]));
@@ -194,13 +194,14 @@ public enum JettyHttpServerFactory implements HttpServerFactory {
             context.addServlet(new ServletHolder(entry.getValue()), entry.getKey());
 
 
-            HttpServerUtil.addFiltersToServletContextHandler(serviceName, jettyHttpThreadPool, context);
 
-            for (Map.Entry<String, Filter> filterEntry : filters.entries()) {
-                context.addFilter(new FilterHolder(filterEntry.getValue()), filterEntry.getKey(), EnumSet.allOf(DispatcherType.class));
-            }
+//            handler.addHandler(context);
+        }
 
-            handler.addHandler(context);
+        HttpServerUtil.addFiltersToServletContextHandler(serviceName, jettyHttpThreadPool, context);
+
+        for (Map.Entry<String, Filter> filterEntry : filters.entries()) {
+            context.addFilter(new FilterHolder(filterEntry.getValue()), filterEntry.getKey(), EnumSet.allOf(DispatcherType.class));
         }
 
         Server server = new Server(jettyHttpThreadPool.threadPool);
@@ -264,7 +265,8 @@ public enum JettyHttpServerFactory implements HttpServerFactory {
             server.setConnectors(connectors);
 
             // set servlets/context handlers
-            server.setHandler(handler);
+//            server.setHandler(handler);
+            server.setHandler(context);
 
             server.start();
             servers.put(serviceName, server);
