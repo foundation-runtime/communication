@@ -80,7 +80,7 @@ public class JettyCompleteListener extends BufferingResponseListener {
 
             byte[] content = getContent();
             if (content != null) {
-                response = new HttpContentResponse(response,content,null);
+                response = new HttpContentResponse(response,content,null, getEncoding());
             }
 
             responseCallback.completed(new JettyHttpResponse(response, uri));
