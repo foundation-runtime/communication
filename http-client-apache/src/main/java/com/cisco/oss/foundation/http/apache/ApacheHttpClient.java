@@ -16,17 +16,12 @@
 
 package com.cisco.oss.foundation.http.apache;
 
-import com.cisco.oss.foundation.flowcontext.FlowContext;
-import com.cisco.oss.foundation.flowcontext.FlowContextFactory;
 import com.cisco.oss.foundation.http.*;
-import com.cisco.oss.foundation.http.HttpRequest;
-import com.cisco.oss.foundation.http.HttpResponse;
 import com.cisco.oss.foundation.loadbalancer.InternalServerProxy;
 import com.cisco.oss.foundation.loadbalancer.LoadBalancerStrategy;
 import com.google.common.base.Joiner;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.*;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.*;
 import org.apache.http.client.utils.URIBuilder;
@@ -35,8 +30,8 @@ import org.apache.http.conn.ssl.SSLContexts;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 import org.apache.http.impl.nio.client.HttpAsyncClients;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -165,8 +160,11 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
         httpUriRequest = buildHttpUriRequest(request, joiner, requestUri);
 
         try {
+            LOGGER.info("sending request: {}", request.getUri());
             CloseableHttpResponse response = httpClient.execute(httpUriRequest);
-            return new ApacheHttpResponse(response, requestUri);
+            ApacheHttpResponse apacheHttpResponse = new ApacheHttpResponse(response, requestUri);
+            LOGGER.info("got response status: {} for request: {}",apacheHttpResponse.getStatus(), apacheHttpResponse.getRequestedURI());
+            return apacheHttpResponse;
         } catch (IOException e) {
             throw new ClientException(e.toString(), e);
         }
@@ -317,9 +315,11 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
 
             serverProxy.setCurrentNumberOfRetries(0);
             serverProxy.setFailedAttemptTimeStamp(0);
-            LOGGER.info("got response: {}", request.getUri());
 
-            responseCallback.completed(new ApacheHttpResponse(response, request.getUri()));
+            ApacheHttpResponse apacheHttpResponse = new ApacheHttpResponse(response, request.getUri());
+            LOGGER.info("got response status: {} for request: {}",apacheHttpResponse.getStatus(), apacheHttpResponse.getRequestedURI());
+            
+            responseCallback.completed(apacheHttpResponse);
         }
 
         @Override

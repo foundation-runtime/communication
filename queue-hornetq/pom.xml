@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <parent>
         <groupId>com.cisco.oss.foundation</groupId>
         <artifactId>foundation-common-base</artifactId>
@@ -16,7 +17,7 @@
         <system>Github</system>
     </issueManagement>
     <mailingLists>
-        <mailingList />
+        <mailingList/>
     </mailingLists>
     <developers>
         <developer>
@@ -30,6 +31,9 @@
             </roles>
         </developer>
     </developers>
+    <properties>
+        <hornetq-version>2.3.12.FINAL</hornetq-version>
+    </properties>
     <scm>
         <connection>scm:git:git@github.com:foundation-runtime/communication.git</connection>
         <developerConnection>scm:git:git@github.com:foundation-runtime/communication.git</developerConnection>
@@ -70,18 +74,18 @@
         <dependency>
             <groupId>org.hornetq</groupId>
             <artifactId>hornetq-server</artifactId>
-            <version>2.4.1.Final</version>
+            <version>${hornetq-version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.hornetq</groupId>
             <artifactId>hornetq-core-client</artifactId>
-            <version>2.4.1.Final</version>
+            <version>${hornetq-version}</version>
         </dependency>
         <dependency>
             <groupId>org.hornetq</groupId>
             <artifactId>hornetq-jms-client</artifactId>
-            <version>2.4.1.Final</version>
+            <version>${hornetq-version}</version>
         </dependency>
         <dependency>
             <groupId>org.jboss.logmanager</groupId>
