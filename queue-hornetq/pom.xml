@@ -32,7 +32,7 @@
         </developer>
     </developers>
     <properties>
-        <hornetq-version>2.3.12.FINAL</hornetq-version>
+        <hornetq-version>2.3.12.Final</hornetq-version>
     </properties>
     <scm>
         <connection>scm:git:git@github.com:foundation-runtime/communication.git</connection>

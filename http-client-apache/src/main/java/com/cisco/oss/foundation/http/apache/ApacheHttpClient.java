@@ -318,7 +318,7 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
 
             ApacheHttpResponse apacheHttpResponse = new ApacheHttpResponse(response, request.getUri());
             LOGGER.info("got response status: {} for request: {}",apacheHttpResponse.getStatus(), apacheHttpResponse.getRequestedURI());
-            
+
             responseCallback.completed(apacheHttpResponse);
         }
 
