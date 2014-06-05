@@ -56,6 +56,9 @@
             </roles>
         </developer>
     </developers>
+    <properties>
+        <commons-version>0.0.0-6</commons-version>
+    </properties>
     <scm>
         <connection>scm:git:git@github.com:foundation-runtime/communication.git</connection>
         <developerConnection>scm:git:git@github.com:foundation-runtime/communication.git</developerConnection>
