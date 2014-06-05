@@ -59,6 +59,7 @@
     <properties>
         <http-client-common-version>0.0.0-7</http-client-common-version>
         <jetty-version>9.2.0.v20140526</jetty-version>
+        <logging-api-version>0.0.0-6</logging-api-version>
     </properties>
     <scm>
         <connection>scm:git:git@github.com:foundation-runtime/communication.git</connection>
