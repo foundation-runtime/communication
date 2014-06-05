@@ -23,7 +23,9 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.lang3.StringUtils;
-import org.eclipse.jetty.server.*;
+import org.eclipse.jetty.server.AbstractConnector;
+import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.server.nio.BlockingChannelConnector;
 import org.eclipse.jetty.server.nio.SelectChannelConnector;
@@ -72,12 +74,25 @@ public enum JettyHttpServerFactory implements HttpServerFactory {
         startHttpServer(serviceName, servlets, filterMap);
     }
 
+    @Override
+    public void startHttpServer(String serviceName, ListMultimap<String, Servlet> servlets, Map<String, String> initParams) {
+
+        ArrayListMultimap<String, Filter> filterMap = ArrayListMultimap.create();
+        startHttpServer(serviceName, servlets, filterMap, Collections.<EventListener>emptyList(), initParams);
+    }
+
+    @Override
+    public void startHttpServer(String serviceName, ListMultimap<String, Servlet> servlets, ListMultimap<String, Filter> filterMap, List<EventListener> eventListeners, Map<String, String> initParams) {
+        startHttpServer(serviceName, servlets, filterMap, eventListeners, initParams, "", "", "", "");
+
+    }
+
+
     /**
-     *
-     * @param serviceName - the http logical service name
-     * @param servlets    - a mapping between servlet path and servlet instance. This mapping uses the google collections {@link com.google.common.collect.ListMultimap}.
-     *                    <br>Example of usage:
-     *                    {@code ArrayListMultimap<String,Servlet> servletMap = ArrayListMultimap.create()}
+     * @param serviceName    - the http logical service name
+     * @param servlets       - a mapping between servlet path and servlet instance. This mapping uses the google collections {@link com.google.common.collect.ListMultimap}.
+     *                       <br>Example of usage:
+     *                       {@code ArrayListMultimap<String,Servlet> servletMap = ArrayListMultimap.create()}
      * @param eventListeners event listeners to be applied on this server
      */
     @Override
@@ -101,18 +116,17 @@ public enum JettyHttpServerFactory implements HttpServerFactory {
     @Override
     public void startHttpServer(String serviceName, ListMultimap<String, Servlet> servlets, ListMultimap<String, Filter> filters) {
 
-        startHttpServer(serviceName, servlets, filters, null, null);
+        startHttpServer(serviceName, servlets, filters, "", "");
     }
 
     /**
-     *
-     * @param serviceName - the http logical service name
-     * @param servlets    - a mapping between servlet path and servlet instance. This mapping uses the google collections {@link com.google.common.collect.ListMultimap}.
-     *                    <br>Example of usage:
-     *                    {@code ArrayListMultimap<String,Servlet> servletMap = ArrayListMultimap.create()}
-     * @param filters     - a mapping between filter path and filter instance. This mapping uses the google collections {@link com.google.common.collect.ListMultimap}.
-     *                    <br>Example of usage:
-     *                    {@code ArrayListMultimap<String,Filter> filterMap = ArrayListMultimap.create()}
+     * @param serviceName    - the http logical service name
+     * @param servlets       - a mapping between servlet path and servlet instance. This mapping uses the google collections {@link com.google.common.collect.ListMultimap}.
+     *                       <br>Example of usage:
+     *                       {@code ArrayListMultimap<String,Servlet> servletMap = ArrayListMultimap.create()}
+     * @param filters        - a mapping between filter path and filter instance. This mapping uses the google collections {@link com.google.common.collect.ListMultimap}.
+     *                       <br>Example of usage:
+     *                       {@code ArrayListMultimap<String,Filter> filterMap = ArrayListMultimap.create()}
      * @param eventListeners event listeners to be applied on this server
      */
     @Override
@@ -121,15 +135,14 @@ public enum JettyHttpServerFactory implements HttpServerFactory {
     }
 
     /**
-     *
-      * @param serviceName - the http logical service name
-     * @param servlets    - a mapping between servlet path and servlet instance. This mapping uses the google collections {@link com.google.common.collect.ListMultimap}.
-     *                    <br>Example of usage:
-     *                    {@code ArrayListMultimap<String,Servlet> servletMap = ArrayListMultimap.create()}
-     * @param filters     - a mapping between filter path and filter instance. This mapping uses the google collections {@link com.google.common.collect.ListMultimap}.
-     *                    <br>Example of usage:
-     *                    {@code ArrayListMultimap<String,Filter> filterMap = ArrayListMultimap.create()}
-     * @param keyStorePath - a path to the keystore file
+     * @param serviceName      - the http logical service name
+     * @param servlets         - a mapping between servlet path and servlet instance. This mapping uses the google collections {@link com.google.common.collect.ListMultimap}.
+     *                         <br>Example of usage:
+     *                         {@code ArrayListMultimap<String,Servlet> servletMap = ArrayListMultimap.create()}
+     * @param filters          - a mapping between filter path and filter instance. This mapping uses the google collections {@link com.google.common.collect.ListMultimap}.
+     *                         <br>Example of usage:
+     *                         {@code ArrayListMultimap<String,Filter> filterMap = ArrayListMultimap.create()}
+     * @param keyStorePath     - a path to the keystore file
      * @param keyStorePassword - the keystore password
      */
     @Override
@@ -141,12 +154,11 @@ public enum JettyHttpServerFactory implements HttpServerFactory {
 
 
     /**
-     *
-     * @param serviceName - the http logical service name
-     * @param servlets    - a mapping between servlet path and servlet instance. This mapping uses the google collections {@link com.google.common.collect.ListMultimap}.
-     *                    <br>Example of usage:
-     *                    {@code ArrayListMultimap<String,Servlet> servletMap = ArrayListMultimap.create()}
-     * @param keyStorePath - a path to the keystore file
+     * @param serviceName      - the http logical service name
+     * @param servlets         - a mapping between servlet path and servlet instance. This mapping uses the google collections {@link com.google.common.collect.ListMultimap}.
+     *                         <br>Example of usage:
+     *                         {@code ArrayListMultimap<String,Servlet> servletMap = ArrayListMultimap.create()}
+     * @param keyStorePath     - a path to the keystore file
      * @param keyStorePassword - the keystore password
      */
     @Override
@@ -155,17 +167,16 @@ public enum JettyHttpServerFactory implements HttpServerFactory {
     }
 
     /**
-     *
-     * @param serviceName - the http logical service name
-     * @param servlets    - a mapping between servlet path and servlet instance. This mapping uses the google collections {@link com.google.common.collect.ListMultimap}.
-     *                    <br>Example of usage:
-     *                    {@code ArrayListMultimap<String,Servlet> servletMap = ArrayListMultimap.create()}
-     * @param filters     - a mapping between filter path and filter instance. This mapping uses the google collections {@link com.google.common.collect.ListMultimap}.
-     *                    <br>Example of usage:
-     *                    {@code ArrayListMultimap<String,Filter> filterMap = ArrayListMultimap.create()}
-     * @param keyStorePath - a path to the keystore file
-     * @param keyStorePassword - the keystore password
-     * @param trustStorePath - the trust store file path
+     * @param serviceName        - the http logical service name
+     * @param servlets           - a mapping between servlet path and servlet instance. This mapping uses the google collections {@link com.google.common.collect.ListMultimap}.
+     *                           <br>Example of usage:
+     *                           {@code ArrayListMultimap<String,Servlet> servletMap = ArrayListMultimap.create()}
+     * @param filters            - a mapping between filter path and filter instance. This mapping uses the google collections {@link com.google.common.collect.ListMultimap}.
+     *                           <br>Example of usage:
+     *                           {@code ArrayListMultimap<String,Filter> filterMap = ArrayListMultimap.create()}
+     * @param keyStorePath       - a path to the keystore file
+     * @param keyStorePassword   - the keystore password
+     * @param trustStorePath     - the trust store file path
      * @param trustStorePassword - the trust store password
      */
     @Override
@@ -173,23 +184,28 @@ public enum JettyHttpServerFactory implements HttpServerFactory {
         startHttpServer(serviceName, servlets, filters, Collections.<EventListener>emptyList(), keyStorePath, keyStorePassword, trustStorePath, trustStorePassword);
     }
 
+    @Override
+    public void startHttpServer(String serviceName, ListMultimap<String, Servlet> servlets, ListMultimap<String, Filter> filters, List<EventListener> eventListeners, String keyStorePath, String keyStorePassword, String trustStorePath, String trustStorePassword) {
+        startHttpServer(serviceName, servlets, filters, eventListeners, new HashMap<String, String>(), keyStorePath, keyStorePassword, trustStorePath, trustStorePassword);
+    }
+
+
     /**
-     *
-     * @param serviceName - the http logical service name
-     * @param servlets    - a mapping between servlet path and servlet instance. This mapping uses the google collections {@link com.google.common.collect.ListMultimap}.
-     *                    <br>Example of usage:
-     *                    {@code ArrayListMultimap<String,Servlet> servletMap = ArrayListMultimap.create()}
-     * @param filters     - a mapping between filter path and filter instance. This mapping uses the google collections {@link com.google.common.collect.ListMultimap}.
-     *                    <br>Example of usage:
-     *                    {@code ArrayListMultimap<String,Filter> filterMap = ArrayListMultimap.create()}
-     * @param eventListeners event listeners to be applied on this server
-     * @param keyStorePath - a path to the keystore file
-     * @param keyStorePassword - the keystore password
-     * @param trustStorePath - the trust store file path
+     * @param serviceName        - the http logical service name
+     * @param servlets           - a mapping between servlet path and servlet instance. This mapping uses the google collections {@link com.google.common.collect.ListMultimap}.
+     *                           <br>Example of usage:
+     *                           {@code ArrayListMultimap<String,Servlet> servletMap = ArrayListMultimap.create()}
+     * @param filters            - a mapping between filter path and filter instance. This mapping uses the google collections {@link com.google.common.collect.ListMultimap}.
+     *                           <br>Example of usage:
+     *                           {@code ArrayListMultimap<String,Filter> filterMap = ArrayListMultimap.create()}
+     * @param eventListeners     event listeners to be applied on this server
+     * @param keyStorePath       - a path to the keystore file
+     * @param keyStorePassword   - the keystore password
+     * @param trustStorePath     - the trust store file path
      * @param trustStorePassword - the trust store password
      */
     @Override
-    public void startHttpServer(String serviceName, ListMultimap<String, Servlet> servlets, ListMultimap<String, Filter> filters, List<EventListener> eventListeners, String keyStorePath, String keyStorePassword, String trustStorePath, String trustStorePassword) {
+    public void startHttpServer(String serviceName, ListMultimap<String, Servlet> servlets, ListMultimap<String, Filter> filters, List<EventListener> eventListeners, Map<String, String> initParams, String keyStorePath, String keyStorePassword, String trustStorePath, String trustStorePassword) {
 
         if (servers.get(serviceName) != null) {
             throw new UnsupportedOperationException("you must first stop stop server: " + serviceName + " before you want to start it again!");
@@ -202,7 +218,7 @@ public enum JettyHttpServerFactory implements HttpServerFactory {
         for (Map.Entry<String, Servlet> entry : servlets.entries()) {
             ServletContextHandler context = new ServletContextHandler();
 
-            if (eventListeners!= null && !eventListeners.isEmpty()){
+            if (eventListeners != null && !eventListeners.isEmpty()) {
                 context.setEventListeners(eventListeners.toArray(new EventListener[0]));
             }
 
@@ -227,14 +243,14 @@ public enum JettyHttpServerFactory implements HttpServerFactory {
             String host = configuration.getString(serviceName + ".http.host", "0.0.0.0");
             int port = configuration.getInt(serviceName + ".http.port", 8080);
             int connectionIdleTime = configuration.getInt(serviceName + ".http.connectionIdleTime", 180000);
-            boolean isBlockingChannelConnector = configuration.getBoolean(serviceName + ".http.isBlockingChannelConnector",false);
+            boolean isBlockingChannelConnector = configuration.getBoolean(serviceName + ".http.isBlockingChannelConnector", false);
             int numberOfAcceptors = configuration.getInt(serviceName + ".http.numberOfAcceptors", Runtime.getRuntime().availableProcessors());
             int acceptQueueSize = configuration.getInt(serviceName + ".http.acceptQueueSize", 0);
 
             AbstractConnector connector = null;
-            if(isBlockingChannelConnector){
+            if (isBlockingChannelConnector) {
                 connector = new BlockingChannelConnector();
-            }else{
+            } else {
                 connector = new SelectChannelConnector();
             }
 
@@ -261,7 +277,7 @@ public enum JettyHttpServerFactory implements HttpServerFactory {
                 sslContextFactory.setKeyStorePassword(keyStorePassword);
 
                 boolean addTrustStoreSupport = StringUtils.isNotEmpty(trustStorePath) && StringUtils.isNotEmpty(trustStorePassword);
-                if(addTrustStoreSupport){
+                if (addTrustStoreSupport) {
                     sslContextFactory.setTrustStore(trustStorePath);
                     sslContextFactory.setTrustStorePassword(trustStorePassword);
                     sslContextFactory.setNeedClientAuth(true);
@@ -295,20 +311,19 @@ public enum JettyHttpServerFactory implements HttpServerFactory {
 
             // server.join();
         } catch (Exception e) {
-            LOGGER.error("Problem starting the http {} server. Error is {}.", new Object[]{serviceName, e,e});
+            LOGGER.error("Problem starting the http {} server. Error is {}.", new Object[]{serviceName, e, e});
             throw new ServerFailedToStartException(e);
         }
     }
 
     /**
-     *
-     * @param serviceName - the http logical service name
-     * @param servlets    - a mapping between servlet path and servlet instance. This mapping uses the google collections {@link com.google.common.collect.ListMultimap}.
-     *                    <br>Example of usage:
-     *                    {@code ArrayListMultimap<String,Servlet> servletMap = ArrayListMultimap.create()}
-     * @param keyStorePath - a path to the keystore file
-     * @param keyStorePassword - the keystore password
-     * @param trustStorePath - the trust store file path
+     * @param serviceName        - the http logical service name
+     * @param servlets           - a mapping between servlet path and servlet instance. This mapping uses the google collections {@link com.google.common.collect.ListMultimap}.
+     *                           <br>Example of usage:
+     *                           {@code ArrayListMultimap<String,Servlet> servletMap = ArrayListMultimap.create()}
+     * @param keyStorePath       - a path to the keystore file
+     * @param keyStorePassword   - the keystore password
+     * @param trustStorePath     - the trust store file path
      * @param trustStorePassword - the trust store password
      */
     @Override
@@ -316,7 +331,6 @@ public enum JettyHttpServerFactory implements HttpServerFactory {
         ArrayListMultimap<String, Filter> filterMap = ArrayListMultimap.create();
         startHttpServer(serviceName, servlets, filterMap, keyStorePath, keyStorePassword, trustStorePath, trustStorePassword);
     }
-
 
 
     /**

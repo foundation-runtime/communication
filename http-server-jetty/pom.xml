@@ -59,6 +59,7 @@
         </developer>
     </developers>
     <properties>
+        <http-client-apache-version>0.0.0-8</http-client-apache-version>
         <logging-log4j-version>0.0.0-6-SNAPSHOT</logging-log4j-version>
         <logging-api-version>0.0.0-6</logging-api-version>
         <jetty-version>9.2.0.v20140526</jetty-version>
