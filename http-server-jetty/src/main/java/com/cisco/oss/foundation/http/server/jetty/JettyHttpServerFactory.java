@@ -72,6 +72,19 @@ public enum JettyHttpServerFactory implements HttpServerFactory {
     }
 
     @Override
+    public void startHttpServer(String serviceName, ListMultimap<String, Servlet> servlets, Map<String,String> initParams) {
+
+        ArrayListMultimap<String, Filter> filterMap = ArrayListMultimap.create();
+        startHttpServer(serviceName, servlets, filterMap, Collections.<EventListener>emptyList(), initParams);
+    }
+
+    @Override
+    public void startHttpServer(String serviceName, ListMultimap<String, Servlet> servlets, ListMultimap<String, Filter> filterMap, List<EventListener> eventListeners, Map<String, String> initParams) {
+        startHttpServer(serviceName, servlets, filterMap, eventListeners, initParams, "", "", "", "");
+
+    }
+
+    @Override
     public void startHttpServer(String serviceName, ListMultimap<String, Servlet> servlets, List<EventListener> eventListeners) {
         ArrayListMultimap<String, Filter> filterMap = ArrayListMultimap.create();
         startHttpServer(serviceName, servlets, filterMap,eventListeners);
@@ -93,7 +106,7 @@ public enum JettyHttpServerFactory implements HttpServerFactory {
     @Override
     public void startHttpServer(String serviceName, ListMultimap<String, Servlet> servlets, ListMultimap<String, Filter> filters) {
 
-        startHttpServer(serviceName, servlets, filters, null, null);
+        startHttpServer(serviceName, servlets, filters, "", "");
     }
 
     @Override
@@ -174,6 +187,11 @@ public enum JettyHttpServerFactory implements HttpServerFactory {
 
     @Override
     public void startHttpServer(String serviceName, ListMultimap<String, Servlet> servlets, ListMultimap<String, Filter> filters, List<EventListener> eventListeners, String keyStorePath, String keyStorePassword, String trustStorePath, String trustStorePassword) {
+        startHttpServer(serviceName, servlets, filters, eventListeners, new HashMap<String, String>(), keyStorePath, keyStorePassword, trustStorePath, trustStorePassword);
+    }
+
+    @Override
+    public void startHttpServer(String serviceName, ListMultimap<String, Servlet> servlets, ListMultimap<String, Filter> filters, List<EventListener> eventListeners, Map<String, String> initParams, String keyStorePath, String keyStorePassword, String trustStorePath, String trustStorePassword) {
         if (servers.get(serviceName) != null) {
             throw new UnsupportedOperationException("you must first stop stop server: " + serviceName + " before you want to start it again!");
         }
@@ -196,6 +214,10 @@ public enum JettyHttpServerFactory implements HttpServerFactory {
 
 
 //            handler.addHandler(context);
+        }
+
+        for (Map.Entry<String, String> initParam : initParams.entrySet()) {
+            context.setInitParameter(initParam.getKey(), initParam.getValue());
         }
 
         HttpServerUtil.addFiltersToServletContextHandler(serviceName, jettyHttpThreadPool, context);
