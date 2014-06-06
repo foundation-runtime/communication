@@ -15,8 +15,7 @@
   ~  limitations under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <parent>
         <groupId>com.cisco.oss.foundation</groupId>
         <artifactId>foundation-common-base</artifactId>
@@ -26,7 +25,7 @@
     <groupId>com.cisco.oss.foundation</groupId>
     <artifactId>http-server-jetty</artifactId>
     <name>http-server-jetty</name>
-    <version>0.0.0-7-SNAPSHOT</version>
+    <version>0.0.0-7</version>
     <packaging>jar</packaging>
     <description>This project is the http jetty server implementation library in the cisco vss foundation runtime
     </description>
@@ -44,7 +43,7 @@
         <url>{URL in JIRA or Product name in CQ}</url>
     </issueManagement>
     <mailingLists>
-        <mailingList/>
+        <mailingList />
     </mailingLists>
     <developers>
         <developer>
@@ -71,7 +70,7 @@
         <connection>scm:git:git@github.com:foundation-runtime/communication.git</connection>
         <developerConnection>scm:git:git@github.com:foundation-runtime/communication.git</developerConnection>
         <url>https://github.com/foundation-runtime/communication.git</url>
-        <tag>HEAD</tag>
+        <tag>http-server-jetty-0.0.0-7</tag>
     </scm>
     <organization>
         <name>Cisco</name>
@@ -79,7 +78,7 @@
     </organization>
     <build>
         <pluginManagement>
-            <plugins/>
+            <plugins />
         </pluginManagement>
         <plugins>
             <plugin>
