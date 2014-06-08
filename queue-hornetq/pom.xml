@@ -33,6 +33,9 @@
     </developers>
     <properties>
         <hornetq-version>2.3.12.Final</hornetq-version>
+        <logging-api-version>0.0.0-6</logging-api-version>
+        <logging-log4j-version>1.0.0-1</logging-log4j-version>
+        <configuration-lib-version>0.0.0-7</configuration-lib-version>
     </properties>
     <scm>
         <connection>scm:git:git@github.com:foundation-runtime/communication.git</connection>
@@ -54,17 +57,17 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>queue-api</artifactId>
-            <version>1.0.0-9-SNAPSHOT</version>
+            <version>1.0.0-1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.cisco.oss.foundation</groupId>
             <artifactId>configuration-lib</artifactId>
-            <version>0.0.0-6</version>
+            <version>0.0.0-7</version>
         </dependency>
         <dependency>
             <groupId>com.cisco.oss.foundation</groupId>
             <artifactId>logging-api</artifactId>
-            <version>0.0.0-5</version>
+            <version>${logging-api-version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
@@ -113,7 +116,7 @@
         <dependency>
             <groupId>com.cisco.oss.foundation</groupId>
             <artifactId>logging-log4j</artifactId>
-            <version>0.0.0-5</version>
+            <version>${logging-log4j-version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -131,7 +134,7 @@
         <dependency>
             <groupId>com.cisco.oss.foundation</groupId>
             <artifactId>configuration-lib</artifactId>
-            <version>0.0.0-6</version>
+            <version>${configuration-lib-version}</version>
             <classifier>tests</classifier>
             <scope>test</scope>
         </dependency>

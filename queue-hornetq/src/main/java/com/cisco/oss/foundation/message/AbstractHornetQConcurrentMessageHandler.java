@@ -16,33 +16,82 @@
 
 package com.cisco.oss.foundation.message;
 
-import com.cisco.oss.foundation.flowcontext.FlowContextFactory;
-import org.apache.commons.lang3.StringUtils;
-import org.hornetq.api.core.HornetQException;
-import org.hornetq.api.core.client.ClientMessage;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Basic abstract handler that exposes the foundation message handler but also implements silently the hornetq message handler
  * Created by Yair Ogen on 24/04/2014.
  */
-public abstract class AbstractHornetQConcurrentMessageHandler implements MessageHandler, org.hornetq.api.core.client.MessageHandler {
+public abstract class AbstractHornetQConcurrentMessageHandler extends AbstractHornetQMessageHandler implements ConcurrentMessageHandler{
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractHornetQConcurrentMessageHandler.class);
+    private MessageIdentifier messageIdentifier = null;
+    private MessageDispatcher messageDispatcher = new LockMessageDispatcher(this);
+    private Map<String, Object> onWorkIdentifierMap;
 
     public AbstractHornetQConcurrentMessageHandler() {
+        onWorkIdentifierMap = new ConcurrentHashMap<String, Object>();
+    }
+
+    public AbstractHornetQConcurrentMessageHandler(MessageIdentifier messageIdentifier) {
+        this.messageIdentifier = messageIdentifier;
+        onWorkIdentifierMap = new ConcurrentHashMap<String, Object>();
     }
 
     @Override
-    public final void onMessage(ClientMessage message) {
-        try {
-            message.acknowledge();
-        } catch (HornetQException e) {
-            throw new QueueException(e);
-        }
-        String flowContextStr = message.getStringProperty(QueueConstants.FLOW_CONTEXT_HEADER);
-        if (StringUtils.isNotBlank(flowContextStr)) {
-            FlowContextFactory.deserializeNativeFlowContext(flowContextStr);
-        }
-        Message msg = new HornetQMessage(message);
-        onMessage(msg);
+    public final void onMessage(Message message) {
+        messageDispatcher.handleMessage(message);
     }
+
+    /**
+     * A message is dispatchable in case there is no other message with the same identifier that is in 'process' now.
+     * If a message has 'null' identifier a true value will be return.
+     */
+    public boolean isDispatchable(Message message) {
+        if(messageIdentifier != null) {
+            String identifier = messageIdentifier.getIdentifier(message);
+            LOGGER.trace("Message identifier is: {}", identifier);
+            if (StringUtils.isNotEmpty(identifier)){
+                return !onWorkIdentifierMap.containsKey(identifier);
+            }
+        }
+        return true;
+    }
+
+
+    public void onDispatchMessage(Message message) {
+        LOGGER.trace("Dispatch message '{}'", message);
+        if(messageIdentifier != null){
+            String identifier = messageIdentifier.getIdentifier(message);
+            if (StringUtils.isNotEmpty(identifier)){
+                onWorkIdentifierMap.put(identifier, 0);
+            }
+        }
+    }
+
+    public void onCompleteMessage(Message message) {
+        LOGGER.trace("Complete message '{}'", message);
+        if(messageIdentifier != null){
+            String identifier = messageIdentifier.getIdentifier(message);
+            if (StringUtils.isNotEmpty(identifier)){
+                onWorkIdentifierMap.remove(identifier);
+            }
+        }
+    }
+
+    public void onException(Message message, Throwable throwable) {
+        if(messageIdentifier != null){
+            String identifier = messageIdentifier.getIdentifier(message);
+            if (StringUtils.isNotEmpty(identifier)){
+                onWorkIdentifierMap.remove(identifier);
+            }
+        }
+    }
+
 
 }

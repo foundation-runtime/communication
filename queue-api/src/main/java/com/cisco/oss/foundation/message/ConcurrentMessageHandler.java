@@ -24,7 +24,39 @@ public interface ConcurrentMessageHandler {
 
     /**
      * the call back method
-     * @param message the asynchronously arrived messaeg
+     * @param message the asynchronously arrived message
      */
-    void onMessage(Message message);
+    void onConcurrentMessage(Message message);
+
+    /**
+     * Check whether the message could be process now or not
+     * @param message
+     * @return true if the message could be process now, otherwise return false
+     */
+    public boolean isDispatchable(Message message);
+
+    /**
+     * The message is dispatchable now and will be added to the worker thread-pool
+     * @param message
+     */
+    public void onDispatchMessage(Message message);
+
+    /**
+     * Do the business logic
+     * @param message
+     */
+    public void process(Message message);
+
+    /**
+     * The 'process'  of the method has been completed successfully
+     * @param message
+     */
+    public void onCompleteMessage(Message message);
+
+    /**
+     * The 'process' method has been completed with exception
+     * @param message
+     * @param throwable
+     */
+    public void onException(Message message, Throwable throwable);
 }

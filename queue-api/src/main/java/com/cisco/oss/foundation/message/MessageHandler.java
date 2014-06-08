@@ -24,7 +24,7 @@ public interface MessageHandler {
 
     /**
      * the call back method
-     * @param message the asynchronously arrived messaeg
+     * @param message the asynchronously arrived message
      */
     void onMessage(Message message);
 }

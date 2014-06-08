@@ -1,3 +1,19 @@
+/*
+ * Copyright 2014 Cisco Systems, Inc.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package com.cisco.oss.foundation.message;
 
 import java.util.concurrent.locks.Lock;
@@ -19,8 +35,8 @@ class LockMessageDispatcher extends AbstractMessageDispatcher {
 	private Lock waitingReadLock;
 	private Lock waitingWriteLock;
 
-	LockMessageDispatcher(MessageProcessor messageProcessor){
-		super(messageProcessor);
+	LockMessageDispatcher(ConcurrentMessageHandler concurrentMessageHandler){
+		super(concurrentMessageHandler);
 
 		ReadWriteLock waitingReadWriteLock = new ReentrantReadWriteLock();
 		waitingReadLock = waitingReadWriteLock.readLock();
@@ -30,14 +46,14 @@ class LockMessageDispatcher extends AbstractMessageDispatcher {
 	/**
 	 * A RejectedExecutionException could be thrown in case there too many requests.
 	 */
-	protected boolean checkAndDispatchEvent(Object message, boolean alreadyOnWaitingList){
+	protected boolean checkAndDispatchEvent(Message message, boolean alreadyOnWaitingList){
 
 		boolean isDispatchable = false;
 		// Try to dispatch the event
 		synchronized (this){
-			isDispatchable = getMessageProcessor().isDispatchable(message);
+			isDispatchable = getConcurrentMessageHandler().isDispatchable(message);
 			if (isDispatchable){
-				getMessageProcessor().onDispatchMessage(message);
+				getConcurrentMessageHandler().onDispatchMessage(message);
 			}
 		}
 
@@ -65,12 +81,12 @@ class LockMessageDispatcher extends AbstractMessageDispatcher {
 	protected void pushNextEvent() {
 
 		// Push next message from waiting list
-		Object nextEvent = null;
+		Message nextEvent = null;
 		boolean dispatchedEvent = false;
 		waitingReadLock.lock();
 		try {
 			
-			for (Object event : getWaitingList()){
+			for (Message event : getWaitingList()){
 				dispatchedEvent = checkAndDispatchEvent(event, true);
 				if (dispatchedEvent){
 					nextEvent = event;
