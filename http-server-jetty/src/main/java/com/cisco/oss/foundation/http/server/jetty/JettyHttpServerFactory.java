@@ -24,6 +24,7 @@ import com.google.common.collect.ListMultimap;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jetty.server.*;
+import org.eclipse.jetty.server.handler.ErrorHandler;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -42,7 +43,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @author Yair Ogen
  */
-public enum JettyHttpServerFactory implements HttpServerFactory {
+public enum JettyHttpServerFactory implements HttpServerFactory, JettyHttpServerFactoryExtensions {
 
     /**
      * implementing singleton using enum
@@ -340,4 +341,12 @@ public enum JettyHttpServerFactory implements HttpServerFactory {
         }
     }
 
+
+    @Override
+    public void setErrorHandler(String serviceName, ErrorHandler errorHandler) {
+        Server server = servers.get(serviceName);
+        if (server != null) {
+            server.getBeans().add(errorHandler);
+        }
+    }
 }
