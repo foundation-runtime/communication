@@ -56,7 +56,7 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>queue-api</artifactId>
-            <version>1.0.0-1</version>
+            <version>1.0.0-2-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.cisco.oss.foundation</groupId>
@@ -89,11 +89,11 @@
             <artifactId>hornetq-jms-client</artifactId>
             <version>${hornetq-version}</version>
         </dependency>
-        <dependency>
+       <!-- <dependency>
             <groupId>org.jboss.logmanager</groupId>
             <artifactId>log4j-jboss-logmanager</artifactId>
             <version>1.1.0.Final</version>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>

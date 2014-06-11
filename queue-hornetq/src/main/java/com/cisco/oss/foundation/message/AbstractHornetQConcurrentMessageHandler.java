@@ -48,6 +48,11 @@ public abstract class AbstractHornetQConcurrentMessageHandler extends AbstractHo
         messageDispatcher.handleMessage(message);
     }
 
+    @Override
+    public void onRecieveMessage(Message message) {
+        LOGGER.trace("Recieved message '{}'", message);
+    }
+
     /**
      * A message is dispatchable in case there is no other message with the same identifier that is in 'process' now.
      * If a message has 'null' identifier a true value will be return.

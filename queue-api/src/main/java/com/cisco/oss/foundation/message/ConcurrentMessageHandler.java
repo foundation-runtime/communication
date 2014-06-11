@@ -26,7 +26,7 @@ public interface ConcurrentMessageHandler {
      * the call back method
      * @param message the asynchronously arrived message
      */
-    void onConcurrentMessage(Message message);
+    void onRecieveMessage(Message message);
 
     /**
      * Check whether the message could be process now or not

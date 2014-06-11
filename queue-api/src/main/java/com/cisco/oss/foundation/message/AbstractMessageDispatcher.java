@@ -75,7 +75,7 @@ abstract class AbstractMessageDispatcher implements MessageDispatcher {
 
 	public void handleMessage(Message message) {
 		// Do eventRecive method on lifecyclePhases
-		getConcurrentMessageHandler().onConcurrentMessage(message);
+		getConcurrentMessageHandler().onRecieveMessage(message);
 		// Try to dispatch the event
 		checkAndDispatchEvent(message, false);
 	}
