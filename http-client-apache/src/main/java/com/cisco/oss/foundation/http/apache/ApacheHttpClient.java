@@ -191,6 +191,9 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
             case OPTIONS:
                 httpUriRequest = new HttpOptions(requestUri);
                 break;
+            case PATCH:
+                httpUriRequest = new HttpPatch(requestUri);
+                break;
             default:
                 throw new ClientException("You have to one of the REST verbs such as GET, POST etc.");
         }
