@@ -59,7 +59,7 @@
     <properties>
         <http-client-api-version>0.0.0-7</http-client-api-version>
         <jetty-version>9.2.0.v20140526</jetty-version>
-        <configuration-api-version>0.0.0-7</configuration-api-version>
+        <configuration-api-version>1.0.0-1-SNAPSHOT</configuration-api-version>
         <logging-log4j-version>1.0.0-1</logging-log4j-version>
     </properties>
     <scm>
