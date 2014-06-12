@@ -346,7 +346,7 @@ public enum JettyHttpServerFactory implements HttpServerFactory, JettyHttpServer
     public void setErrorHandler(String serviceName, ErrorHandler errorHandler) {
         Server server = servers.get(serviceName);
         if (server != null) {
-            server.getBeans().add(errorHandler);
+            server.addBean(errorHandler);
         }
     }
 }
