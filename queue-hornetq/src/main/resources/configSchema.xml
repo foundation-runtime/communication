@@ -32,6 +32,11 @@
         <ParameterType name="queue.producer.base" type="STRUCTURE" description="base structure for queue producers">
             <StructureDefinition>
                 <StructureMemberDefinition name="queue.name" type="STRING" advanced="true"/>
+                <StructureMemberDefinition name="queue.expiration" type="LONG" advanced="true" unit="milliseconds">
+                    <DefaultValue>
+                        <PrimitiveValue value="1800000"/>
+                    </DefaultValue>
+                        </StructureMemberDefinition>
                 <StructureMemberDefinition name="queue.isDurable" type="BOOLEAN" advanced="true">
                     <DefaultValue>
                         <PrimitiveValue value="true"/>
