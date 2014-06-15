@@ -73,7 +73,7 @@ class HornetQMessageProducer implements MessageProducer {
             throw new QueueException("Check Configuration - missing required queue name for producer: " + producerName);
         }
 
-        String realQueueName = "foundation." + queueName;
+        String realQueueName = /*"foundation." + */queueName;
 
 
         boolean queueExists = false;

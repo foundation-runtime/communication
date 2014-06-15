@@ -79,7 +79,7 @@ class HornetQMessageConsumer implements MessageConsumer {
             if (StringUtils.isBlank(subscribedTo)) {
                 throw new QueueException("Check Configuration - missing required subscribedTo name for consumer[" + consumerName + "] as it is marked as isSubscription=true");
             }
-            subscribedTo = "foundation." + subscribedTo;
+//            subscribedTo = "foundation." + subscribedTo;
         }
 
         if (StringUtils.isBlank(queueName)) {
@@ -107,7 +107,7 @@ class HornetQMessageConsumer implements MessageConsumer {
             }
         }
 
-        String realQueueName = "foundation." + queueName;
+        String realQueueName = /*"foundation." + */queueName;
 
         boolean queueExists = false;
 
