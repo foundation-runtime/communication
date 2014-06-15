@@ -43,6 +43,7 @@ class HornetQMessageProducer implements MessageProducer {
     private String producerName = "N/A";
     private Configuration configuration = ConfigurationFactory.getConfiguration();
     private String queueName = "";
+    private long expiration = 1800000;
 
     HornetQMessageProducer(String producerName) {
 
@@ -89,6 +90,9 @@ class HornetQMessageProducer implements MessageProducer {
 //
 //        }
 
+        //update expiration
+        expiration = subset.getLong("queue.expiration",1800000);
+
         return realQueueName;
     }
 
@@ -108,6 +112,7 @@ class HornetQMessageProducer implements MessageProducer {
         try {
 
             ClientMessage clientMessage = getClientMessage(messageHeaders);
+            clientMessage.setExpiration(System.currentTimeMillis() + expiration);
             clientMessage.getBodyBuffer().writeBytes(message);
             getProducer().send(clientMessage);
 
@@ -123,6 +128,7 @@ class HornetQMessageProducer implements MessageProducer {
         try {
 
             ClientMessage clientMessage = getClientMessage(messageHeaders);
+            clientMessage.setExpiration(System.currentTimeMillis() + expiration);
             clientMessage.getBodyBuffer().writeString(message);
             getProducer().send(clientMessage);
 

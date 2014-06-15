@@ -18,10 +18,8 @@ package com.cisco.oss.foundation.message;
 
 import com.cisco.oss.foundation.configuration.ConfigUtil;
 import com.google.common.collect.Lists;
-import org.hornetq.api.core.HornetQException;
 import org.hornetq.api.core.TransportConfiguration;
 import org.hornetq.api.core.client.ClientSession;
-import org.hornetq.api.core.client.ClientSessionFactory;
 import org.hornetq.api.core.client.HornetQClient;
 import org.hornetq.api.core.client.ServerLocator;
 import org.hornetq.core.remoting.impl.netty.NettyConnectorFactory;
@@ -129,6 +127,11 @@ public class HornetQMessagingFactory {
                 serverLocator.setRetryInterval(1000);
                 serverLocator.setRetryIntervalMultiplier(1);
                 serverLocator.setReconnectAttempts(-1);
+                try {
+                    serverLocator.setAckBatchSize(1);
+                } catch (Exception e) {
+                    LOGGER.debug("error trying to set ack batch size: {}", e);
+                }
 
             } else {
                 throw new IllegalArgumentException("'service.queue.connections' must contain at least on host/port pair.");
