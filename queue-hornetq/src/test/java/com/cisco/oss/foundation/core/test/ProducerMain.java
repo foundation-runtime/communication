@@ -18,10 +18,6 @@ package com.cisco.oss.foundation.core.test;
 
 import com.cisco.oss.foundation.message.HornetQMessagingFactory;
 import com.cisco.oss.foundation.message.MessageProducer;
-import org.apache.commons.lang3.CharUtils;
-import org.hornetq.api.core.TransportConfiguration;
-import org.hornetq.api.core.client.*;
-import org.hornetq.core.remoting.impl.netty.NettyConnectorFactory;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -40,12 +36,31 @@ public class ProducerMain {
             byte[] bytes = new byte[10];
             System.in.read(bytes);
 //            producer.sendMessage("hello: " + new String(bytes));
-            Map<String,Object> props = new HashMap<String,Object>();
-            props.put("key1","value2");
-            producer.sendMessage("hello: " + new String(bytes), props);
+            sendMessage(producer, bytes,"1");
+            sendMessage(producer, bytes,"1");
+            sendMessage(producer, bytes,"1");
+            sendMessage(producer, bytes,"1");
+            sendMessage(producer, bytes,"1");
+
+
+            sendMessage(producer, bytes,"2");
+            sendMessage(producer, bytes,"2");
+            sendMessage(producer, bytes,"2");
+            sendMessage(producer, bytes,"2");
+            sendMessage(producer, bytes,"2");
+
 
         }
 
 
+    }
+
+    private static Map<String, Object> sendMessage(MessageProducer producer, byte[] bytes, String hhId) {
+        Map<String,Object> props = new HashMap<String,Object>();
+        props.put("key1","value2");
+//        props.put(MessageImpl.HDR_GROUP_ID.toString(),hhId);
+        props.put("HHID",hhId);
+        producer.sendMessage("hello: " + new String(bytes), props);
+        return props;
     }
 }

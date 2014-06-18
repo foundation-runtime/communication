@@ -5,10 +5,15 @@
         <NamespaceIdentifier version="TBD" name="TBD"/>
 
 
-        <ParameterType name="queue.consumer.base" type="STRUCTURE" description="base struccture for queue consumers">
+        <ParameterType name="queue.consumer.base" type="STRUCTURE" description="base structure for queue consumers">
             <StructureDefinition>
                 <StructureMemberDefinition name="queue.name" type="STRING" advanced="true" required="false"/>
                 <StructureMemberDefinition name="queue.filter" type="STRING" advanced="true" required="false"/>
+                <StructureMemberDefinition name="queue.isMonitoringEnabled" type="BOOLEAN" advanced="true" required="false">
+                    <DefaultValue>
+                        <PrimitiveValue value="false"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
                 <StructureMemberDefinition name="queue.isSubscription" type="BOOLEAN" advanced="true">
                     <DefaultValue>
                         <PrimitiveValue value="false"/>
@@ -26,6 +31,7 @@
         <ParameterType name="queue.producer.base" type="STRUCTURE" description="base structure for queue producers">
             <StructureDefinition>
                 <StructureMemberDefinition name="queue.name" type="STRING" advanced="true"/>
+                <StructureMemberDefinition name="queue.groupId" type="STRING" advanced="true"/>
                 <StructureMemberDefinition name="queue.expiration" type="LONG" advanced="true" unit="milliseconds">
                     <DefaultValue>
                         <PrimitiveValue value="1800000"/>
@@ -34,6 +40,11 @@
                 <StructureMemberDefinition name="queue.isDurable" type="BOOLEAN" advanced="true">
                     <DefaultValue>
                         <PrimitiveValue value="true"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
+                <StructureMemberDefinition name="queue.isMonitoringEnabled" type="BOOLEAN" advanced="true" required="false">
+                    <DefaultValue>
+                        <PrimitiveValue value="false"/>
                     </DefaultValue>
                 </StructureMemberDefinition>
             </StructureDefinition>

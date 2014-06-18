@@ -20,39 +20,47 @@ import com.cisco.oss.foundation.message.AbstractHornetQMessageHandler;
 import com.cisco.oss.foundation.message.HornetQMessagingFactory;
 import com.cisco.oss.foundation.message.Message;
 import com.cisco.oss.foundation.message.MessageConsumer;
-import org.hornetq.core.message.impl.MessageImpl;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Created by Yair Ogen on 23/04/2014.
  */
-public class Consumer1Main {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(Consumer1Main.class);
+public class UPMConsumer {
     
     public static void main(String[] args) throws Exception {
 
-        Thread t = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                final MessageConsumer consumer1 = HornetQMessagingFactory.createConsumer("consumer1");
-                consumer1.registerMessageHandler(new AbstractHornetQMessageHandler("consumer1") {
-                    @Override
-                    public void onMessage(Message message) {
-                        LOGGER.info("message: {}, HHID: {}, groupId: {}", message.getPayloadAsString(), message.getProperties().get("HHID"), message.getProperties().get(MessageImpl.HDR_GROUP_ID.toString()));
+//        MyRunnable myRunnable = new MyRunnable();
+//
+//        myRunnable.setDaemon(false);
+//
+//        myRunnable.start();
 
-                    }
-                });
+        final MessageConsumer consumer1 = HornetQMessagingFactory.createConsumer("upmConsumer");
+        consumer1.registerMessageHandler(new AbstractHornetQMessageHandler("upmConsumer") {
+            @Override
+            public void onMessage(Message message) {
+                System.out.println("[1] " + message.getPayloadAsString());
+
             }
         });
 
-        t.setDaemon(false);
+        int i=0;
 
-        t.start();
+//        System.in.read();
 
-        System.in.read();
+    }
 
+    private static class MyRunnable extends Thread{
+        @Override
+        public void run() {
+            final MessageConsumer consumer1 = HornetQMessagingFactory.createConsumer("upmConsumer");
+            consumer1.registerMessageHandler(new AbstractHornetQMessageHandler("upmConsumer") {
+                @Override
+                public void onMessage(Message message) {
+                    System.out.println("[1] " + message.getPayloadAsString());
+
+                }
+            });
+        }
     }
 
 }

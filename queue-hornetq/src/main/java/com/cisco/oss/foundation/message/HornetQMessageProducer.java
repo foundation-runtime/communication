@@ -24,10 +24,14 @@ import org.hornetq.api.core.HornetQException;
 import org.hornetq.api.core.SimpleString;
 import org.hornetq.api.core.client.ClientMessage;
 import org.hornetq.api.core.client.ClientProducer;
+import org.hornetq.core.message.impl.MessageImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * A HornetQ producer wrapper. NOTE: This class is thread safe although wraps HornetQ ClientProducer
@@ -35,19 +39,24 @@ import java.util.*;
  * so this class can be used in a multi-threaded environment.
  * Created by Yair Ogen on 24/04/2014.
  */
-class HornetQMessageProducer implements MessageProducer {
+class HornetQMessageProducer extends AbstractMessageProducer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HornetQMessageProducer.class);
     private static final ThreadLocal<ClientProducer> producer = new ThreadLocal<ClientProducer>();
     private static final Set<ClientProducer> producers = new HashSet<ClientProducer>();
-    private String producerName = "N/A";
     private Configuration configuration = ConfigurationFactory.getConfiguration();
-    private String queueName = "";
+    private String groupId = "";
+
     private long expiration = 1800000;
 
     HornetQMessageProducer(String producerName) {
 
-        this.producerName = producerName;
+        super(producerName);
+    }
+
+    @Override
+    public String getProducerImpl() {
+        return null;
     }
 
     private ClientProducer getProducer() {
@@ -92,6 +101,7 @@ class HornetQMessageProducer implements MessageProducer {
 
         //update expiration
         expiration = subset.getLong("queue.expiration",1800000);
+        groupId = subset.getString("queue.groupId","");
 
         return realQueueName;
     }
@@ -146,6 +156,10 @@ class HornetQMessageProducer implements MessageProducer {
 
         for (Map.Entry<String, Object> headers : messageHeaders.entrySet()) {
             clientMessage.putObjectProperty(headers.getKey(), headers.getValue());
+        }
+
+        if(StringUtils.isNoneBlank(groupId) && messageHeaders.get(groupId) != null){
+            clientMessage.putStringProperty(MessageImpl.HDR_GROUP_ID.toString(), messageHeaders.get(groupId).toString());
         }
 
         return clientMessage;

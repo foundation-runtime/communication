@@ -34,11 +34,13 @@ public abstract class AbstractHornetQConcurrentMessageHandler extends AbstractHo
     private MessageDispatcher messageDispatcher = new LockMessageDispatcher(this);
     private Map<String, Object> onWorkIdentifierMap;
 
-    public AbstractHornetQConcurrentMessageHandler() {
+    public AbstractHornetQConcurrentMessageHandler(String consumerName) {
+        super(consumerName);
         onWorkIdentifierMap = new ConcurrentHashMap<String, Object>();
     }
 
-    public AbstractHornetQConcurrentMessageHandler(MessageIdentifier messageIdentifier) {
+    public AbstractHornetQConcurrentMessageHandler(String consumerName, MessageIdentifier messageIdentifier) {
+        super(consumerName);
         this.messageIdentifier = messageIdentifier;
         onWorkIdentifierMap = new ConcurrentHashMap<String, Object>();
     }
@@ -50,7 +52,7 @@ public abstract class AbstractHornetQConcurrentMessageHandler extends AbstractHo
 
     @Override
     public void onRecieveMessage(Message message) {
-        LOGGER.trace("Recieved message '{}'", message);
+        LOGGER.trace("Received message '{}'", message);
     }
 
     /**

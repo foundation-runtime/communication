@@ -14,20 +14,32 @@
  *  limitations under the License.
  */
 
-package com.cisco.oss.foundation.message;
+package com.cisco.oss.foundation.core.multithread.test;
 
-/**
- * Identify message
- * The implementation of MessageIdentifier must be thread-safe
- * @author yglass
- *
- */
-public interface MessageIdentifier {
 
-	/**
-	 * 
-	 * @param message
-	 * @return the message identifier
-	 */
-	public String getIdentifier(Message message);
+import com.cisco.oss.foundation.message.Message;
+
+import java.util.Map;
+
+public class MessageT implements Message {
+
+	public long threadId;
+	public int identifier;
+	public long startTime;
+	public long endTime;
+
+    @Override
+    public Map<String, Object> getProperties() {
+        return null;
+    }
+
+    @Override
+    public byte[] getPayloadAsBytes() {
+        return new byte[0];
+    }
+
+    @Override
+    public String getPayloadAsString() {
+        return null;
+    }
 }

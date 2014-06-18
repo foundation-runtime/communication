@@ -53,5 +53,10 @@
             <artifactId>configuration-api</artifactId>
             <version>0.0.0-7</version>
         </dependency>
+        <dependency>
+            <groupId>com.cisco.oss.foundation</groupId>
+            <artifactId>monitoring-api</artifactId>
+            <version>1.0.0-1-SNAPSHOT</version>
+        </dependency>
     </dependencies>
 </project>

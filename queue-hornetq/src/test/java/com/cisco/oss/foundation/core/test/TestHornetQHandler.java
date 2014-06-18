@@ -24,8 +24,22 @@ import com.cisco.oss.foundation.message.Message;
  */
 public class TestHornetQHandler extends AbstractHornetQMessageHandler {
 
+    public TestHornetQHandler(String consumerName){
+        super(consumerName);
+    }
+
     @Override
     public void onMessage(Message message) {
         System.out.println(message.getPayloadAsString());
+    }
+
+    @Override
+    public String getProtocol() {
+        return "TestHornetQHandler";
+    }
+
+    @Override
+    public String getServiceDescription() {
+        return "DUMMY";
     }
 }

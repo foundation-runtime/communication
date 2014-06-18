@@ -49,6 +49,10 @@ public interface MessageProducer {
      */
     void sendMessage(String message, Map<String,Object> messageHeaders);
 
+    void preSendMessage();
+
+    void postSendMessage();
+
     /**
      * close this producer. This is useful for resource cleanup.
      * usually you don't need to run this API directly as implementation registers a shutdown hook for that.

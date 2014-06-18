@@ -52,7 +52,7 @@ public class EmbeddedCoreTest {
             @Override
             public void run() {
                 final MessageConsumer consumer = HornetQMessagingFactory.createConsumer("consumer1");
-                consumer.registerMessageHandler(new AbstractHornetQMessageHandler() {
+                consumer.registerMessageHandler(new AbstractHornetQMessageHandler("consumer1") {
                     @Override
                     public void onMessage(Message message) {
 //                        System.out.println("[1] " + message.getPayloadAsString());
@@ -66,7 +66,7 @@ public class EmbeddedCoreTest {
             @Override
             public void run() {
                 final MessageConsumer consumer = HornetQMessagingFactory.createConsumer("consumer2");
-                consumer.registerMessageHandler(new AbstractHornetQMessageHandler() {
+                consumer.registerMessageHandler(new AbstractHornetQMessageHandler("consumer2") {
                     @Override
                     public void onMessage(Message message) {
 //                        System.out.println("[2] " + message.getPayloadAsString());
@@ -288,7 +288,7 @@ public class EmbeddedCoreTest {
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        consumer.registerMessageHandler(new AbstractHornetQMessageHandler() {
+                        consumer.registerMessageHandler(new AbstractHornetQMessageHandler("directConsumer") {
                             @Override
                             public void onMessage(Message message) {
                                 countDownLatch.countDown();

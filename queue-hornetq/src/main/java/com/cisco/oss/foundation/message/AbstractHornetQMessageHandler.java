@@ -25,9 +25,12 @@ import org.hornetq.api.core.client.ClientMessage;
  * Basic abstract handler that exposes the foundation message handler but also implements silently the hornetq message handler
  * Created by Yair Ogen on 24/04/2014.
  */
-public abstract class AbstractHornetQMessageHandler implements MessageHandler, org.hornetq.api.core.client.MessageHandler {
+public abstract class AbstractHornetQMessageHandler extends AbstractMessageHandler implements org.hornetq.api.core.client.MessageHandler {
 
-    public AbstractHornetQMessageHandler() {
+
+
+    public AbstractHornetQMessageHandler(String consumerName) {
+        super(consumerName);
     }
 
     @Override
@@ -42,7 +45,18 @@ public abstract class AbstractHornetQMessageHandler implements MessageHandler, o
             FlowContextFactory.deserializeNativeFlowContext(flowContextStr);
         }
         Message msg = new HornetQMessage(message);
+        preMessageProcessing(msg);
         onMessage(msg);
+        postMessageProcessing(msg);
     }
 
+    @Override
+    public String getServiceDescription() {
+        return "HornetQ listener";
+    }
+
+    @Override
+    public String getProtocol() {
+        return "HORNETQ";
+    }
 }
