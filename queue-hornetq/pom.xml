@@ -9,7 +9,7 @@
     <groupId>com.cisco.oss.foundation.queue</groupId>
     <artifactId>queue-hornetq</artifactId>
     <name>queue-hornetq</name>
-    <version>1.0.0-2-SNAPSHOT</version>
+    <version>1.0.0-2</version>
     <description>This project is a hornetq implementation for the queue-api library.</description>
     <url>http://maven-doc.nds.com/maven_sites/${project.groupId}/${project.artifactId}/${project.version}</url>
     <issueManagement>
@@ -40,7 +40,7 @@
         <connection>scm:git:git@github.com:foundation-runtime/communication.git</connection>
         <developerConnection>scm:git:git@github.com:foundation-runtime/communication.git</developerConnection>
         <url>https://github.com/foundation-runtime/communication.git</url>
-        <tag>HEAD</tag>
+        <tag>queue-hornetq-1.0.0-2</tag>
     </scm>
     <organization>
         <name>Cisco</name>
