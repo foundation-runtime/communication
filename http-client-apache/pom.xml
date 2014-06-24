@@ -57,7 +57,7 @@
         </developer>
     </developers>
     <properties>
-        <http-client-common-version>1.0.0-1</http-client-common-version>
+        <http-client-common-version>1.0.0-2-SNAPSHOT</http-client-common-version>
         <jetty-version>9.2.0.v20140526</jetty-version>
         <logging-api-version>0.0.0-6</logging-api-version>
         <logging-log4j-version>1.0.0-1</logging-log4j-version>
@@ -150,7 +150,7 @@
         <dependency>
             <groupId>org.scala-lang</groupId>
             <artifactId>scala-library</artifactId>
-            <version>2.10.3</version>
+            <version>2.11.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -173,8 +173,8 @@
         </dependency>
         <dependency>
             <groupId>com.typesafe.akka</groupId>
-            <artifactId>akka-actor_2.10</artifactId>
-            <version>2.2.4</version>
+            <artifactId>akka-actor_2.11</artifactId>
+            <version>2.3.3</version>
             <scope>test</scope>
         </dependency>
     </dependencies>    

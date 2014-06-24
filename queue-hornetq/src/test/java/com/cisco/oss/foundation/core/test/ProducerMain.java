@@ -33,7 +33,7 @@ public class ProducerMain {
 
         while(true){
 
-            byte[] bytes = new byte[10];
+            byte[] bytes = new byte[100];
             System.in.read(bytes);
 //            producer.sendMessage("hello: " + new String(bytes));
             sendMessage(producer, bytes,"1");

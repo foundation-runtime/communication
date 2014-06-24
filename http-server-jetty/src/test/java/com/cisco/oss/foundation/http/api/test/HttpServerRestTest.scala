@@ -109,7 +109,7 @@ class HttpServerRestTest extends FeatureSpec with GivenWhenThen with BeforeAndAf
     config setProperty("service.serverTest1-client.1.host", IpUtils.getIpAddress)
 
     val map: ArrayListMultimap[String, Servlet] = ArrayListMultimap.create()
-    //    val sh = new ServletContextHandler
+    //    val scripts.sh = new ServletContextHandler
     val resourceConfig = new ResourceConfig()
     resourceConfig packages ("com.cisco")
 

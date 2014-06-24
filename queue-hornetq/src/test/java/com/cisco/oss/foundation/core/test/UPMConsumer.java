@@ -45,7 +45,7 @@ public class UPMConsumer {
 
         int i=0;
 
-//        System.in.read();
+        System.in.read();
 
     }
 
