@@ -25,7 +25,7 @@
     <groupId>com.cisco.oss.foundation</groupId>
     <artifactId>http-client-apache</artifactId>
     <name>http-client-apache</name>
-    <version>1.0.0-2</version>
+    <version>1.0.0-3-SNAPSHOT</version>
     <description>This project is the apache http client implementation library in the cisco vss foundation runtime</description>
     <url>https://github.com/foundation-runtime/communication/http-client-apache</url>
     <packaging>jar</packaging>
@@ -66,7 +66,7 @@
         <connection>scm:git:git@github.com:foundation-runtime/communication.git</connection>
         <developerConnection>scm:git:git@github.com:foundation-runtime/communication.git</developerConnection>
         <url>https://github.com/foundation-runtime/communication.git</url>
-        <tag>http-client-apache-1.0.0-2</tag>
+        <tag>HEAD</tag>
     </scm>
     <organization>
         <name>Cisco</name>
