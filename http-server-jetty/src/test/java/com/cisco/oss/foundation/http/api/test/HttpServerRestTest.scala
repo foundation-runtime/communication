@@ -19,9 +19,6 @@ package com.cisco.oss.foundation.http.api.test
 import org.junit.runner.RunWith
 import javax.servlet.Servlet
 import com.google.common.collect.ArrayListMultimap
-import org.eclipse.jetty.servlet.ServletHolder
-import org.eclipse.jetty.servlet.ServletContextHandler
-import org.springframework.context.support.ClassPathXmlApplicationContext
 import org.eclipse.jetty.util.ssl.SslContextFactory
 import com.cisco.oss.foundation.configuration.ConfigurationFactory
 import org.scalatest._
@@ -33,11 +30,6 @@ import com.cisco.oss.foundation.http.server.jetty.JettyHttpServerFactory
 import com.cisco.oss.foundation.flowcontext.FlowContextFactory
 import com.cisco.oss.foundation.http.apache.ApacheHttpClientFactory
 import com.cisco.oss.foundation.http.{HttpMethod, HttpRequest}
-import java.util.logging._
-import java.util.Date
-import java.text.MessageFormat
-import org.joda.time.{DateTimeZone, DateTime}
-import org.joda.time.format.{DateTimeFormatterBuilder, DateTimeFormatter, DateTimeFormat}
 
 //class MyLogFormatter extends Formatter {
 //
