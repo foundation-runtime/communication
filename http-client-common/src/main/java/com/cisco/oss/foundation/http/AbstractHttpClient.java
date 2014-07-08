@@ -260,6 +260,7 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
         int maxConnectionsTotal = subset.getInt("http." + LoadBalancerConstants.MAX_CONNECTIONS_TOTAL, LoadBalancerConstants.DEFAULT_MAX_CONNECTIONS_TOTAL);
         int maxQueueSizePerAddress = subset.getInt("http." + LoadBalancerConstants.MAX_QUEUE_PER_ADDRESS, LoadBalancerConstants.DEFAULT_MAX_QUEUE_PER_ADDRESS);
         boolean followRedirects = subset.getBoolean("http." + LoadBalancerConstants.FOLLOW_REDIRECTS, false);
+        boolean autoCloseable = subset.getBoolean("http." + LoadBalancerConstants.AUTO_CLOSEABLE, true);
 
         String keyStorePath = subset.getString("http." + LoadBalancerConstants.KEYSTORE_PATH, "");
         String keyStorePassword = subset.getString("http." + LoadBalancerConstants.KEYSTORE_PASSWORD, "");
@@ -298,7 +299,7 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
 
         }
 
-        InternalServerProxyMetadata metadata = new InternalServerProxyMetadata(readTimeout, connectTimeout, idleTimeout, maxConnectionsPerAddress, maxConnectionsTotal, maxQueueSizePerAddress, waitingTime, numberOfAttempts, retryDelay, hostAndPortPairs, keyStorePath, keyStorePassword, trustStorePath, trustStorePassword, followRedirects);
+        InternalServerProxyMetadata metadata = new InternalServerProxyMetadata(readTimeout, connectTimeout, idleTimeout, maxConnectionsPerAddress, maxConnectionsTotal, maxQueueSizePerAddress, waitingTime, numberOfAttempts, retryDelay, hostAndPortPairs, keyStorePath, keyStorePassword, trustStorePath, trustStorePassword, followRedirects, autoCloseable);
 //        metadata.getHostAndPortPairs().addAll(hostAndPortPairs);
 //        metadata.setReadTimeout(readTimeout);
 //        metadata.setConnectTimeout(connectTimeout);
