@@ -54,6 +54,12 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
     CloseableHttpAsyncClient httpAsyncClient = null;
     private CloseableHttpClient httpClient = null;
 
+    public boolean isAutoCloseable() {
+        return autoCloseable;
+    }
+
+    private boolean autoCloseable = true;
+
 
     ApacheHttpClient(String apiName, Configuration configuration, boolean enableLoadBalancing) {
         super(apiName, configuration, enableLoadBalancing);
@@ -78,6 +84,8 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
         boolean addSslSupport = StringUtils.isNotEmpty(metadata.getKeyStorePath()) && StringUtils.isNotEmpty(metadata.getKeyStorePassword());
 
         boolean addTrustSupport = StringUtils.isNotEmpty(metadata.getTrustStorePath()) && StringUtils.isNotEmpty(metadata.getTrustStorePassword());
+
+        autoCloseable = metadata.isAutoCloseable();
 
         SSLContext sslContext = null;
 
@@ -162,6 +170,9 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
         try {
             LOGGER.info("sending request: {}", request.getUri());
             CloseableHttpResponse response = httpClient.execute(httpUriRequest);
+            if(autoCloseable){
+                response.close();
+            }
             ApacheHttpResponse apacheHttpResponse = new ApacheHttpResponse(response, requestUri);
             LOGGER.info("got response status: {} for request: {}",apacheHttpResponse.getStatus(), apacheHttpResponse.getRequestedURI());
             return apacheHttpResponse;
@@ -321,6 +332,9 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
 
             ApacheHttpResponse apacheHttpResponse = new ApacheHttpResponse(response, request.getUri());
             LOGGER.info("got response status: {} for request: {}",apacheHttpResponse.getStatus(), apacheHttpResponse.getRequestedURI());
+            if(apacheHttpClient.isAutoCloseable()){
+                apacheHttpResponse.close();
+            }
 
             responseCallback.completed(apacheHttpResponse);
         }

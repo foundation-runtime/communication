@@ -39,6 +39,7 @@ public class ApacheHttpResponse implements HttpResponse {
 
     public ApacheHttpResponse(org.apache.http.HttpResponse httpResponse, URI requestUri) {
         this.httpResponse = httpResponse;
+        close();
         this.requestUri = requestUri;
     }
 
