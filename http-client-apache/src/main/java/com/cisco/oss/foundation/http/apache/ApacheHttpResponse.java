@@ -36,11 +36,18 @@ public class ApacheHttpResponse implements HttpResponse {
 
     private org.apache.http.HttpResponse httpResponse = null;
     private URI requestUri = null;
+    private String responseBody;
+    private boolean isClosed = false;
 
-    public ApacheHttpResponse(org.apache.http.HttpResponse httpResponse, URI requestUri) {
+    public ApacheHttpResponse(org.apache.http.HttpResponse httpResponse, URI requestUri, boolean autoCloseable) {
         this.httpResponse = httpResponse;
-        close();
         this.requestUri = requestUri;
+        if (autoCloseable) {
+            if (hasResponseBody()) {
+                responseBody = getResponseAsString();
+            }
+            close();
+        }
     }
 
     @Override
@@ -71,10 +78,14 @@ public class ApacheHttpResponse implements HttpResponse {
     @Override
     public byte[] getResponse() {
         if (hasResponseBody()) {
-            try {
-                return EntityUtils.toByteArray(httpResponse.getEntity());
-            } catch (IOException e) {
-                throw new ClientException(e.toString(), e);
+            if (!isClosed) {
+                try {
+                    return EntityUtils.toByteArray(httpResponse.getEntity());
+                } catch (IOException e) {
+                    throw new ClientException(e.toString(), e);
+                }
+            } else {
+                return responseBody.getBytes();
             }
         } else {
             return new byte[0];
@@ -84,10 +95,14 @@ public class ApacheHttpResponse implements HttpResponse {
     @Override
     public String getResponseAsString() {
         if (hasResponseBody()) {
-            try {
-                return EntityUtils.toString(httpResponse.getEntity());
-            } catch (IOException e) {
-                throw new ClientException(e.toString(), e);
+            if (!isClosed) {
+                try {
+                    return EntityUtils.toString(httpResponse.getEntity());
+                } catch (IOException e) {
+                    throw new ClientException(e.toString(), e);
+                }
+            } else {
+                return responseBody;
             }
         } else {
             return "";
@@ -115,7 +130,7 @@ public class ApacheHttpResponse implements HttpResponse {
     @Override
     public boolean isSuccess() {
         boolean isSuccess = false;
-        int status = httpResponse.getStatusLine() != null? httpResponse.getStatusLine().getStatusCode(): null;
+        int status = httpResponse.getStatusLine() != null ? httpResponse.getStatusLine().getStatusCode() : null;
         isSuccess = status / 100 == 2;
         return isSuccess;
     }
@@ -123,11 +138,12 @@ public class ApacheHttpResponse implements HttpResponse {
     @Override
     public void close() {
         try {
-            if(httpResponse instanceof CloseableHttpResponse){
-                ((CloseableHttpResponse)httpResponse).close();
+            if (httpResponse instanceof CloseableHttpResponse) {
+                ((CloseableHttpResponse) httpResponse).close();
             }
         } catch (IOException e) {
             throw new ClientException(e.toString(), e);
         }
+        isClosed = true;
     }
 }

@@ -46,9 +46,6 @@ class ApacheAsyncClientTest {
     strategy.setRefreshDelay(propsConfiguration.getInt("configuration.dynamicConfigReload.refreshDelay"))
     propsConfiguration.setReloadingStrategy(strategy)
 
-
-
-
     val clientRoundRobinTest = ApacheHttpClientFactory.createHttpClient("clientRoundRobinSyncTest", propsConfiguration)
     httpTestUtil.realServerInvokePostRoudRobin(clientRoundRobinTest,propsConfiguration)
 

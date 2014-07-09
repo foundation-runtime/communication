@@ -170,10 +170,7 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
         try {
             LOGGER.info("sending request: {}", request.getUri());
             CloseableHttpResponse response = httpClient.execute(httpUriRequest);
-            if(autoCloseable){
-                response.close();
-            }
-            ApacheHttpResponse apacheHttpResponse = new ApacheHttpResponse(response, requestUri);
+            ApacheHttpResponse apacheHttpResponse = new ApacheHttpResponse(response, requestUri, autoCloseable);
             LOGGER.info("got response status: {} for request: {}",apacheHttpResponse.getStatus(), apacheHttpResponse.getRequestedURI());
             return apacheHttpResponse;
         } catch (IOException e) {
@@ -330,12 +327,8 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
             serverProxy.setCurrentNumberOfRetries(0);
             serverProxy.setFailedAttemptTimeStamp(0);
 
-            ApacheHttpResponse apacheHttpResponse = new ApacheHttpResponse(response, request.getUri());
+            ApacheHttpResponse apacheHttpResponse = new ApacheHttpResponse(response, request.getUri(), apacheHttpClient.isAutoCloseable());
             LOGGER.info("got response status: {} for request: {}",apacheHttpResponse.getStatus(), apacheHttpResponse.getRequestedURI());
-            if(apacheHttpClient.isAutoCloseable()){
-                apacheHttpResponse.close();
-            }
-
             responseCallback.completed(apacheHttpResponse);
         }
 
