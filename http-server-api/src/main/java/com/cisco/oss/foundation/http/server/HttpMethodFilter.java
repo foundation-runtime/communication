@@ -64,7 +64,7 @@ public class HttpMethodFilter extends AbstractInfraHttpFilter {
 		HttpServletRequest httpServletRequest = (HttpServletRequest)request;
 		
 		String method = httpServletRequest.getMethod();
-		if(methods.contains(method.toUpperCase(Locale.getDefault()))){
+		if(methods.contains(method)){
 			LOGGER.error("method {} is not allowed", method);
 			((HttpServletResponse)response).sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		}else{			
