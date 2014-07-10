@@ -78,9 +78,19 @@
                     </DefaultValue>
                 </StructureMemberDefinition>
                 <StructureMemberDefinition name="http.monitoringBaseUri" type="STRING" isArray="true" advanced="true" description="A list of base Uri's . If the list is not empty the infrastructure will try and match the base uri with the actual uri. if found the base uri will be the monitoring service/api name." required="false" />
-                <StructureMemberDefinition name="http.exposeStatisticsToMonitor" type="BOOLEAN" advanced="true" description="Set to true if you wnt to monitor client connections." required="false">
+                <StructureMemberDefinition name="http.exposeStatisticsToMonitor" type="BOOLEAN" advanced="true" description="Set to true if you want to monitor client connections." required="false">
                     <DefaultValue>
                         <PrimitiveValue value="true"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
+                <StructureMemberDefinition name="http.autoCloseable" type="BOOLEAN" advanced="true" description="Set to true if you want to client to close automatically and release the connection even before consuming the content. Note: you may need to disable this and call close directly if you want to work with the inputstream using streaming style." required="false">
+                    <DefaultValue>
+                        <PrimitiveValue value="true"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
+                <StructureMemberDefinition name="http.followRedirects" type="BOOLEAN" advanced="true" description="Set to true if you client to redirected to a new location in response to an HTTP response received from the target." required="false">
+                    <DefaultValue>
+                        <PrimitiveValue value="false"/>
                     </DefaultValue>
                 </StructureMemberDefinition>
                 <StructureMemberDefinition name="http.keyStorePath" type="STRING" advanced="true" description="the path to the keystore file." required="false" />
