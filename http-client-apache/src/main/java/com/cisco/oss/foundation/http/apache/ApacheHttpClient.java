@@ -171,7 +171,7 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
 //            LOGGER.info("sending request: {}", request.getUri());
             CloseableHttpResponse response = httpClient.execute(httpUriRequest);
             ApacheHttpResponse apacheHttpResponse = new ApacheHttpResponse(response, requestUri, autoCloseable);
-            LOGGER.info("got response status: {} for request: {}",apacheHttpResponse.getStatus(), apacheHttpResponse.getRequestedURI());
+//            LOGGER.info("got response status: {} for request: {}",apacheHttpResponse.getStatus(), apacheHttpResponse.getRequestedURI());
             return apacheHttpResponse;
         } catch (IOException e) {
             throw new ClientException(e.toString(), e);

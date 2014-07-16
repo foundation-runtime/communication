@@ -131,7 +131,7 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
                     CommunicationInfo.getCommunicationInfo().transactionStarted(connectionDetails, getMonioringApiName(request));
                 }
                 result = executeDirect(request);
-                LOGGER.info("got response: {}", result.getRequestedURI());
+                LOGGER.info("got response status: {} for request: {}",result.getStatus(), result.getRequestedURI());
                 if (exposeStatisticsToMonitor) {
 
                     int responseStatus = result.getStatus();

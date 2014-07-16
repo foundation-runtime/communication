@@ -37,17 +37,17 @@ public class ProducerMain {
             System.in.read(bytes);
 //            producer.sendMessage("hello: " + new String(bytes));
             sendMessage(producer, bytes,"1");
-            sendMessage(producer, bytes,"1");
-            sendMessage(producer, bytes,"1");
-            sendMessage(producer, bytes,"1");
-            sendMessage(producer, bytes,"1");
-
-
-            sendMessage(producer, bytes,"2");
-            sendMessage(producer, bytes,"2");
-            sendMessage(producer, bytes,"2");
-            sendMessage(producer, bytes,"2");
-            sendMessage(producer, bytes,"2");
+//            sendMessage(producer, bytes,"1");
+//            sendMessage(producer, bytes,"1");
+//            sendMessage(producer, bytes,"1");
+//            sendMessage(producer, bytes,"1");
+//
+//
+//            sendMessage(producer, bytes,"2");
+//            sendMessage(producer, bytes,"2");
+//            sendMessage(producer, bytes,"2");
+//            sendMessage(producer, bytes,"2");
+//            sendMessage(producer, bytes,"2");
 
 
         }
