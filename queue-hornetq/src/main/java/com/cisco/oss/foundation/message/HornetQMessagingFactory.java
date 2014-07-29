@@ -127,6 +127,7 @@ public class HornetQMessagingFactory {
                 serverLocator.setRetryInterval(1000);
                 serverLocator.setRetryIntervalMultiplier(1);
                 serverLocator.setReconnectAttempts(-1);
+                serverLocator.setInitialConnectAttempts(-1);
                 try {
                     serverLocator.setAckBatchSize(1);
                 } catch (Exception e) {

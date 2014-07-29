@@ -36,7 +36,15 @@ public class ProducerMain {
             byte[] bytes = new byte[100];
             System.in.read(bytes);
 //            producer.sendMessage("hello: " + new String(bytes));
+
+//            for (int i=0; i < 500; i++) {
+//                sendMessage(producer, bytes,"1");
+//                Thread.sleep(1000);
+//            }
+
             sendMessage(producer, bytes,"1");
+
+
 //            sendMessage(producer, bytes,"1");
 //            sendMessage(producer, bytes,"1");
 //            sendMessage(producer, bytes,"1");
