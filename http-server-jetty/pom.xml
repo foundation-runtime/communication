@@ -61,7 +61,7 @@
         <http-client-apache-version>0.0.0-8</http-client-apache-version>
         <logging-log4j-version>1.0.0-1</logging-log4j-version>
         <logging-api-version>0.0.0-6</logging-api-version>
-        <jetty-version>9.2.0.v20140526</jetty-version>
+        <jetty-version>9.2.2.v20140723</jetty-version>
         <http-server-api-version>1.0.0-1</http-server-api-version>
         <configuration-lib-version>0.0.0-7</configuration-lib-version>
         <monitoring-api-version>0.0.0-6</monitoring-api-version>
