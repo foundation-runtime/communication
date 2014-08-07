@@ -28,14 +28,14 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * @author yglass
  *
  */
-class LockMessageDispatcher extends AbstractMessageDispatcher {
+public class LockMessageDispatcher extends AbstractMessageDispatcher {
 
 	//private static final Logger LOGGER = LoggerFactory.getLogger(LockMessageDispatcher.class);
 
 	private Lock waitingReadLock;
 	private Lock waitingWriteLock;
 
-	LockMessageDispatcher(ConcurrentMessageHandler concurrentMessageHandler){
+	public LockMessageDispatcher(ConcurrentMessageHandler concurrentMessageHandler){
 		super(concurrentMessageHandler);
 
 		ReadWriteLock waitingReadWriteLock = new ReentrantReadWriteLock();

@@ -16,7 +16,7 @@
 
 package com.cisco.oss.foundation.message;
 
-interface MessageDispatcher {
+public interface MessageDispatcher {
 
 	public void handleMessage(Message message);
 }
