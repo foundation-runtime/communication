@@ -33,14 +33,14 @@ public abstract class AbstractMessageHandler implements MessageHandler {
         this.consumerName = consumerName;
     }
 
-    @Override
+//    @Override
     public void preMessageProcessing(Message message) {
         if(isMonitoringEnabled()){
             CommunicationInfo.INSTANCE.transactionStarted(serviceDetails,consumerName);
         }
     }
 
-    @Override
+//    @Override
     public void postMessageProcessing(Message message) {
         if(isMonitoringEnabled()){
             CommunicationInfo.INSTANCE.transactionFinished(serviceDetails,consumerName,false, "N/A");

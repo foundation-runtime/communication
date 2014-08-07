@@ -22,9 +22,9 @@ package com.cisco.oss.foundation.message;
  */
 public interface MessageHandler {
 
-    void preMessageProcessing(Message message);
-
-    void postMessageProcessing(Message message);
+//    void preMessageProcessing(Message message);
+//
+//    void postMessageProcessing(Message message);
 
     /**
      * the call back method
