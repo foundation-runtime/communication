@@ -56,7 +56,7 @@ class HornetQMessageProducer extends AbstractMessageProducer {
 
     @Override
     public String getProducerImpl() {
-        return null;
+        return "CORE";
     }
 
     private ClientProducer getProducer() {
