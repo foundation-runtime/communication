@@ -32,9 +32,9 @@
     </developers>
     <properties>
         <hornetq-version>2.3.12.Final</hornetq-version>
-        <logging-api-version>0.0.0-6</logging-api-version>
-        <logging-log4j-version>1.0.0-1</logging-log4j-version>
-        <configuration-lib-version>0.0.0-7</configuration-lib-version>
+        <logging-api-version>1.0.0-1</logging-api-version>
+        <logging-log4j-version>1.0.0-2</logging-log4j-version>
+        <configuration-lib-version>1.0.0-1</configuration-lib-version>
     </properties>
     <scm>
         <connection>scm:git:git@github.com:foundation-runtime/communication.git</connection>
@@ -56,12 +56,12 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>queue-api</artifactId>
-            <version>1.0.0-3-SNAPSHOT</version>
+            <version>1.0.0-3</version>
         </dependency>
         <dependency>
             <groupId>com.cisco.oss.foundation</groupId>
             <artifactId>configuration-lib</artifactId>
-            <version>0.0.0-7</version>
+            <version>1.0.0-1</version>
         </dependency>
         <dependency>
             <groupId>com.cisco.oss.foundation</groupId>
