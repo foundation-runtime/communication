@@ -224,6 +224,10 @@ public enum JettyHttpServerFactory implements HttpServerFactory {
 
             context.addServlet(new ServletHolder(entry.getValue()), entry.getKey());
 
+            for (Map.Entry<String, String> initParam : initParams.entrySet()) {
+                context.setInitParameter(initParam.getKey(), initParam.getValue());
+            }
+
 
             HttpServerUtil.addFiltersToServletContextHandler(serviceName, jettyHttpThreadPool, context);
 
