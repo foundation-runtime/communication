@@ -116,6 +116,13 @@
             </EnabledBy>
         </Parameter>
 
+        <Parameter name="service.queue.attachRetryDelay" type="INTEGER" unit="MILLISECONDS" description="Delay between attempts to attach to the queue server(s)"
+                   advanced="true">
+            <DefaultValue>
+                <PrimitiveValue value="60000"/>
+            </DefaultValue>
+        </Parameter>
+
         <Parameter name="messageHandling.threadpool.size" type="INTEGER"
                    description="set the maximun size of a thread pool that will get application messages"
                    advanced="true">

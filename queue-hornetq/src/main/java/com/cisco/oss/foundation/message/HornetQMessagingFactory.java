@@ -18,6 +18,7 @@ package com.cisco.oss.foundation.message;
 
 import com.cisco.oss.foundation.configuration.ConfigUtil;
 import com.google.common.collect.Lists;
+import org.apache.commons.lang3.StringUtils;
 import org.hornetq.api.core.TransportConfiguration;
 import org.hornetq.api.core.client.ClientSession;
 import org.hornetq.api.core.client.HornetQClient;
@@ -26,6 +27,7 @@ import org.hornetq.core.remoting.impl.netty.NettyConnectorFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.InputStream;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -120,6 +122,30 @@ public class HornetQMessagingFactory {
                     transportConfigurations.add(new TransportConfiguration(NettyConnectorFactory.class.getName(), map));
 
                 }
+
+                Package hornetqClientPacakge = HornetQClient.class.getPackage();
+                if(hornetqClientPacakge != null){
+                    String version = hornetqClientPacakge.getSpecificationVersion();
+                    if(StringUtils.isBlank(version)){
+                        version = hornetqClientPacakge.getImplementationVersion();
+                    }
+
+                    if(StringUtils.isBlank(version)){
+                        InputStream stream = HornetQClient.class.getResourceAsStream("/META-INF/maven/org.hornetq/hornetq-core-client/pom.properties");
+                        if(stream != null){
+                           Properties properties = new Properties();
+                            properties.load(stream);
+                            stream.close();
+                            version = properties.getProperty("version");
+                        }
+                    }
+
+                    if (StringUtils.isNotBlank(version)){
+                        LOGGER.info("HornetQ version: {}", version);
+                    }
+
+                }
+
 
                 transportConfigurations.toArray(transportConfigurationsArray);
 
