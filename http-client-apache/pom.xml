@@ -25,7 +25,7 @@
     <groupId>com.cisco.oss.foundation</groupId>
     <artifactId>http-client-apache</artifactId>
     <name>http-client-apache</name>
-    <version>1.0.1-2-SNAPSHOT</version>
+    <version>1.0.2-1-SNAPSHOT</version>
     <description>This project is the apache http client implementation library in the cisco vss foundation runtime</description>
     <url>https://github.com/foundation-runtime/communication/http-client-apache</url>
     <packaging>jar</packaging>
@@ -57,10 +57,11 @@
         </developer>
     </developers>
     <properties>
-        <http-client-common-version>1.0.1-2</http-client-common-version>
-        <jetty-version>9.2.0.v20140526</jetty-version>
-        <logging-api-version>0.0.0-6</logging-api-version>
-        <logging-log4j-version>1.0.0-1</logging-log4j-version>
+        <http-client-common-version>1.0.2-1-SNAPSHOT</http-client-common-version>
+        <logging-api-version>1.0.2-1-SNAPSHOT</logging-api-version>
+        <logging-log4j-version>1.0.2-1-SNAPSHOT</logging-log4j-version>
+        <jetty-version>8.1.15.v20140411</jetty-version>
+        <javaVersion>1.6</javaVersion>
     </properties>
     <scm>
         <connection>scm:git:git@github.com:foundation-runtime/communication.git</connection>
@@ -154,6 +155,12 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-actor_2.11</artifactId>
+            <version>2.3.3</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-server</artifactId>
             <version>${jetty-version}</version>
@@ -169,12 +176,6 @@
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-servlets</artifactId>
             <version>${jetty-version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.typesafe.akka</groupId>
-            <artifactId>akka-actor_2.11</artifactId>
-            <version>2.3.3</version>
             <scope>test</scope>
         </dependency>
     </dependencies>    
