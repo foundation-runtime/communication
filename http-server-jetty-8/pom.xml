@@ -25,7 +25,7 @@
     <groupId>com.cisco.oss.foundation</groupId>
     <artifactId>http-server-jetty-8</artifactId>
     <name>http-server-jetty-8</name>
-    <version>1.0.0-1-SNAPSHOT</version>
+    <version>1.0.2-1-SNAPSHOT</version>
     <packaging>jar</packaging>
     <description>This project is the http jetty server (version 8.x) implementation library in the cisco vss foundation runtime</description>
     <url>https://github.com/foundation-runtime/communication/http-server-jetty</url>
@@ -57,11 +57,12 @@
         </developer>
     </developers>
     <properties>
-        <logging-api-version>1.0.0-1</logging-api-version>
-        <http-server-api-version>1.0.0-3-SNAPSHOT</http-server-api-version>
-        <logging-log4j-version>1.0.0-2</logging-log4j-version>
-        <http-client-apache-version>1.0.1-1</http-client-apache-version>
-        <configuration-lib-version>1.0.0-1</configuration-lib-version>
+        <javaVersion>1.6</javaVersion>
+        <logging-api-version>1.0.2-1-SNAPSHOT</logging-api-version>
+        <http-server-api-version>1.0.2-1-SNAPSHOT</http-server-api-version>
+        <logging-log4j-version>1.0.2-1-SNAPSHOT</logging-log4j-version>
+        <http-client-apache-version>1.0.2-1-SNAPSHOT</http-client-apache-version>
+        <configuration-lib-version>1.0.2-1-SNAPSHOT</configuration-lib-version>
         <monitoring-api-version>0.0.0-6</monitoring-api-version>
         <jetty-8-version>8.1.15.v20140411</jetty-8-version>
     </properties>
