@@ -15,17 +15,18 @@
   ~  limitations under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <parent>
-		<groupId>com.cisco.oss.foundation</groupId>
-		<artifactId>foundation-common-base</artifactId>
-		<version>0.0.0-5</version>
+        <groupId>com.cisco.oss.foundation</groupId>
+        <artifactId>foundation-common-base</artifactId>
+        <version>0.0.0-5</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.cisco.oss.foundation</groupId>
     <artifactId>http-client-common</artifactId>
     <name>http-client-common</name>
-    <version>1.0.1-3-SNAPSHOT</version>
+    <version>1.0.2-1-SNAPSHOT</version>
     <description>This project is the common library for http client in the cisco vss foundation runtime</description>
     <url>https://github.com/foundation-runtime/communication/http-client-common</url>
     <packaging>jar</packaging>
@@ -42,7 +43,7 @@
         <url>{URL in JIRA or Product name in CQ}</url>
     </issueManagement>
     <mailingLists>
-        <mailingList />
+        <mailingList/>
     </mailingLists>
     <developers>
         <developer>
@@ -57,10 +58,11 @@
         </developer>
     </developers>
     <properties>
-        <http-client-api-version>1.0.1-0</http-client-api-version>
-        <jetty-version>9.2.0.v20140526</jetty-version>
-        <configuration-api-version>0.0.0-7</configuration-api-version>
-        <logging-log4j-version>1.0.0-1</logging-log4j-version>
+        <http-client-api-version>1.0.2-1-SNAPSHOT</http-client-api-version>
+        <configuration-api-version>1.0.2-1-SNAPSHOT</configuration-api-version>
+        <logging-log4j-version>1.0.2-1-SNAPSHOT</logging-log4j-version>
+        <jetty-version>8.1.15.v20140411</jetty-version>
+        <javaVersion>1.6</javaVersion>
     </properties>
     <scm>
         <connection>scm:git:git@github.com:foundation-runtime/communication.git</connection>
@@ -74,7 +76,7 @@
     </organization>
     <build>
         <pluginManagement>
-            <plugins />
+            <plugins/>
         </pluginManagement>
         <plugins>
             <plugin>
@@ -178,5 +180,5 @@
             <version>2.3.3</version>
             <scope>test</scope>
         </dependency>
-    </dependencies>	
+    </dependencies>
 </project>
