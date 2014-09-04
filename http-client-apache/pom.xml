@@ -61,6 +61,7 @@
         <logging-api-version>1.0.2-1-SNAPSHOT</logging-api-version>
         <logging-log4j-version>1.0.2-1-SNAPSHOT</logging-log4j-version>
         <jetty-version>8.1.15.v20140411</jetty-version>
+        <configuration-api-version>1.0.2-1-SNAPSHOT</configuration-api-version>
         <javaVersion>1.6</javaVersion>
     </properties>
     <scm>
