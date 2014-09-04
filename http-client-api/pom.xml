@@ -57,7 +57,7 @@
         </developer>
     </developers>
     <properties>
-        <commons-version>0.0.0-6</commons-version>
+        <commons-version>1.0.0-1</commons-version>
     </properties>
     <scm>
         <connection>scm:git:git@github.com:foundation-runtime/communication.git</connection>
