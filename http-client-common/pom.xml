@@ -58,10 +58,10 @@
         </developer>
     </developers>
     <properties>
-        <http-client-api-version>1.0.2-1-SNAPSHOT</http-client-api-version>
-        <configuration-api-version>1.0.2-1-SNAPSHOT</configuration-api-version>
-        <logging-log4j-version>1.0.2-1-SNAPSHOT</logging-log4j-version>
-        <monitoring-jmx-lib-version>1.0.2-1-SNAPSHOT</monitoring-jmx-lib-version>
+        <http-client-api-version>1.0.2-1</http-client-api-version>
+        <configuration-api-version>1.0.2-1</configuration-api-version>
+        <logging-log4j-version>1.0.2-1</logging-log4j-version>
+        <monitoring-jmx-lib-version>1.0.2-1</monitoring-jmx-lib-version>
         <jetty-version>8.1.15.v20140411</jetty-version>
         <javaVersion>1.6</javaVersion>
     </properties>
