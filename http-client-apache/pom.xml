@@ -57,11 +57,11 @@
         </developer>
     </developers>
     <properties>
-        <http-client-common-version>1.0.2-1-SNAPSHOT</http-client-common-version>
-        <logging-api-version>1.0.2-1-SNAPSHOT</logging-api-version>
-        <logging-log4j-version>1.0.2-1-SNAPSHOT</logging-log4j-version>
+        <http-client-common-version>1.0.2-1</http-client-common-version>
+        <logging-api-version>1.0.2-1</logging-api-version>
+        <logging-log4j-version>1.0.2-1</logging-log4j-version>
         <jetty-version>8.1.15.v20140411</jetty-version>
-        <configuration-api-version>1.0.2-1-SNAPSHOT</configuration-api-version>
+        <configuration-api-version>1.0.2-1</configuration-api-version>
         <javaVersion>1.6</javaVersion>
     </properties>
     <scm>
