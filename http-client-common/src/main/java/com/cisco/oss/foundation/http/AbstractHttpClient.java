@@ -437,7 +437,9 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
 
         }
 
-        return request.getUri().toString();
+        String path = request.getUri().getPath();
+        int secondsSlashIndex = path.indexOf('/', 1);
+        return secondsSlashIndex > 0 ? path.substring(0,secondsSlashIndex) : path;
     }
 
     private List<BoyerMoore> populateBoyersList() {
