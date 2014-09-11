@@ -88,6 +88,11 @@
                         <PrimitiveValue value="true"/>
                     </DefaultValue>
                 </StructureMemberDefinition>
+                <StructureMemberDefinition name="http.staleConnectionCheckEnabled" type="BOOLEAN" advanced="true" description="Set to true if you want Client connections to be tested before re-used from the pool. Currently supported only in Apache client.." required="false">
+                    <DefaultValue>
+                        <PrimitiveValue value="false"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
                 <StructureMemberDefinition name="http.followRedirects" type="BOOLEAN" advanced="true" description="Set to true if you client to redirected to a new location in response to an HTTP response received from the target." required="false">
                     <DefaultValue>
                         <PrimitiveValue value="false"/>

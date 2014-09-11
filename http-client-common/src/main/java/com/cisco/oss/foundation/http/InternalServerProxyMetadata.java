@@ -41,13 +41,18 @@ public class InternalServerProxyMetadata {
     private String keyStorePassword = "";
     private String trustStorePath = "";
     private String trustStorePassword = "";
+    private boolean staleConnectionCheckEnabled = false;
+    private boolean autoCloseable = true;
+
     private List<Pair<String, Integer>> hostAndPortPairs = null;
 
     public boolean isAutoCloseable() {
         return autoCloseable;
     }
 
-    private boolean autoCloseable = true;
+    public boolean isStaleConnectionCheckEnabled() {
+        return staleConnectionCheckEnabled;
+    }
 
     public boolean isFollowRedirects() {
         return followRedirects;
@@ -99,7 +104,7 @@ public class InternalServerProxyMetadata {
         return waitingTime;
     }
 
-    public InternalServerProxyMetadata(int readTimeout, int connectTimeout, long idleTimeout, int maxConnectionsPerAddress, int maxConnectionsTotal, int maxQueueSizePerAddress, long waitingTime, int numberOfRetries, long retryDelay, List<Pair<String, Integer>> hostAndPortPairs, String keyStorePath, String keyStorePassword,String trustStorePath,String trustStorePassword, boolean followRedirects, boolean autoCloseable) {
+    public InternalServerProxyMetadata(int readTimeout, int connectTimeout, long idleTimeout, int maxConnectionsPerAddress, int maxConnectionsTotal, int maxQueueSizePerAddress, long waitingTime, int numberOfRetries, long retryDelay, List<Pair<String, Integer>> hostAndPortPairs, String keyStorePath, String keyStorePassword,String trustStorePath,String trustStorePassword, boolean followRedirects, boolean autoCloseable, boolean staleConnectionCheckEnabled) {
         this.readTimeout = readTimeout;
         this.connectTimeout = connectTimeout;
         this.idleTimeout = idleTimeout;
@@ -112,6 +117,7 @@ public class InternalServerProxyMetadata {
         this.hostAndPortPairs = hostAndPortPairs;
         this.followRedirects = followRedirects;
         this.autoCloseable = autoCloseable;
+        this.staleConnectionCheckEnabled = staleConnectionCheckEnabled;
     }
 
     public int getNumberOfRetries() {

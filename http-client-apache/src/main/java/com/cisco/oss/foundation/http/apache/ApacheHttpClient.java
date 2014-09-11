@@ -78,6 +78,7 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
         RequestConfig.Builder requestBuilder = RequestConfig.custom();
         requestBuilder = requestBuilder.setConnectTimeout(metadata.getConnectTimeout());
         requestBuilder = requestBuilder.setSocketTimeout(metadata.getReadTimeout());
+        requestBuilder = requestBuilder.setStaleConnectionCheckEnabled(metadata.isStaleConnectionCheckEnabled());
 
         RequestConfig requestConfig = requestBuilder.build();
 
