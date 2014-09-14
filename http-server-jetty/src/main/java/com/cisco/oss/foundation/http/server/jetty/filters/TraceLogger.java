@@ -16,23 +16,20 @@
 
 package com.cisco.oss.foundation.http.server.jetty.filters;
 
-import java.io.Closeable;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
-import java.util.Enumeration;
-import java.util.Map;
+import com.google.common.base.Joiner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.AsyncEvent;
 import javax.servlet.AsyncListener;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import com.google.common.base.Joiner;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.io.Closeable;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.util.Enumeration;
+import java.util.Map;
 
 public class TraceLogger implements Closeable, AsyncListener {
     private static final Logger LOGGER = LoggerFactory.getLogger(TraceLogger.class);
@@ -219,6 +216,7 @@ public class TraceLogger implements Closeable, AsyncListener {
         private final ByteBuffer buf;
         private long length = 0;
         private boolean closed = false;
+        private StringBuilder body = new StringBuilder();
 
         public ByteContentLogFormatter(String mode) {
             this.mode = mode;
@@ -231,6 +229,7 @@ public class TraceLogger implements Closeable, AsyncListener {
                 return;
             } else {
                 processBuf(true);
+                LOGGER.trace("Response Content: " + body.toString());
                 LOGGER.trace("[{}] Closed :: Seen {} bytes", mode, length);
             }
             closed = true;
@@ -259,10 +258,11 @@ public class TraceLogger implements Closeable, AsyncListener {
                     if ((c >= 0x20) && (c <= 0x7E)) {
                         asciid.append((char) c);
                     } else {
-                        asciid.append(".");
+//                        asciid.append(".");
                     }
                 }
                 buf.flip();
+                body.append(asciid);
                 LOGGER.debug("[{}] Content:: {}", mode, asciid);
             }
         }
@@ -274,6 +274,7 @@ public class TraceLogger implements Closeable, AsyncListener {
         private CharBuffer buf;
         private long length = 0;
         private boolean closed = false;
+        private StringBuilder body = new StringBuilder();
 
         public CharContentLogFormatter(String mode) {
             this.mode = mode;
@@ -286,6 +287,7 @@ public class TraceLogger implements Closeable, AsyncListener {
                 return;
             } else {
                 processBuf(true);
+                LOGGER.trace("Response Content: " + body.toString());
                 LOGGER.debug("[{}] Closed :: Seen {} characters", mode, length);
             }
             closed = true;
@@ -321,7 +323,9 @@ public class TraceLogger implements Closeable, AsyncListener {
                     }
                 }
                 buf.flip();
-                LOGGER.debug(line.toString());
+                String msg = line.toString();
+                body.append(msg);
+                LOGGER.debug(msg);
             }
         }
     }
