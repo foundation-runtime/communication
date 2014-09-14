@@ -35,7 +35,7 @@ public class InternalServerProxyMetadata {
     private int maxConnectionsTotal = 3000;
     private int maxQueueSizePerAddress = 1000;
     private long waitingTime = 0;
-    private int numberOfRetries = 0;
+    private int numberOfAttempts = 0;
     private long retryDelay = 0;
     private String keyStorePath = "";
     private String keyStorePassword = "";
@@ -104,7 +104,7 @@ public class InternalServerProxyMetadata {
         return waitingTime;
     }
 
-    public InternalServerProxyMetadata(int readTimeout, int connectTimeout, long idleTimeout, int maxConnectionsPerAddress, int maxConnectionsTotal, int maxQueueSizePerAddress, long waitingTime, int numberOfRetries, long retryDelay, List<Pair<String, Integer>> hostAndPortPairs, String keyStorePath, String keyStorePassword,String trustStorePath,String trustStorePassword, boolean followRedirects, boolean autoCloseable, boolean staleConnectionCheckEnabled) {
+    public InternalServerProxyMetadata(int readTimeout, int connectTimeout, long idleTimeout, int maxConnectionsPerAddress, int maxConnectionsTotal, int maxQueueSizePerAddress, long waitingTime, int numberOfAttempts, long retryDelay, List<Pair<String, Integer>> hostAndPortPairs, String keyStorePath, String keyStorePassword,String trustStorePath,String trustStorePassword, boolean followRedirects, boolean autoCloseable, boolean staleConnectionCheckEnabled) {
         this.readTimeout = readTimeout;
         this.connectTimeout = connectTimeout;
         this.idleTimeout = idleTimeout;
@@ -112,7 +112,7 @@ public class InternalServerProxyMetadata {
         this.maxConnectionsTotal = maxConnectionsTotal;
         this.maxQueueSizePerAddress = maxQueueSizePerAddress;
         this.waitingTime = waitingTime;
-        this.numberOfRetries = numberOfRetries;
+        this.numberOfAttempts = numberOfAttempts;
         this.retryDelay = retryDelay;
         this.hostAndPortPairs = hostAndPortPairs;
         this.followRedirects = followRedirects;
@@ -120,8 +120,8 @@ public class InternalServerProxyMetadata {
         this.staleConnectionCheckEnabled = staleConnectionCheckEnabled;
     }
 
-    public int getNumberOfRetries() {
-        return numberOfRetries;
+    public int getNumberOfAttempts() {
+        return numberOfAttempts;
     }
 
     public long getRetryDelay() {

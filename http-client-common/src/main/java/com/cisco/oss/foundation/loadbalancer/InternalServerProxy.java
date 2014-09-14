@@ -50,9 +50,9 @@ public class InternalServerProxy {
     // private AtomicBoolean notify = new AtomicBoolean(true);
 
     private long failedAttemptTimeStamp;
-    private int maxNumberOfRetries = -1;
+    private int maxNumberOfAttempts = -1;
     private long retryDelay = -1;
-    private int currentNumberOfRetries;
+    private int currentNumberOfAttempts;
     private String host;
     private Integer port;
     private String serviceName;
@@ -79,7 +79,7 @@ public class InternalServerProxy {
             passivationTimeStamp = System.currentTimeMillis();
 
 //            LoggingHelper.warn(AUDITOR, "Lost connection to host: [%s], port [%s]", getHost(), getPort());
-            LOGGER.warn("Invocation of service '{}' at [{}:{}] has failed {} consecutive times. [{}:{}] will be blacklisted for {} milliseconds", serviceName, getHost(), getPort(),getMaxNumberOfRetries(), getHost(), getPort(), waitingTime);
+            LOGGER.warn("Invocation of service '{}' at [{}:{}] has failed {} consecutive times. [{}:{}] will be blacklisted for {} milliseconds", serviceName, getHost(), getPort(), getMaxNumberOfAttempts(), getHost(), getPort(), waitingTime);
 
             if (LOGGER.isDebugEnabled()) {
                 final Date passTimeAndWaitTime = new Date(passivationTimeStamp);
@@ -106,7 +106,7 @@ public class InternalServerProxy {
             if (passTimeAndWaitTimeMilis < currentTimeInMilis) {
                 // reset counters before re activating.
                 setFailedAttemptTimeStamp(0);
-                setCurrentNumberOfRetries(0);
+                setCurrentNumberOfAttempts(0);
 
                 LOGGER.info("Attempting to reconnect to [{}:{}]", getHost(), getPort());
                 active = true;
@@ -163,8 +163,8 @@ public class InternalServerProxy {
      * @return the number of times to retry invoking a server before it is
      *         passivated.
      */
-    public int getMaxNumberOfRetries() {
-        return maxNumberOfRetries;
+    public int getMaxNumberOfAttempts() {
+        return maxNumberOfAttempts;
     }
 
     /**
@@ -174,8 +174,8 @@ public class InternalServerProxy {
      * @param numberOfRetries the number of times to retry invoking a server before it is
      *                           passivated.
      */
-    public void setMaxNumberOfRetries(final int numberOfRetries) {
-        this.maxNumberOfRetries = numberOfRetries;
+    public void setMaxNumberOfAttempts(final int numberOfRetries) {
+        this.maxNumberOfAttempts = numberOfRetries;
     }
 
     /**
@@ -205,17 +205,17 @@ public class InternalServerProxy {
      *
      * @return the number of times the server was invoked until now.
      */
-    public synchronized int getCurrentNumberOfRetries() {
-        return currentNumberOfRetries;
+    public synchronized int getCurrentNumberOfAttempts() {
+        return currentNumberOfAttempts;
     }
 
     /**
      * set the number of times the server was invoked until now.
      *
-     * @param currentNumberOfRetries the number of times the server was invoked until now.
+     * @param currentNumberOfAttempts the number of times the server was invoked until now.
      */
-    public synchronized void setCurrentNumberOfRetries(final int currentNumberOfRetries) {
-        this.currentNumberOfRetries = currentNumberOfRetries;
+    public synchronized void setCurrentNumberOfAttempts(final int currentNumberOfAttempts) {
+        this.currentNumberOfAttempts = currentNumberOfAttempts;
     }
 
     /**
@@ -234,7 +234,7 @@ public class InternalServerProxy {
      */
     public synchronized void processFailureAttempt() {
         setFailedAttemptTimeStamp(System.currentTimeMillis());
-        currentNumberOfRetries++;
+        currentNumberOfAttempts++;
     }
 
     /**

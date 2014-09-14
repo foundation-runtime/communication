@@ -145,7 +145,7 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
 //                if (lastKnownErrorThreadLocal.get() != null) {
 //                    lastCaugtException = handleException(serviceMethod, serverProxy, lastKnownErrorThreadLocal.get());
 //                } else {
-                serverProxy.setCurrentNumberOfRetries(0);
+                serverProxy.setCurrentNumberOfAttempts(0);
                 serverProxy.setFailedAttemptTimeStamp(0);
 //                }
 
@@ -315,7 +315,7 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
     private InternalServerProxy createInternalServerProxy(final InternalServerProxyMetadata metadata, final String hostEntry, final int portEntry) {
         final InternalServerProxy internalServerProxy = new InternalServerProxy(metadata.getWaitingTime(), apiName);
         internalServerProxy.setRetryDelay(metadata.getRetryDelay());
-        internalServerProxy.setMaxNumberOfRetries(metadata.getNumberOfRetries());
+        internalServerProxy.setMaxNumberOfAttempts(metadata.getNumberOfAttempts());
         internalServerProxy.setHost(hostEntry);
         internalServerProxy.setPort(portEntry);
         return internalServerProxy;

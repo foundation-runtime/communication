@@ -82,14 +82,14 @@ public abstract class AbstractLoadBalancerStrategy<S extends HttpRequest> implem
 
 		if (LOGGER.isDebugEnabled()) {
 			// LOGGER.warn(errorMessage + ". Exception is: " + throwable);
-			LOGGER.warn(warnMessage + "(attempt " + serverProxy.getCurrentNumberOfRetries() + ", will retry in " + serverProxy.getRetryDelay() + " milliseconds)", throwable);
+			LOGGER.warn(warnMessage + "(attempt " + serverProxy.getCurrentNumberOfAttempts() + ", will retry in " + serverProxy.getRetryDelay() + " milliseconds)", throwable);
 		} else {
-			LOGGER.warn(warnMessage + "(attempt " + serverProxy.getCurrentNumberOfRetries() + ", will retry in " + serverProxy.getRetryDelay() + " milliseconds)");
+			LOGGER.warn(warnMessage + "(attempt " + serverProxy.getCurrentNumberOfAttempts() + ", will retry in " + serverProxy.getRetryDelay() + " milliseconds)");
 		}
 
 		serverProxy.processFailureAttempt();
 
-		if (serverProxy.getCurrentNumberOfRetries() >= serverProxy.getMaxNumberOfRetries()) {
+		if (serverProxy.getCurrentNumberOfAttempts() >= serverProxy.getMaxNumberOfAttempts()) {
 			serverProxy.passivate();
 		}
 
