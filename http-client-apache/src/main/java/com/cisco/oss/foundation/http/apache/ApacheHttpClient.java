@@ -325,7 +325,7 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
         @Override
         public void completed(org.apache.http.HttpResponse response) {
 
-            serverProxy.setCurrentNumberOfRetries(0);
+            serverProxy.setCurrentNumberOfAttempts(0);
             serverProxy.setFailedAttemptTimeStamp(0);
 
             ApacheHttpResponse apacheHttpResponse = new ApacheHttpResponse(response, request.getUri(), apacheHttpClient.isAutoCloseable());
