@@ -67,11 +67,6 @@
             <DefaultValue>
                 <PrimitiveValue value="hquser"/>
             </DefaultValue>
-            <EnabledBy parameterName="service.queue.security.isEnabled" operator="E">
-                <Value>
-                    <PrimitiveValue value="true"/>
-                </Value>
-            </EnabledBy>
         </Parameter>
 
         <Parameter name="service.queue.security.password" type="STRING"
@@ -109,11 +104,6 @@
                     <StructureMemberValue name="jmxPort" value="3900"/>
                 </StructureValue>
             </DefaultValue>
-            <EnabledBy parameterName="service.queue.isEnabled" operator="E">
-                <Value>
-                    <PrimitiveValue value="true"/>
-                </Value>
-            </EnabledBy>
         </Parameter>
 
         <Parameter name="service.queue.attachRetryDelay" type="INTEGER" unit="MILLISECONDS" description="Delay between attempts to attach to the queue server(s)"
