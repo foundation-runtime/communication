@@ -61,33 +61,15 @@ class HornetQMessageProducer extends AbstractMessageProducer {
 
     private ClientProducer getProducer() {
         try {
-            ClientProducer clientProducer = producer.get();
-            String realQueueName = createQueueIfNeeded();
-            if (clientProducer == null) {
-                ClientProducer clientProducerTmp = HornetQMessagingFactory.getSession().createProducer(realQueueName);
-                producers.add(clientProducerTmp);
-                producer.set(clientProducerTmp);
-                clientProducer = clientProducerTmp;
+            if (producer.get() == null) {
+                String realQueueName = createQueueIfNeeded();
+                ClientProducer clientProducer = HornetQMessagingFactory.getSession().createProducer(realQueueName);
+                producers.add(clientProducer);
+                producer.set(clientProducer);
             }
-
-            if (clientProducer.isClosed()) {
-                producers.remove(clientProducer);
-                producer.set(null);
-                try {
-                    ClientProducer clientProducerTmp = HornetQMessagingFactory.getSession().createProducer(realQueueName);
-                    producers.add(clientProducerTmp);
-                    producer.set(clientProducerTmp);
-                    return clientProducerTmp;
-                } catch (Exception e) {
-                    LOGGER.error("can't create queue producer: {}", e, e);
-                    throw new QueueException(e);
-                }
-//                throw new QueueException("producer is closed. probably server was restarted");
-            }
-
-            return clientProducer;
+            return producer.get();
         } catch (Exception e) {
-            LOGGER.error("can't create queue producer: {}", e, e);
+            LOGGER.error("can't create queue consumer: {}", e, e);
             throw new QueueException(e);
         }
     }
@@ -118,8 +100,8 @@ class HornetQMessageProducer extends AbstractMessageProducer {
 //        }
 
         //update expiration
-        expiration = subset.getLong("queue.expiration", 1800000);
-        groupId = subset.getString("queue.groupId", "");
+        expiration = subset.getLong("queue.expiration",1800000);
+        groupId = subset.getString("queue.groupId","");
 
         return realQueueName;
     }
@@ -176,7 +158,7 @@ class HornetQMessageProducer extends AbstractMessageProducer {
             clientMessage.putObjectProperty(headers.getKey(), headers.getValue());
         }
 
-        if (StringUtils.isNoneBlank(groupId) && messageHeaders.get(groupId) != null) {
+        if(StringUtils.isNoneBlank(groupId) && messageHeaders.get(groupId) != null){
             clientMessage.putStringProperty(MessageImpl.HDR_GROUP_ID.toString(), messageHeaders.get(groupId).toString());
         }
 

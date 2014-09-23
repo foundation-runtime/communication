@@ -42,11 +42,7 @@ public class ProducerMain {
 //                Thread.sleep(1000);
 //            }
 
-            try {
-                sendMessage(producer, bytes,"1");
-            } catch (Exception e) {
-                System.err.println(e.toString());
-            }
+            sendMessage(producer, bytes,"1");
 
 
 //            sendMessage(producer, bytes,"1");

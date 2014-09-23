@@ -17,22 +17,17 @@
 package com.cisco.oss.foundation.message;
 
 import com.cisco.oss.foundation.configuration.ConfigUtil;
-import com.cisco.oss.foundation.configuration.ConfigurationFactory;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
-import org.hornetq.api.core.HornetQException;
 import org.hornetq.api.core.TransportConfiguration;
 import org.hornetq.api.core.client.ClientSession;
 import org.hornetq.api.core.client.HornetQClient;
 import org.hornetq.api.core.client.ServerLocator;
-import org.hornetq.core.client.impl.DelegatingSession;
 import org.hornetq.core.remoting.impl.netty.NettyConnectorFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.jms.JMSException;
 import java.io.InputStream;
-import java.lang.reflect.Field;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -44,12 +39,11 @@ import java.util.concurrent.ConcurrentHashMap;
 public class HornetQMessagingFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HornetQMessagingFactory.class);
-    static final Set<ClientSession> sessions = new HashSet<ClientSession>();
+    private static final Set<ClientSession> sessions = new HashSet<ClientSession>();
     public static ThreadLocal<ClientSession> sessionThreadLocal = new ThreadLocal<ClientSession>();
     private static ServerLocator serverLocator = null;
     private static Map<String, MessageConsumer> consumers = new ConcurrentHashMap<String, MessageConsumer>();
     private static Map<String, MessageProducer> producers = new ConcurrentHashMap<String, MessageProducer>();
-    private static TransportConfiguration[] transportConfigurationsArray = null;
 
     static {
         init();
@@ -84,44 +78,21 @@ public class HornetQMessagingFactory {
      * @return a new hornetq session
      */
     public static ClientSession getSession() {
-        if (sessionThreadLocal.get() == null || sessionIsClosed(sessionThreadLocal.get())) {
+        if (sessionThreadLocal.get() == null) {
             try {
-                LOGGER.debug("creating a new session");
+                LOGGER.info("creating a new session");
 
                 //session is created with auto-commit and auto-ack set to true
                 ClientSession hornetQSession = serverLocator.createSessionFactory().createSession(true, true);
-                hornetQSession.addFailureListener(new FoundationQueueFailureListener(hornetQSession));
                 hornetQSession.start();
                 sessionThreadLocal.set(hornetQSession);
                 sessions.add(hornetQSession);
-            } catch (HornetQException e) {
-                LOGGER.warn("can't create hornetq session: {}", e, e);
-                infiniteRetry();
-                throw new QueueException(e);
-            }catch (Exception e) {
+            } catch (Exception e) {
                 LOGGER.error("can't create hornetq session: {}", e, e);
                 throw new QueueException(e);
             }
         }
         return sessionThreadLocal.get();
-    }
-
-    private static boolean sessionIsClosed(ClientSession clientSession) {
-        if(clientSession != null){
-            if(clientSession instanceof DelegatingSession){
-                DelegatingSession delegatingSession = (DelegatingSession)clientSession;
-                try {
-                    Field closed = delegatingSession.getClass().getDeclaredField("closed");
-                    closed.setAccessible(true);
-                    return (boolean)closed.get(delegatingSession);
-                } catch (Exception e) {
-                    LOGGER.trace("unable to get closed state from session: {}", e, e);
-                }
-            }else{
-                return clientSession.isClosed();
-            }
-        }
-        return true;
     }
 
     /**
@@ -135,7 +106,7 @@ public class HornetQMessagingFactory {
             if (serverConnections != null && !serverConnections.isEmpty()) {
                 ArrayList<String> serverConnectionKeys = Lists.newArrayList(serverConnections.keySet());
                 Collections.sort(serverConnectionKeys);
-                transportConfigurationsArray = new TransportConfiguration[serverConnectionKeys.size()];
+                TransportConfiguration[] transportConfigurationsArray = new TransportConfiguration[serverConnectionKeys.size()];
                 List<TransportConfiguration> transportConfigurations = new ArrayList<TransportConfiguration>();
 
                 for (String serverConnectionKey : serverConnectionKeys) {
@@ -175,90 +146,29 @@ public class HornetQMessagingFactory {
 
                 }
 
+
                 transportConfigurations.toArray(transportConfigurationsArray);
-                connect();
 
-
-//
-//                serverLocator = HornetQClient.createServerLocatorWithHA(transportConfigurationsArray);
-//                serverLocator.setRetryInterval(1000);
-//                serverLocator.setRetryIntervalMultiplier(1);
-//                serverLocator.setReconnectAttempts(5);
-//                serverLocator.setInitialConnectAttempts(5);
-//                try {
-//                    serverLocator.setAckBatchSize(1);
-//                } catch (Exception e) {
-//                    LOGGER.debug("error trying to set ack batch size: {}", e);
-//                }
+                serverLocator = HornetQClient.createServerLocatorWithHA(transportConfigurationsArray);
+                serverLocator.setRetryInterval(1000);
+                serverLocator.setRetryIntervalMultiplier(1);
+                serverLocator.setReconnectAttempts(-1);
+                serverLocator.setInitialConnectAttempts(-1);
+                try {
+                    serverLocator.setAckBatchSize(1);
+                } catch (Exception e) {
+                    LOGGER.debug("error trying to set ack batch size: {}", e);
+                }
 
             } else {
                 throw new IllegalArgumentException("'service.queue.connections' must contain at least on host/port pair.");
             }
 
         } catch (Exception e) {
-            LOGGER.error("can't create hornetq service locator: {}", e, e);
+            LOGGER.error("can't create hornetq session: {}", e, e);
             throw new QueueException(e);
         }
 
-    }
-
-    private static void connect() throws JMSException {
-        System.out.println("********** 1");
-        if(serverLocator != null){
-//            try {
-            System.out.println("********** 2");
-            serverLocator.close();
-//            } catch (HornetQException e) {
-//                LOGGER.trace("problem closing jms connection: {}", e);
-//            }
-        }
-        System.out.println("********** 3");
-
-        serverLocator = HornetQClient.createServerLocatorWithHA(transportConfigurationsArray);
-        System.out.println("********** 4");
-        serverLocator.setRetryInterval(100);
-        serverLocator.setRetryIntervalMultiplier(1);
-        serverLocator.setReconnectAttempts(5);
-        serverLocator.setInitialConnectAttempts(5);
-        System.out.println("********** 5");
-        try {
-            serverLocator.setAckBatchSize(1);
-            System.out.println("********** 6");
-        } catch (Exception e) {
-            LOGGER.debug("error trying to set ack batch size: {}", e);
-        }
-        System.out.println("********** 6");
-
-    }
-
-    static void infiniteRetry() {
-
-        Thread thread = new Thread(new Runnable() {
-
-            private boolean done = false;
-            @Override
-            public void run() {
-
-                while(!done){
-
-                    LOGGER.trace("attempting to reconnect to HornetQ");
-                    try {
-                        connect();
-                        done=true;
-                    } catch (Exception e) {
-                        LOGGER.trace("failed to reconnect. retrying...",e);
-                        try {
-                            Thread.sleep(ConfigurationFactory.getConfiguration().getInt("service.queue.attachRetryDelay", 60000));
-                        } catch (InterruptedException e1) {
-                            LOGGER.trace("thread interrupted!!!", e1);
-                        }
-                    }
-                }
-            }
-        });
-        thread.setName("hornetq-reconnect");
-        thread.setDaemon(true);
-        thread.start();
     }
 
     /**
