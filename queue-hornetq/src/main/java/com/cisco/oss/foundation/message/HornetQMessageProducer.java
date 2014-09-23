@@ -61,31 +61,38 @@ class HornetQMessageProducer extends AbstractMessageProducer {
 
     private ClientProducer getProducer() {
         try {
-            ClientProducer clientProducer = producer.get();
-            String realQueueName = createQueueIfNeeded();
-            if (clientProducer == null) {
-                ClientProducer clientProducerTmp = HornetQMessagingFactory.getSession().createProducer(realQueueName);
-                producers.add(clientProducerTmp);
-                producer.set(clientProducerTmp);
-                clientProducer = clientProducerTmp;
+            if (producer.get() == null) {
+                String realQueueName = createQueueIfNeeded();
+                ClientProducer clientProducer = HornetQMessagingFactory.getSession().createProducer(realQueueName);
+                producers.add(clientProducer);
+                producer.set(clientProducer);
             }
+//                ClientProducer clientProducer = producer.get();
+//                String realQueueName = createQueueIfNeeded();
+//                if (clientProducer == null) {
+//                    ClientProducer clientProducerTmp = HornetQMessagingFactory.getSession().createProducer(realQueueName);
+//                    producers.add(clientProducerTmp);
+//                    producer.set(clientProducerTmp);
+//                    clientProducer = clientProducerTmp;
+//                }
+                return producer.get();
 
-            if (clientProducer.isClosed()) {
-                producers.remove(clientProducer);
-                producer.set(null);
-                try {
-                    ClientProducer clientProducerTmp = HornetQMessagingFactory.getSession().createProducer(realQueueName);
-                    producers.add(clientProducerTmp);
-                    producer.set(clientProducerTmp);
-                    return clientProducerTmp;
-                } catch (Exception e) {
-                    LOGGER.error("can't create queue producer: {}", e, e);
-                    throw new QueueException(e);
-                }
+//                if (clientProducer.isClosed()) {
+//                    producers.remove(clientProducer);
+//                    producer.set(null);
+//                    try {
+//                        ClientProducer clientProducerTmp = HornetQMessagingFactory.getSession().createProducer(realQueueName);
+//                        producers.add(clientProducerTmp);
+//                        producer.set(clientProducerTmp);
+//                        return clientProducerTmp;
+//                    } catch (Exception e) {
+//                        LOGGER.error("can't create queue producer: {}", e, e);
+//                        throw new QueueException(e);
+//                    }
 //                throw new QueueException("producer is closed. probably server was restarted");
-            }
+//                }
 
-            return clientProducer;
+//                return clientProducer;
         } catch (Exception e) {
             LOGGER.error("can't create queue producer: {}", e, e);
             throw new QueueException(e);

@@ -36,15 +36,15 @@ public class FoundationQueueFailureListener implements SessionFailureListener{
     @Override
     public void connectionFailed(HornetQException exception, boolean failedOver) {
         LOGGER.error("failed connection: {}, failing over: {}",exception, failedOver);
-        HornetQMessagingFactory.infiniteRetry();
-        if(hornetQSession != null){
-            try {
-                hornetQSession.close();
-            } catch (HornetQException e) {
-                LOGGER.trace("can't close the session");
-            }
-            HornetQMessagingFactory.sessions.remove(hornetQSession);
-        }
+//        HornetQMessagingFactory.infiniteRetry();
+//        if(hornetQSession != null){
+//            try {
+//                hornetQSession.close();
+//            } catch (HornetQException e) {
+//                LOGGER.trace("can't close the session");
+//            }
+//            HornetQMessagingFactory.sessions.remove(hornetQSession);
+//        }
 
     }
 
