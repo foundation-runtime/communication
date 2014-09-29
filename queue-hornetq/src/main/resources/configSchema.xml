@@ -55,11 +55,6 @@
             <DefaultValue>
                 <PrimitiveValue value="false"></PrimitiveValue>
             </DefaultValue>
-            <EnabledBy parameterName="service.queue.isEnabled" operator="E">
-                <Value>
-                    <PrimitiveValue value="true"/>
-                </Value>
-            </EnabledBy>
         </Parameter>
 
         <Parameter name="service.queue.security.userName" type="STRING"
