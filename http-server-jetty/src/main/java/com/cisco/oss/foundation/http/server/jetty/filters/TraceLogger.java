@@ -263,7 +263,7 @@ public class TraceLogger implements Closeable, AsyncListener {
                 }
                 buf.flip();
                 body.append(asciid);
-                LOGGER.debug("[{}] Content:: {}", mode, asciid);
+//                LOGGER.debug("[{}] Content:: {}", mode, asciid);
             }
         }
     }

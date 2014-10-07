@@ -16,10 +16,9 @@
 
 package com.cisco.oss.foundation.http.server.jetty.filters;
 
-import java.io.IOException;
-
 import javax.servlet.ReadListener;
 import javax.servlet.ServletInputStream;
+import java.io.IOException;
 
 public class TraceServletInputStream extends ServletInputStream {
     private final ServletInputStream delegate;
@@ -54,7 +53,7 @@ public class TraceServletInputStream extends ServletInputStream {
                 builder.append((char)ret);
 //                tracer.logRequestContentByte((byte) ret);
             } else {
-                tracer.log("Content: {}", builder.toString());
+//                tracer.log("Content: {}", builder.toString());
 //                tracer.log("EOF reached on {}", delegate);
             }
             return ret;
