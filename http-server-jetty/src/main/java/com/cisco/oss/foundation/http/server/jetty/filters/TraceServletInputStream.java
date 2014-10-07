@@ -24,6 +24,7 @@ public class TraceServletInputStream extends ServletInputStream {
     private final ServletInputStream delegate;
     private final TraceLogger tracer;
     private final StringBuilder builder = new StringBuilder();
+    private boolean isClosed = false;
 
     public TraceServletInputStream(ServletInputStream stream, TraceLogger tracer) {
         this.delegate = stream;
@@ -65,14 +66,17 @@ public class TraceServletInputStream extends ServletInputStream {
 
     @Override
     public void close() throws IOException {
-        tracer.logRequestContentClose();
-        try {
-            delegate.close();
-            tracer.log("Request Content: {}", builder.toString());
-            tracer.log("Closed: {}", delegate);
-        } catch (IOException e) {
-            tracer.log(e);
-            throw e;
+        if (!isClosed) {
+            tracer.logRequestContentClose();
+            try {
+                delegate.close();
+                tracer.log("Request Content: {}", builder.toString());
+                tracer.log("Closed: {}", delegate);
+                isClosed = true;
+            } catch (IOException e) {
+                tracer.log(e);
+                throw e;
+            }
         }
     }
 

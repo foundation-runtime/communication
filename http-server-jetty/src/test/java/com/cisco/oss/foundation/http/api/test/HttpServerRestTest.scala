@@ -133,7 +133,8 @@ class HttpServerRestTest extends FeatureSpec with GivenWhenThen with BeforeAndAf
       val client = ApacheHttpClientFactory.createHttpClient("service.serverTest1-client")
       val request = HttpRequest.newBuilder()
         .uri("/ps/ifs")
-        .httpMethod(HttpMethod.GET)
+        .httpMethod(HttpMethod.POST)
+        .entity("hello *************")
         .build()
 
       val result = client.execute(request)
