@@ -31,7 +31,7 @@
         </developer>
     </developers>
     <properties>
-        <hornetq-version>2.3.12.Final</hornetq-version>
+        <hornetq-version>2.4.4.Final</hornetq-version>
         <logging-api-version>1.0.0-1</logging-api-version>
         <logging-log4j-version>1.0.0-2</logging-log4j-version>
         <configuration-lib-version>1.0.0-1</configuration-lib-version>

@@ -52,9 +52,13 @@ class HornetQMessageConsumer implements MessageConsumer {
     private ClientConsumer getConsumer() {
         try {
             if (consumer.get() == null) {
-                String realQueueName = createQueueIfNeeded();
+                LOGGER.info("waiting for connection successful signal");
+                HornetQMessagingFactory.INIT_READY.await();
+                FoundationQueueConsumerFailureListener foundationQueueConsumerFailureListener = new FoundationQueueConsumerFailureListener();;
+                String realQueueName = createQueueIfNeeded(foundationQueueConsumerFailureListener);
                 LOGGER.info("creating new consumer for: {}", consumerName);
-                ClientConsumer clientConsumer = HornetQMessagingFactory.getSession().createConsumer(realQueueName);
+                ClientConsumer clientConsumer = HornetQMessagingFactory.getSession(foundationQueueConsumerFailureListener).createConsumer(realQueueName);
+                foundationQueueConsumerFailureListener.setReconnectProperties(realQueueName, clientConsumer);
                 consumers.add(clientConsumer);
                 consumer.set(clientConsumer);
             }
@@ -65,7 +69,7 @@ class HornetQMessageConsumer implements MessageConsumer {
         }
     }
 
-    private String createQueueIfNeeded() {
+    private String createQueueIfNeeded(FoundationQueueConsumerFailureListener foundationQueueConsumerFailureListener) {
 
         Configuration subset = configuration.subset(consumerName);
         queueName = subset.getString("queue.name");
@@ -112,14 +116,14 @@ class HornetQMessageConsumer implements MessageConsumer {
         boolean queueExists = false;
 
         try {
-            queueExists = HornetQMessagingFactory.getSession().queueQuery(new SimpleString(realQueueName)).isExists();
+            queueExists = HornetQMessagingFactory.getSession(foundationQueueConsumerFailureListener).queueQuery(new SimpleString(realQueueName)).isExists();
         } catch (HornetQException e) {
             queueExists = false;
         }
 
         if (!queueExists) {
             try {
-                HornetQMessagingFactory.getSession().createQueue(isSubscription ? subscribedTo : realQueueName, realQueueName, filter, isDurable);
+                HornetQMessagingFactory.getSession(foundationQueueConsumerFailureListener).createQueue(isSubscription ? subscribedTo : realQueueName, realQueueName, filter, isDurable);
             } catch (HornetQException e) {
                 throw new QueueException("Can't create queue: " + realQueueName + ". Error: " + e, e);
             }

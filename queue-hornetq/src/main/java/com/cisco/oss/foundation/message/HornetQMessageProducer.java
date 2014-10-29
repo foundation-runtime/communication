@@ -21,6 +21,7 @@ import com.cisco.oss.foundation.flowcontext.FlowContextFactory;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.lang3.StringUtils;
 import org.hornetq.api.core.HornetQException;
+import org.hornetq.api.core.HornetQObjectClosedException;
 import org.hornetq.api.core.SimpleString;
 import org.hornetq.api.core.client.ClientMessage;
 import org.hornetq.api.core.client.ClientProducer;
@@ -167,7 +168,11 @@ class HornetQMessageProducer extends AbstractMessageProducer {
             clientMessage.getBodyBuffer().writeString(message);
             getProducer().send(clientMessage);
 
-        } catch (Exception e) {
+        } catch (HornetQObjectClosedException e) {
+            LOGGER.warn("can't send message: {}", e, e);
+            producer.set(null);
+            HornetQMessagingFactory.sessionThreadLocal.set(null);
+        }catch (Exception e) {
             LOGGER.error("can't send message: {}", e, e);
             throw new QueueException(e);
         }
