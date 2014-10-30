@@ -24,14 +24,23 @@ import org.hornetq.api.core.client.ClientSession;
 import org.hornetq.api.core.client.HornetQClient;
 import org.hornetq.api.core.client.ServerLocator;
 import org.hornetq.api.core.client.SessionFailureListener;
+import org.hornetq.api.core.management.ObjectNameBuilder;
+import org.hornetq.api.jms.management.JMSQueueControl;
+import org.hornetq.api.jms.management.JMSServerControl;
 import org.hornetq.core.remoting.impl.netty.NettyConnectorFactory;
 import org.hornetq.utils.VersionLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.management.MBeanServerConnection;
+import javax.management.MBeanServerInvocationHandler;
+import javax.management.ObjectName;
+import javax.management.remote.JMXConnector;
+import javax.management.remote.JMXConnectorFactory;
+import javax.management.remote.JMXServiceURL;
+import java.text.MessageFormat;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.*;
 
 /**
  * This is the main API tp be used to instantiate new consumers and producers.
@@ -49,6 +58,7 @@ public class HornetQMessagingFactory {
     private static Map<String, MessageProducer> producers = new ConcurrentHashMap<String, MessageProducer>();
     private static TransportConfiguration[] transportConfigurationsArray = null;
     public static CountDownLatch INIT_READY = new CountDownLatch(1);
+
 
     static {
         init();
@@ -142,12 +152,16 @@ public class HornetQMessagingFactory {
     private static void init() {
         try {
 //            nettyFactory = HornetQClient.createServerLocatorWithoutHA(new TransportConfiguration(NettyConnectorFactory.class.getName())).createSessionFactory();
-            Map<String, Map<String, String>> serverConnections = ConfigUtil.parseComplexArrayStructure("service.queue.connections");
+            final Map<String, Map<String, String>> serverConnections = ConfigUtil.parseComplexArrayStructure("service.queue.connections");
             if (serverConnections != null && !serverConnections.isEmpty()) {
-                ArrayList<String> serverConnectionKeys = Lists.newArrayList(serverConnections.keySet());
+                final ArrayList<String> serverConnectionKeys = Lists.newArrayList(serverConnections.keySet());
                 Collections.sort(serverConnectionKeys);
                 transportConfigurationsArray = new TransportConfiguration[serverConnectionKeys.size()];
                 List<TransportConfiguration> transportConfigurations = new ArrayList<TransportConfiguration>();
+
+
+
+
 
                 for (String serverConnectionKey : serverConnectionKeys) {
 
@@ -165,21 +179,53 @@ public class HornetQMessagingFactory {
 
                 LOGGER.info("HornetQ version: {}", VersionLoader.getVersion().getVersionName());
 
+                Runnable getVersionFromServer = new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            if(serverConnectionKeys != null && !serverConnectionKeys.isEmpty()){
+
+                                String host = serverConnections.get(serverConnectionKeys.get(0)).get("host");
+                                String port = serverConnections.get(serverConnectionKeys.get(0)).get("jmxPort");
+
+                                // Step 9. Retrieve the ObjectName of the queue. This is used to identify the server resources to manage
+                                ObjectName on = ObjectNameBuilder.DEFAULT.getHornetQServerObjectName();
+
+                                // Step 10. Create JMX Connector to connect to the server's MBeanServer
+                                String url = MessageFormat.format("service:jmx:rmi://{0}/jndi/rmi://{0}:{1}/jmxrmi", host, port);
+                                LOGGER.debug("HornetQ Server jmx url: {}", url);
+                                JMXConnector connector = JMXConnectorFactory.connect(new JMXServiceURL(url), new HashMap());
+
+                                // Step 11. Retrieve the MBeanServerConnection
+                                MBeanServerConnection mbsc = connector.getMBeanServerConnection();
+
+                                // Step 12. Create a JMSQueueControl proxy to manage the queue on the server
+                                JMSServerControl serverControl = MBeanServerInvocationHandler.newProxyInstance(mbsc, on, JMSServerControl.class, false);
+
+                                String serverControlVersion = serverControl.getVersion();
+                                LOGGER.info("HornetQ Server version: {}", serverControlVersion);
+
+                            }
+                        } catch (Exception e) {
+                            LOGGER.info("can't log server version. error is: {}", e.toString());
+                        }
+                    }
+                };
+
+
+
+                try {
+
+//                    runWithTimeout(getVersionFromServer, 2, TimeUnit.SECONDS);
+                    new Thread(getVersionFromServer).start();
+
+                } catch (Exception e) {
+                    LOGGER.info("can't log server version. error is: {}", e.toString());
+                }
+
+
                 transportConfigurations.toArray(transportConfigurationsArray);
                 connect();
-
-
-//
-//                serverLocator = HornetQClient.createServerLocatorWithHA(transportConfigurationsArray);
-//                serverLocator.setRetryInterval(1000);
-//                serverLocator.setRetryIntervalMultiplier(1);
-//                serverLocator.setReconnectAttempts(5);
-//                serverLocator.setInitialConnectAttempts(5);
-//                try {
-//                    serverLocator.setAckBatchSize(1);
-//                } catch (Exception e) {
-//                    LOGGER.debug("error trying to set ack batch size: {}", e);
-//                }
 
             } else {
                 throw new IllegalArgumentException("'service.queue.connections' must contain at least on host/port pair.");
@@ -190,6 +236,36 @@ public class HornetQMessagingFactory {
             throw new QueueException(e);
         }
 
+    }
+
+    public static void runWithTimeout(final Runnable runnable, long timeout, TimeUnit timeUnit) throws Exception {
+        runWithTimeout(new Callable<Object>() {
+            @Override
+            public Object call() throws Exception {
+                runnable.run();
+                return null;
+            }
+        }, timeout, timeUnit);
+    }
+
+    public static <T> T runWithTimeout(Callable<T> callable, long timeout, TimeUnit timeUnit) throws Exception {
+        final ExecutorService executor = Executors.newSingleThreadExecutor();
+        final Future<T> future = executor.submit(callable);
+        try {
+            return future.get(timeout, timeUnit);
+        } catch (ExecutionException e) {
+            //unwrap the root cause
+            Throwable t = e.getCause();
+            if (t instanceof Error) {
+                throw (Error) t;
+            } else if (t instanceof Exception) {
+                throw (Exception) e;
+            } else {
+                throw new IllegalStateException(t);
+            }
+        }finally {
+            executor.shutdown();
+        }
     }
 
     private static void connect() {
@@ -206,7 +282,6 @@ public class HornetQMessagingFactory {
         serverLocator.setRetryIntervalMultiplier(2);
         serverLocator.setReconnectAttempts(1);
         serverLocator.setInitialConnectAttempts(1);
-//        serverLocator.setConnectionLoadBalancingPolicyClassName(FirstElementConnectionLoadBalancingPolicy.class.getName());
         try {
             serverLocator.setAckBatchSize(1);
         } catch (Exception e) {
