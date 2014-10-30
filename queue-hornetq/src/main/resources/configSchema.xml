@@ -104,7 +104,7 @@
         <Parameter name="service.queue.attachRetryDelay" type="INTEGER" unit="MILLISECONDS" description="Delay between attempts to attach to the queue server(s)"
                    advanced="true">
             <DefaultValue>
-                <PrimitiveValue value="60000"/>
+                <PrimitiveValue value="10000"/>
             </DefaultValue>
         </Parameter>
 

@@ -18,8 +18,8 @@ package com.cisco.oss.foundation.message;
 
 import com.cisco.oss.foundation.configuration.ConfigurationFactory;
 import org.hornetq.api.core.HornetQException;
-import org.hornetq.api.core.client.ClientConsumer;
-import org.hornetq.api.core.client.SessionFailureListener;
+import org.hornetq.api.core.client.*;
+import org.hornetq.api.core.client.MessageHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,6 +30,7 @@ public class FoundationQueueConsumerFailureListener implements SessionFailureLis
 
     private ClientConsumer clientConsumer = null;
     private String queueName = null;
+    private org.hornetq.api.core.client.MessageHandler messageHandler = null;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FoundationQueueConsumerFailureListener.class);
 
@@ -38,6 +39,9 @@ public class FoundationQueueConsumerFailureListener implements SessionFailureLis
         this.queueName = queueName;
     }
 
+    public void setMessageHandler(MessageHandler messageHandler) {
+        this.messageHandler = messageHandler;
+    }
 
     @Override
     public void connectionFailed(HornetQException exception, boolean failedOver) {
@@ -49,14 +53,23 @@ public class FoundationQueueConsumerFailureListener implements SessionFailureLis
             while (!done) {
 
                 LOGGER.trace("attempting to reconnect to HornetQ");
+                HornetQMessagingFactory.sessionThreadLocal.set(null);
                 try {
-                    ClientConsumer consumer = HornetQMessagingFactory.getSession().createConsumer(queueName);
-                    consumer.setMessageHandler(clientConsumer.getMessageHandler());
+                    FoundationQueueConsumerFailureListener foundationQueueConsumerFailureListener = new FoundationQueueConsumerFailureListener();;
+                    foundationQueueConsumerFailureListener.setReconnectProperties(queueName,clientConsumer);
+                    MessageHandler handler = null;
+                    if (this.messageHandler == null) {
+                        handler = clientConsumer.getMessageHandler();
+                        this.messageHandler = handler;
+                    }
+                    foundationQueueConsumerFailureListener.setMessageHandler(messageHandler);
+                    ClientConsumer consumer = HornetQMessagingFactory.getSession(foundationQueueConsumerFailureListener).createConsumer(queueName);
+                    consumer.setMessageHandler(messageHandler);
                     done = true;
                 } catch (Exception e) {
                     LOGGER.trace("failed to reconnect. retrying...", e);
                     try {
-                        Thread.sleep(ConfigurationFactory.getConfiguration().getInt("service.queue.attachRetryDelay", 60000));
+                        Thread.sleep(ConfigurationFactory.getConfiguration().getInt("service.queue.attachRetryDelay", 10000));
                     } catch (InterruptedException e1) {
                         LOGGER.trace("thread interrupted!!!", e1);
                     }

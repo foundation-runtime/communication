@@ -25,7 +25,6 @@ import org.hornetq.api.core.client.HornetQClient;
 import org.hornetq.api.core.client.ServerLocator;
 import org.hornetq.api.core.client.SessionFailureListener;
 import org.hornetq.api.core.management.ObjectNameBuilder;
-import org.hornetq.api.jms.management.JMSQueueControl;
 import org.hornetq.api.jms.management.JMSServerControl;
 import org.hornetq.core.remoting.impl.netty.NettyConnectorFactory;
 import org.hornetq.utils.VersionLoader;
@@ -52,12 +51,13 @@ public class HornetQMessagingFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(HornetQMessagingFactory.class);
     private static final Set<ClientSession> sessions = new HashSet<ClientSession>();
     public static ThreadLocal<ClientSession> sessionThreadLocal = new ThreadLocal<ClientSession>();
+    public static CountDownLatch INIT_READY = new CountDownLatch(1);
+
     private static ServerLocator serverLocator = null;
     private static ClientSession clientSession = null;
     private static Map<String, MessageConsumer> consumers = new ConcurrentHashMap<String, MessageConsumer>();
     private static Map<String, MessageProducer> producers = new ConcurrentHashMap<String, MessageProducer>();
     private static TransportConfiguration[] transportConfigurationsArray = null;
-    public static CountDownLatch INIT_READY = new CountDownLatch(1);
 
 
     static {
@@ -85,7 +85,6 @@ public class HornetQMessagingFactory {
             }
         });
     }
-
 
     public static ClientSession getSession(SessionFailureListener sessionFailureListener) {
 
@@ -160,9 +159,6 @@ public class HornetQMessagingFactory {
                 List<TransportConfiguration> transportConfigurations = new ArrayList<TransportConfiguration>();
 
 
-
-
-
                 for (String serverConnectionKey : serverConnectionKeys) {
 
                     Map<String, String> serverConnection = serverConnections.get(serverConnectionKey);
@@ -183,7 +179,7 @@ public class HornetQMessagingFactory {
                     @Override
                     public void run() {
                         try {
-                            if(serverConnectionKeys != null && !serverConnectionKeys.isEmpty()){
+                            if (serverConnectionKeys != null && !serverConnectionKeys.isEmpty()) {
 
                                 String host = serverConnections.get(serverConnectionKeys.get(0)).get("host");
                                 String port = serverConnections.get(serverConnectionKeys.get(0)).get("jmxPort");
@@ -211,7 +207,6 @@ public class HornetQMessagingFactory {
                         }
                     }
                 };
-
 
 
                 try {
@@ -263,7 +258,7 @@ public class HornetQMessagingFactory {
             } else {
                 throw new IllegalStateException(t);
             }
-        }finally {
+        } finally {
             executor.shutdown();
         }
     }
@@ -276,28 +271,38 @@ public class HornetQMessagingFactory {
 //                LOGGER.trace("problem closing jms connection: {}", e);
 //            }
 //        }
+        try {
+            connectInternal();
+            INIT_READY.countDown();
+        } catch (Exception e) {
+            LOGGER.warn("can't connect to hornetQ: {}", e);
+            infiniteRetry();
+        }
 
+    }
+
+    private static void connectInternal() throws Exception {
         serverLocator = HornetQClient.createServerLocatorWithHA(transportConfigurationsArray);
         serverLocator.setRetryInterval(100);
         serverLocator.setRetryIntervalMultiplier(2);
         serverLocator.setReconnectAttempts(1);
         serverLocator.setInitialConnectAttempts(1);
+        serverLocator.setFailoverOnInitialConnection(true);
+        serverLocator.setClientFailureCheckPeriod(5000);
+        serverLocator.setConnectionTTL(10000);
+        serverLocator.setCallTimeout(10000);
+
+
         try {
             serverLocator.setAckBatchSize(1);
         } catch (Exception e) {
             LOGGER.debug("error trying to set ack batch size: {}", e);
         }
 
-        try {
 
-            clientSession = serverLocator.createSessionFactory().createSession(true, true);
-            clientSession.start();
-            clientSession.addFailureListener(new FoundationQueueFailureListener(clientSession));
-            INIT_READY.countDown();
-        } catch (Exception e) {
-            LOGGER.warn("can't connect to hornetQ: {}", e);
-            infiniteRetry();
-        }
+        clientSession = serverLocator.createSessionFactory().createSession(true, true);
+        clientSession.start();
+        clientSession.addFailureListener(new FoundationQueueFailureListener(clientSession));
 
     }
 
@@ -314,12 +319,14 @@ public class HornetQMessagingFactory {
 
                     LOGGER.trace("attempting to reconnect to HornetQ");
                     try {
-                        connect();
+                        connectInternal();
+                        LOGGER.trace("reconnect to HornetQ is successful");
+                        INIT_READY.countDown();
                         done = true;
                     } catch (Exception e) {
                         LOGGER.trace("failed to reconnect. retrying...", e);
                         try {
-                            Thread.sleep(ConfigurationFactory.getConfiguration().getInt("service.queue.attachRetryDelay", 60000));
+                            Thread.sleep(ConfigurationFactory.getConfiguration().getInt("service.queue.attachRetryDelay", 10000));
                         } catch (InterruptedException e1) {
                             LOGGER.trace("thread interrupted!!!", e1);
                         }

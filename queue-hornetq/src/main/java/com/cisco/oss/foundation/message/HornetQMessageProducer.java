@@ -112,13 +112,13 @@ class HornetQMessageProducer extends AbstractMessageProducer {
         String realQueueName = /*"foundation." + */queueName;
 
 
-        boolean queueExists = false;
-
-        try {
-            queueExists = HornetQMessagingFactory.getSession().queueQuery(new SimpleString(realQueueName)).isExists();
-        } catch (HornetQException e) {
-            queueExists = false;
-        }
+//        boolean queueExists = false;
+//
+//        try {
+//            queueExists = HornetQMessagingFactory.getSession().queueQuery(new SimpleString(realQueueName)).isExists();
+//        } catch (HornetQException e) {
+//            queueExists = false;
+//        }
 
 //        if (!queueExists) {
 //            boolean isDurable = subset.getBoolean("queue.isDurable", true);
@@ -163,19 +163,30 @@ class HornetQMessageProducer extends AbstractMessageProducer {
     public void sendMessage(String message, Map<String, Object> messageHeaders) {
         try {
 
-            ClientMessage clientMessage = getClientMessage(messageHeaders);
-            clientMessage.setExpiration(System.currentTimeMillis() + expiration);
-            clientMessage.getBodyBuffer().writeString(message);
-            getProducer().send(clientMessage);
+            sendMessageInternal(message, messageHeaders);
 
         } catch (HornetQObjectClosedException e) {
-            LOGGER.warn("can't send message: {}", e, e);
+            LOGGER.warn("can't send message. will try one reconnect. error is: {}", e);
             producer.set(null);
             HornetQMessagingFactory.sessionThreadLocal.set(null);
+            //retry once it came back till now
+            try {
+                sendMessageInternal(message, messageHeaders);
+            } catch (Exception e1) {
+                LOGGER.error("can't send message: {}", e1, e1);
+                throw new QueueException(e1);
+            }
         }catch (Exception e) {
             LOGGER.error("can't send message: {}", e, e);
             throw new QueueException(e);
         }
+    }
+
+    private void sendMessageInternal(String message, Map<String, Object> messageHeaders) throws HornetQException {
+        ClientMessage clientMessage = getClientMessage(messageHeaders);
+        clientMessage.setExpiration(System.currentTimeMillis() + expiration);
+        clientMessage.getBodyBuffer().writeString(message);
+        getProducer().send(clientMessage);
     }
 
     private ClientMessage getClientMessage(Map<String, Object> messageHeaders) {
