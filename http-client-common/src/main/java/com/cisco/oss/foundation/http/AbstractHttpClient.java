@@ -125,7 +125,7 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
 
                 request = updateRequestUri(request, serverProxy);
 
-                LOGGER.info("sending request: {}", request.getUri());
+                LOGGER.info("sending request: {}-{}", request.getHttpMethod(),request.getUri());
                 ServerConnectionDetails connectionDetails = new ServerConnectionDetails(apiName, "HTTP:" + request.getHttpMethod(), request.getUri().getHost(), -1, request.getUri().getPort());
                 if (exposeStatisticsToMonitor) {
                     CommunicationInfo.getCommunicationInfo().transactionStarted(connectionDetails, getMonioringApiName(request));
