@@ -273,7 +273,7 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
 
 //        final HttpRequest tempRequest = request;
 
-        LOGGER.info("sending request: {}", request.getUri());
+        LOGGER.info("sending request: {}-{}", request.getHttpMethod(),request.getUri());
 //        final FlowContext fc = FlowContextFactory.getFlowContext();
 //        Request httpRequest = prepareRequest(request).onRequestQueued(new Request.QueuedListener() {
 //            @Override
