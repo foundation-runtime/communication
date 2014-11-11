@@ -15,7 +15,7 @@
   ~  limitations under the License.
   -->
 
-<NamespaceDefinitions xsi:noNamespaceSchemaLocation="http://ch-infra.il.nds.com/cabResources/CCP_XML.xsd"
+<NamespaceDefinitions xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/foundation-runtime/configuration/master/ccp_schema/CCP_XML.xsd"
                       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <NamespaceDefinition>
         <NamespaceIdentifier version="TBD" name="TBD"/>
