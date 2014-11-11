@@ -59,7 +59,7 @@
     <properties>
         <logging-api-version>1.0.2-1</logging-api-version>
         <commons-version>1.0.2-1</commons-version>
-        <configuration-api-version>1.0.2-1</configuration-api-version>
+        <configuration-api-version>1.0.2-3-SNAPSHOT</configuration-api-version>
         <monitoring-jmx-lib-version>1.0.2-1</monitoring-jmx-lib-version>
         <javaVersion>1.6</javaVersion>
     </properties>
