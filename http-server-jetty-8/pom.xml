@@ -19,7 +19,7 @@
     <parent>
 		<groupId>com.cisco.oss.foundation</groupId>
 		<artifactId>foundation-common-base</artifactId>
-		<version>0.0.0-5</version>
+		<version>1.0.0-2</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.cisco.oss.foundation</groupId>
@@ -62,7 +62,7 @@
         <http-server-api-version>1.0.2-1</http-server-api-version>
         <logging-log4j-version>1.0.2-1</logging-log4j-version>
         <http-client-apache-version>1.0.2-2</http-client-apache-version>
-        <configuration-lib-version>1.0.2-1</configuration-lib-version>
+        <configuration-lib-version>1.0.2-4-SNAPSHOT</configuration-lib-version>
         <monitoring-api-version>0.0.0-6</monitoring-api-version>
         <jetty-8-version>8.1.16.v20140903</jetty-8-version>
     </properties>

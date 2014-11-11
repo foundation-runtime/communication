@@ -19,7 +19,7 @@
     <parent>
         <groupId>com.cisco.oss.foundation</groupId>
         <artifactId>foundation-common-base</artifactId>
-        <version>0.0.0-5</version>
+        <version>1.0.0-2</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.cisco.oss.foundation</groupId>
@@ -60,7 +60,7 @@
         <http-client-common-version>1.0.1-2</http-client-common-version>
         <jetty-version>9.2.4.v20141103</jetty-version>
         <logging-log4j-version>1.0.0-1</logging-log4j-version>
-        <configuration-lib-version>0.0.0-7</configuration-lib-version>
+        <configuration-lib-version>1.0.2-4-SNAPSHOT</configuration-lib-version>
     </properties>
     <scm>
         <connection>scm:git:git@github.com:foundation-runtime/communication.git</connection>
