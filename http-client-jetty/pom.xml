@@ -57,9 +57,9 @@
         </developer>
     </developers>
     <properties>
-        <http-client-common-version>1.0.1-2</http-client-common-version>
+        <http-client-common-version>1.0.2-3</http-client-common-version>
         <jetty-version>9.2.4.v20141103</jetty-version>
-        <logging-log4j-version>1.0.0-1</logging-log4j-version>
+        <logging-log4j-version>1.0.2-1</logging-log4j-version>
         <configuration-lib-version>1.0.2-4-SNAPSHOT</configuration-lib-version>
     </properties>
     <scm>
