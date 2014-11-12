@@ -16,8 +16,6 @@
 
 package com.cisco.oss.foundation.loadbalancer;
 
-import com.cisco.oss.foundation.http.HttpRequest;
-
 import java.io.Serializable;
 import java.util.List;
 
@@ -28,7 +26,7 @@ import java.util.List;
  *
  * @author Yair Ogen
  */
-public interface LoadBalancerStrategy<S extends HttpRequest> extends Serializable {
+public interface LoadBalancerStrategy<S extends ClientRequest> extends Serializable {
 	
 	static final ThreadLocal<Throwable> lastKnownErrorThreadLocal = new ThreadLocal<Throwable>();
 

@@ -23,11 +23,11 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.cisco.oss.foundation</groupId>
-    <artifactId>http-client-common</artifactId>
-    <version>1.0.2-4-SNAPSHOT</version>
-    <name>http-client-common</name>
-    <description>This project is the common library for http client in the cisco vss foundation runtime</description>
-    <url>https://github.com/foundation-runtime/communication/http-client-common</url>
+    <artifactId>client-common</artifactId>
+    <version>1.0.1-1-SNAPSHOT</version>
+    <name>client-common</name>
+    <description>This project is the common library for http client in the cisco oss foundation runtime</description>
+    <url>https://github.com/foundation-runtime/communication/client-common</url>
     <packaging>jar</packaging>
     <licenses>
         <license>
@@ -56,12 +56,9 @@
             </roles>
         </developer>
     </developers>
-    <properties>
-        <http-client-api-version>1.0.2-3-SNAPSHOT</http-client-api-version>
-        <configuration-api-version>1.0.2-3</configuration-api-version>
+    <properties>        
+        <configuration-api-version>1.0.2-3-SNAPSHOT</configuration-api-version>
         <logging-log4j-version>1.0.2-1</logging-log4j-version>
-        <monitoring-jmx-lib-version>1.0.2-1</monitoring-jmx-lib-version>
-        <jetty-version>8.1.16.v20140903</jetty-version>
         <javaVersion>1.6</javaVersion>
     </properties>
     <scm>
@@ -139,12 +136,7 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-    <dependencies>
-        <dependency>
-            <groupId>com.cisco.oss.foundation</groupId>
-            <artifactId>http-client-api</artifactId>
-            <version>${http-client-api-version}</version>
-        </dependency>
+    <dependencies>        
         <dependency>
             <groupId>com.cisco.oss.foundation</groupId>
             <artifactId>configuration-api</artifactId>
@@ -154,12 +146,7 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>3.3.1</version>
-        </dependency>
-        <dependency>
-            <groupId>com.twitter</groupId>
-            <artifactId>jsr166e</artifactId>
-            <version>1.0.0</version>
-        </dependency>
+        </dependency>        
         <dependency>
             <groupId>com.cisco.oss.foundation</groupId>
             <artifactId>monitoring-jmx-lib</artifactId>
@@ -170,30 +157,6 @@
             <artifactId>scala-library</artifactId>
             <version>2.11.1</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-server</artifactId>
-            <version>${jetty-version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-servlet</artifactId>
-            <version>${jetty-version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-servlets</artifactId>
-            <version>${jetty-version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.typesafe.akka</groupId>
-            <artifactId>akka-actor_2.11</artifactId>
-            <version>2.3.3</version>
-            <scope>test</scope>
-        </dependency>
+        </dependency>        
     </dependencies>
 </project>

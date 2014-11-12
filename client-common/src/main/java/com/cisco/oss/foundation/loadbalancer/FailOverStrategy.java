@@ -16,7 +16,6 @@
 
 package com.cisco.oss.foundation.loadbalancer;
 
-import com.cisco.oss.foundation.http.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +31,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *
  * @author Yair Ogen
  */
-public class FailOverStrategy<S extends HttpRequest> extends AbstractLoadBalancerStrategy<S> {
+public class FailOverStrategy<S extends ClientRequest> extends AbstractLoadBalancerStrategy<S> {
 
     private static final long serialVersionUID = 6806126762594591923L;
 

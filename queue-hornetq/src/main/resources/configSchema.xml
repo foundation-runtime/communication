@@ -80,25 +80,44 @@
         <Parameter name="service.queue.connections" isArray="true" type="STRUCTURE"
                    description="Connection identifier for queue server(s). For HornetQ this is the connection to HornetQ's jndi service.">
             <StructureDefinition>
-                <StructureMemberDefinition name="host" type="STRING"/>
-                <StructureMemberDefinition name="port" type="INTEGER">
-                    <DefaultValue>
-                        <PrimitiveValue value="5902"/>
-                    </DefaultValue>
+                <StructureMemberDefinition name="host" type="STRING" required="false"/>
+                <StructureMemberDefinition name="port" type="INTEGER" required="false">
+                    <!--<DefaultValue>
+                        <PrimitiveValue value="5900"/>
+                    </DefaultValue>-->
                 </StructureMemberDefinition>
-                <StructureMemberDefinition name="jmxPort" type="INTEGER">
-                    <DefaultValue>
+                <StructureMemberDefinition name="jmxPort" type="INTEGER" required="false">
+                    <!--<DefaultValue>
                         <PrimitiveValue value="3900"/>
-                    </DefaultValue>
+                    </DefaultValue>-->
+                </StructureMemberDefinition>
+                <StructureMemberDefinition name="instances" type="STRUCTURE" required="false">
+                    <StructureDefinition>
+                        <StructureMemberDefinition name="connections" type="STRUCTURE" isArray="true" ignoreName="true">
+                            <StructureDefinition>
+                                <StructureMemberDefinition name="host" type="STRING" required="false"/>
+                                <StructureMemberDefinition name="port" type="INTEGER" required="false">
+                                    <DefaultValue>
+                                        <PrimitiveValue value="5900"/>
+                                    </DefaultValue>
+                                </StructureMemberDefinition>
+                                <StructureMemberDefinition name="jmxPort" type="INTEGER" required="false">
+                                    <DefaultValue>
+                                        <PrimitiveValue value="3900"/>
+                                    </DefaultValue>
+                                </StructureMemberDefinition>
+                            </StructureDefinition>
+                        </StructureMemberDefinition>
+                    </StructureDefinition>
                 </StructureMemberDefinition>
             </StructureDefinition>
-            <DefaultValue>
+            <!--<DefaultValue>
                 <StructureValue index="1">
                     <StructureMemberValue name="host" value="vgc1a"/>
                     <StructureMemberValue name="port" value="5902"/>
                     <StructureMemberValue name="jmxPort" value="3900"/>
                 </StructureValue>
-            </DefaultValue>
+            </DefaultValue>-->
         </Parameter>
 
         <Parameter name="service.queue.attachRetryDelay" type="INTEGER" unit="MILLISECONDS" description="Delay between attempts to attach to the queue server(s)"
