@@ -72,7 +72,7 @@ public class JettyCompleteListener extends BufferingResponseListener {
             }
 
         } else {
-            serverProxy.setCurrentNumberOfRetries(0);
+            serverProxy.setCurrentNumberOfAttempts(0);
             serverProxy.setFailedAttemptTimeStamp(0);
             LOGGER.info("got response: {}", uri);
 
