@@ -33,7 +33,7 @@ public class ProducerMain {
 
         while(true){
 
-            byte[] bytes = new byte[100];
+            final byte[] bytes = new byte[100];
             System.in.read(bytes);
 //            producer.sendMessage("hello: " + new String(bytes));
 
@@ -41,12 +41,17 @@ public class ProducerMain {
 //                sendMessage(producer, bytes,"1");
 //                Thread.sleep(1000);
 //            }
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        sendMessage(producer, bytes,"1");
+                    } catch (Exception e) {
+                        System.err.println(e.toString());
+                    }
+                }
+            }).start();
 
-            try {
-                sendMessage(producer, bytes,"1");
-            } catch (Exception e) {
-                System.err.println(e.toString());
-            }
 
 
 //            sendMessage(producer, bytes,"1");

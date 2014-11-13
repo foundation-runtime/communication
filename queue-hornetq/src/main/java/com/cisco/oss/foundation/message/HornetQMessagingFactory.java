@@ -20,6 +20,7 @@ import com.cisco.oss.foundation.configuration.ConfigUtil;
 import com.cisco.oss.foundation.configuration.ConfigurationFactory;
 import com.google.common.collect.Lists;
 import org.apache.commons.configuration.Configuration;
+import org.apache.commons.lang3.tuple.Pair;
 import org.hornetq.api.core.TransportConfiguration;
 import org.hornetq.api.core.client.ClientSession;
 import org.hornetq.api.core.client.HornetQClient;
@@ -28,7 +29,6 @@ import org.hornetq.api.core.client.SessionFailureListener;
 import org.hornetq.api.core.management.ObjectNameBuilder;
 import org.hornetq.api.jms.management.JMSServerControl;
 import org.hornetq.core.remoting.impl.netty.NettyConnectorFactory;
-import org.hornetq.jms.client.HornetQSession;
 import org.hornetq.utils.VersionLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,11 +52,11 @@ public class HornetQMessagingFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HornetQMessagingFactory.class);
     private static final Set<ClientSession> sessions = new HashSet<ClientSession>();
-    public static ThreadLocal<Collection<ClientSession>> sessionThreadLocal = new ThreadLocal<Collection<ClientSession>>();
+    public static ThreadLocal<List<Pair<ClientSession, SessionFailureListener>>> sessionThreadLocal = new ThreadLocal<List<Pair<ClientSession, SessionFailureListener>>>();
     public static CountDownLatch INIT_READY = new CountDownLatch(1);
 
-    private static Collection<ServerLocator> serverLocators = null;
-    private static Collection<ClientSession> clientSessions = null;
+    private static List<ServerLocator> serverLocators = new CopyOnWriteArrayList<>();
+    private static List<ClientSession> clientSessions = new CopyOnWriteArrayList<>();
     private static Map<String, MessageConsumer> consumers = new ConcurrentHashMap<String, MessageConsumer>();
     private static Map<String, MessageProducer> producers = new ConcurrentHashMap<String, MessageProducer>();
     private static TransportConfiguration[] transportConfigurationsArray = null;
@@ -88,21 +88,23 @@ public class HornetQMessagingFactory {
         });
     }
 
-    public static Collection<ClientSession> getSession(SessionFailureListener sessionFailureListener) {
+    public static List<Pair<ClientSession, SessionFailureListener>> getSession(Class<? extends SessionFailureListener> sessionFailureListener) {
 
 
         if (sessionThreadLocal.get() == null) {
             try {
                 LOGGER.debug("creating a new session");
-                Collection<ClientSession> hornetQSessions = new ArrayList<>();
+                List<Pair<ClientSession, SessionFailureListener>> hornetQSessions = new ArrayList<>();
                 for (ServerLocator serverLocator : serverLocators) {
                     ClientSession hornetQSession = serverLocator.createSessionFactory().createSession(true, true);
+                    SessionFailureListener listener = null;
                     if (sessionFailureListener != null) {
-                        hornetQSession.addFailureListener(sessionFailureListener);
+                        listener = sessionFailureListener.newInstance();
+                        hornetQSession.addFailureListener(listener);
                     }
                     hornetQSession.start();
                     sessions.add(hornetQSession);
-                    hornetQSessions.add(hornetQSession);
+                    hornetQSessions.add(Pair.of(hornetQSession, listener));
                 }
                 sessionThreadLocal.set(hornetQSessions);
 
@@ -122,7 +124,7 @@ public class HornetQMessagingFactory {
      *
      * @return a new hornetq session
      */
-    public static Collection<ClientSession> getSession() {
+    public static List<Pair<ClientSession, SessionFailureListener>> getSession() {
         return getSession(null);
     }
 
@@ -167,7 +169,26 @@ public class HornetQMessagingFactory {
                             final ArrayList<String> activeActiveServerConnectionKeys = Lists.newArrayList(activeActiveServerConnections.keySet());
                             Collections.sort(activeActiveServerConnectionKeys);
                             printHQVersion(activeActiveServerConnections, activeActiveServerConnectionKeys);
-                            int i = 0;
+                            List<TransportConfiguration> transportConfigurations = new ArrayList<TransportConfiguration>();
+                            for (String activeActiveServerConnectionKey : activeActiveServerConnectionKeys) {
+
+                                transportConfigurationsArray = new TransportConfiguration[activeActiveServerConnectionKeys.size()];
+
+
+                                Map<String, String> serverConnection = activeActiveServerConnections.get(activeActiveServerConnectionKey);
+
+                                Map<String, Object> map = new HashMap<String, Object>();
+
+                                map.put("host", serverConnection.get("host"));
+                                map.put("port", serverConnection.get("port"));
+
+
+                                transportConfigurations.add(new TransportConfiguration(NettyConnectorFactory.class.getName(), map));
+
+
+                            }
+                            transportConfigurations.toArray(transportConfigurationsArray);
+                            connect();
 
                         }
                     }
@@ -223,6 +244,9 @@ public class HornetQMessagingFactory {
 
                         String host = serverConnections.get(serverConnectionKeys.get(0)).get("host");
                         String port = serverConnections.get(serverConnectionKeys.get(0)).get("jmxPort");
+                        if(port == null){
+                            port = "3900";
+                        }
 
                         // Step 9. Retrieve the ObjectName of the queue. This is used to identify the server resources to manage
                         ObjectName on = ObjectNameBuilder.DEFAULT.getHornetQServerObjectName();

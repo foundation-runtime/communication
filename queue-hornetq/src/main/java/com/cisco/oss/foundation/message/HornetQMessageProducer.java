@@ -20,19 +20,19 @@ import com.cisco.oss.foundation.configuration.ConfigurationFactory;
 import com.cisco.oss.foundation.flowcontext.FlowContextFactory;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.hornetq.api.core.HornetQException;
 import org.hornetq.api.core.HornetQObjectClosedException;
-import org.hornetq.api.core.SimpleString;
 import org.hornetq.api.core.client.ClientMessage;
 import org.hornetq.api.core.client.ClientProducer;
+import org.hornetq.api.core.client.ClientSession;
+import org.hornetq.api.core.client.SessionFailureListener;
 import org.hornetq.core.message.impl.MessageImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * A HornetQ producer wrapper. NOTE: This class is thread safe although wraps HornetQ ClientProducer
@@ -43,16 +43,22 @@ import java.util.Set;
 class HornetQMessageProducer extends AbstractMessageProducer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HornetQMessageProducer.class);
-    private static final ThreadLocal<ClientProducer> producer = new ThreadLocal<ClientProducer>();
-    private static final Set<ClientProducer> producers = new HashSet<ClientProducer>();
+    private static final ThreadLocal<List<ClientProducer>> producer = new ThreadLocal<List<ClientProducer>>();
+    private static final Set<ClientProducer> producersSet = new HashSet<ClientProducer>();
     private Configuration configuration = ConfigurationFactory.getConfiguration();
     private String groupId = "";
-
     private long expiration = 1800000;
+
+    private AtomicInteger nextIndex = new AtomicInteger(0);
 
     HornetQMessageProducer(String producerName) {
 
         super(producerName);
+    }
+
+    protected int nextNode(int serverProxisListSize) {
+        int index = nextIndex.incrementAndGet() % serverProxisListSize;
+        return index;
     }
 
     @Override
@@ -64,36 +70,17 @@ class HornetQMessageProducer extends AbstractMessageProducer {
         try {
             if (producer.get() == null) {
                 String realQueueName = createQueueIfNeeded();
-                ClientProducer clientProducer = HornetQMessagingFactory.getSession().createProducer(realQueueName);
-                producers.add(clientProducer);
-                producer.set(clientProducer);
+                List<ClientProducer> producers = new ArrayList<>();
+                for (Pair<ClientSession,SessionFailureListener> clientSession : HornetQMessagingFactory.getSession()) {
+                    ClientProducer clientProducer = clientSession.getLeft().createProducer(realQueueName);
+                    producersSet.add(clientProducer);
+                    producers.add(clientProducer);
+                }
+                producer.set(producers);
             }
-//                ClientProducer clientProducer = producer.get();
-//                String realQueueName = createQueueIfNeeded();
-//                if (clientProducer == null) {
-//                    ClientProducer clientProducerTmp = HornetQMessagingFactory.getSession().createProducer(realQueueName);
-//                    producers.add(clientProducerTmp);
-//                    producer.set(clientProducerTmp);
-//                    clientProducer = clientProducerTmp;
-//                }
-                return producer.get();
 
-//                if (clientProducer.isClosed()) {
-//                    producers.remove(clientProducer);
-//                    producer.set(null);
-//                    try {
-//                        ClientProducer clientProducerTmp = HornetQMessagingFactory.getSession().createProducer(realQueueName);
-//                        producers.add(clientProducerTmp);
-//                        producer.set(clientProducerTmp);
-//                        return clientProducerTmp;
-//                    } catch (Exception e) {
-//                        LOGGER.error("can't create queue producer: {}", e, e);
-//                        throw new QueueException(e);
-//                    }
-//                throw new QueueException("producer is closed. probably server was restarted");
-//                }
+            return producer.get().get(nextNode(producer.get().size()));
 
-//                return clientProducer;
         } catch (Exception e) {
             LOGGER.error("can't create queue producer: {}", e, e);
             throw new QueueException(e);
@@ -110,20 +97,6 @@ class HornetQMessageProducer extends AbstractMessageProducer {
         }
 
         String realQueueName = /*"foundation." + */queueName;
-
-
-//        boolean queueExists = false;
-//
-//        try {
-//            queueExists = HornetQMessagingFactory.getSession().queueQuery(new SimpleString(realQueueName)).isExists();
-//        } catch (HornetQException e) {
-//            queueExists = false;
-//        }
-
-//        if (!queueExists) {
-//            boolean isDurable = subset.getBoolean("queue.isDurable", true);
-//
-//        }
 
         //update expiration
         expiration = subset.getLong("queue.expiration", 1800000);
@@ -176,7 +149,7 @@ class HornetQMessageProducer extends AbstractMessageProducer {
                 LOGGER.error("can't send message: {}", e1, e1);
                 throw new QueueException(e1);
             }
-        }catch (Exception e) {
+        } catch (Exception e) {
             LOGGER.error("can't send message: {}", e, e);
             throw new QueueException(e);
         }
@@ -191,7 +164,7 @@ class HornetQMessageProducer extends AbstractMessageProducer {
 
     private ClientMessage getClientMessage(Map<String, Object> messageHeaders) {
 
-        ClientMessage clientMessage = HornetQMessagingFactory.getSession().createMessage(true);
+        ClientMessage clientMessage = HornetQMessagingFactory.getSession().get(0).getLeft().createMessage(true);
 
         clientMessage.putStringProperty(QueueConstants.FLOW_CONTEXT_HEADER, FlowContextFactory.serializeNativeFlowContext());
 
@@ -210,7 +183,7 @@ class HornetQMessageProducer extends AbstractMessageProducer {
     public void close() {
         if (getProducer() != null) {
             try {
-                for (ClientProducer clientProducer : producers) {
+                for (ClientProducer clientProducer : producersSet) {
                     clientProducer.close();
                 }
             } catch (HornetQException e) {
