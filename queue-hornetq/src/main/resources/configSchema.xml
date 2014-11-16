@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<NamespaceDefinitions xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/foundation-runtime/configuration/master/ccp_schema/CCP_XML.xsd"
-                      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<NamespaceDefinitions
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/foundation-runtime/configuration/master/ccp_schema/CCP_XML.xsd"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <NamespaceDefinition>
         <NamespaceIdentifier version="TBD" name="TBD"/>
 
@@ -9,7 +10,8 @@
             <StructureDefinition>
                 <StructureMemberDefinition name="queue.name" type="STRING" advanced="true" required="false"/>
                 <StructureMemberDefinition name="queue.filter" type="STRING" advanced="true" required="false"/>
-                <StructureMemberDefinition name="queue.isMonitoringEnabled" type="BOOLEAN" advanced="true" required="false">
+                <StructureMemberDefinition name="queue.isMonitoringEnabled" type="BOOLEAN" advanced="true"
+                                           required="false">
                     <DefaultValue>
                         <PrimitiveValue value="false"/>
                     </DefaultValue>
@@ -36,13 +38,14 @@
                     <DefaultValue>
                         <PrimitiveValue value="1800000"/>
                     </DefaultValue>
-                        </StructureMemberDefinition>
+                </StructureMemberDefinition>
                 <StructureMemberDefinition name="queue.isDurable" type="BOOLEAN" advanced="true">
                     <DefaultValue>
                         <PrimitiveValue value="true"/>
                     </DefaultValue>
                 </StructureMemberDefinition>
-                <StructureMemberDefinition name="queue.isMonitoringEnabled" type="BOOLEAN" advanced="true" required="false">
+                <StructureMemberDefinition name="queue.isMonitoringEnabled" type="BOOLEAN" advanced="true"
+                                           required="false">
                     <DefaultValue>
                         <PrimitiveValue value="false"/>
                     </DefaultValue>
@@ -91,22 +94,33 @@
                         <PrimitiveValue value="3900"/>
                     </DefaultValue>-->
                 </StructureMemberDefinition>
-                <StructureMemberDefinition name="instances" type="STRUCTURE" required="false">
+                <StructureMemberDefinition name="instance1" type="STRUCTURE" required="false">
                     <StructureDefinition>
-                        <StructureMemberDefinition name="connections" type="STRUCTURE" isArray="true" ignoreName="true">
-                            <StructureDefinition>
-                                <StructureMemberDefinition name="host" type="STRING" required="false"/>
-                                <StructureMemberDefinition name="port" type="INTEGER" required="false">
-                                    <DefaultValue>
-                                        <PrimitiveValue value="5900"/>
-                                    </DefaultValue>
-                                </StructureMemberDefinition>
-                                <StructureMemberDefinition name="jmxPort" type="INTEGER" required="false">
-                                    <DefaultValue>
-                                        <PrimitiveValue value="3900"/>
-                                    </DefaultValue>
-                                </StructureMemberDefinition>
-                            </StructureDefinition>
+                        <StructureMemberDefinition name="host" type="STRING" required="false"/>
+                        <StructureMemberDefinition name="port" type="INTEGER" required="false">
+                            <DefaultValue>
+                                <PrimitiveValue value="5900"/>
+                            </DefaultValue>
+                        </StructureMemberDefinition>
+                        <StructureMemberDefinition name="jmxPort" type="INTEGER" required="false">
+                            <DefaultValue>
+                                <PrimitiveValue value="3900"/>
+                            </DefaultValue>
+                        </StructureMemberDefinition>
+                    </StructureDefinition>
+                </StructureMemberDefinition>
+                <StructureMemberDefinition name="instance2" type="STRUCTURE" required="false">
+                    <StructureDefinition>
+                        <StructureMemberDefinition name="host" type="STRING" required="false"/>
+                        <StructureMemberDefinition name="port" type="INTEGER" required="false">
+                            <DefaultValue>
+                                <PrimitiveValue value="5900"/>
+                            </DefaultValue>
+                        </StructureMemberDefinition>
+                        <StructureMemberDefinition name="jmxPort" type="INTEGER" required="false">
+                            <DefaultValue>
+                                <PrimitiveValue value="3900"/>
+                            </DefaultValue>
                         </StructureMemberDefinition>
                     </StructureDefinition>
                 </StructureMemberDefinition>
@@ -120,7 +134,8 @@
             </DefaultValue>-->
         </Parameter>
 
-        <Parameter name="service.queue.attachRetryDelay" type="INTEGER" unit="MILLISECONDS" description="Delay between attempts to attach to the queue server(s)"
+        <Parameter name="service.queue.attachRetryDelay" type="INTEGER" unit="MILLISECONDS"
+                   description="Delay between attempts to attach to the queue server(s)"
                    advanced="true">
             <DefaultValue>
                 <PrimitiveValue value="10000"/>
