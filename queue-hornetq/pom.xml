@@ -9,7 +9,7 @@
     <groupId>com.cisco.oss.foundation.queue</groupId>
     <artifactId>queue-hornetq</artifactId>
     <name>queue-hornetq</name>
-    <version>1.0.2-2-SNAPSHOT</version>
+    <version>1.0.3-1-SNAPSHOT</version>
     <description>This project is a hornetq implementation for the queue-api library.</description>
     <url>http://maven-doc.nds.com/maven_sites/${project.groupId}/${project.artifactId}/${project.version}</url>
     <issueManagement>
