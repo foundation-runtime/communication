@@ -66,7 +66,7 @@ class HornetQMessageProducer extends AbstractMessageProducer {
         return "CORE";
     }
 
-    private ClientProducer getProducer() {
+    private ClientProducer getProducer(String groupIdentifier) {
         try {
             if (producer.get() == null) {
                 String realQueueName = createQueueIfNeeded();
@@ -79,7 +79,13 @@ class HornetQMessageProducer extends AbstractMessageProducer {
                 producer.set(producers);
             }
 
-            return producer.get().get(nextNode(producer.get().size()));
+            ClientProducer clientProducer = null;
+            if(groupIdentifier != null){
+                clientProducer = producer.get().get(groupIdentifier.hashCode()%producer.get().size());
+            }else{
+                clientProducer = producer.get().get(nextNode(producer.get().size()));
+            }
+            return clientProducer;
 
         } catch (Exception e) {
             LOGGER.error("can't create queue producer: {}", e, e);
@@ -118,12 +124,18 @@ class HornetQMessageProducer extends AbstractMessageProducer {
     @Override
     public void sendMessage(byte[] message, Map<String, Object> messageHeaders) {
 
+        String groupIdentifier = null;
+        if (StringUtils.isNoneBlank(groupId) && messageHeaders.get(groupId) != null) {
+            groupIdentifier = messageHeaders.get(groupId).toString();
+        }
+
+
         try {
 
-            ClientMessage clientMessage = getClientMessage(messageHeaders);
+            ClientMessage clientMessage = getClientMessage(messageHeaders, groupIdentifier);
             clientMessage.setExpiration(System.currentTimeMillis() + expiration);
             clientMessage.getBodyBuffer().writeBytes(message);
-            getProducer().send(clientMessage);
+            getProducer(groupIdentifier).send(clientMessage);
 
         } catch (Exception e) {
             LOGGER.error("can't send message: {}", e, e);
@@ -156,13 +168,18 @@ class HornetQMessageProducer extends AbstractMessageProducer {
     }
 
     private void sendMessageInternal(String message, Map<String, Object> messageHeaders) throws HornetQException {
-        ClientMessage clientMessage = getClientMessage(messageHeaders);
+        String groupIdentifier = null;
+        if (StringUtils.isNoneBlank(groupId) && messageHeaders.get(groupId) != null) {
+            groupIdentifier = messageHeaders.get(groupId).toString();
+        }
+
+        ClientMessage clientMessage = getClientMessage(messageHeaders, groupIdentifier);
         clientMessage.setExpiration(System.currentTimeMillis() + expiration);
         clientMessage.getBodyBuffer().writeString(message);
-        getProducer().send(clientMessage);
+        getProducer(groupIdentifier).send(clientMessage);
     }
 
-    private ClientMessage getClientMessage(Map<String, Object> messageHeaders) {
+    private ClientMessage getClientMessage(Map<String, Object> messageHeaders, String groupIdentifier) {
 
         ClientMessage clientMessage = HornetQMessagingFactory.getSession().get(0).getLeft().createMessage(true);
 
@@ -172,16 +189,12 @@ class HornetQMessageProducer extends AbstractMessageProducer {
             clientMessage.putObjectProperty(headers.getKey(), headers.getValue());
         }
 
-        if (StringUtils.isNoneBlank(groupId) && messageHeaders.get(groupId) != null) {
-            clientMessage.putStringProperty(MessageImpl.HDR_GROUP_ID.toString(), messageHeaders.get(groupId).toString());
-        }
-
         return clientMessage;
     }
 
     @Override
     public void close() {
-        if (getProducer() != null) {
+        if (getProducer(null) != null) {
             try {
                 for (ClientProducer clientProducer : producersSet) {
                     clientProducer.close();
