@@ -27,6 +27,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -38,11 +40,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 class HornetQMessageConsumer implements MessageConsumer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HornetQMessageConsumer.class);
-    private static final Set<ClientConsumer> consumersSet = new HashSet<ClientConsumer>();
-    private static final ThreadLocal<List<ClientConsumer>> consumerThreadLocal = new ThreadLocal<List<ClientConsumer>>();
+    static final List<ClientConsumer> consumers = new CopyOnWriteArrayList<>();
+    static final Map<String,MessageHandler> consumerInfo = new ConcurrentHashMap<>();
+    public static final ThreadLocal<List<ClientConsumer>> consumerThreadLocal = new ThreadLocal<List<ClientConsumer>>();
     private String consumerName = "N/A";
     private Configuration configuration = ConfigurationFactory.getConfiguration();
     private String queueName = "";
+
 
     private AtomicInteger nextIndex = new AtomicInteger(0);
 
@@ -67,7 +71,7 @@ class HornetQMessageConsumer implements MessageConsumer {
                     LOGGER.info("creating new consumerThreadLocal for: {}", consumerName);
                     ClientConsumer clientConsumer = clientSessionSessionFailureListenerPair.getLeft().createConsumer(realQueueName);
                     ((FoundationQueueConsumerFailureListener)clientSessionSessionFailureListenerPair.getRight()).setReconnectProperties(realQueueName, clientConsumer);
-                    consumersSet.add(clientConsumer);
+                    HornetQMessageConsumer.consumers.add(clientConsumer);
                     consumers.add(clientConsumer);
                 }
 
@@ -181,9 +185,11 @@ class HornetQMessageConsumer implements MessageConsumer {
 
         try {
             if (messageHandler instanceof org.hornetq.api.core.client.MessageHandler) {
+                org.hornetq.api.core.client.MessageHandler handler = (org.hornetq.api.core.client.MessageHandler) messageHandler;
+                consumerInfo.put(consumerName,messageHandler);
                 List<ClientConsumer> consumer = getConsumer(true);
                 for (ClientConsumer clientConsumer : consumer) {
-                    clientConsumer.setMessageHandler((org.hornetq.api.core.client.MessageHandler) messageHandler);
+                    clientConsumer.setMessageHandler(handler);
                 }
             } else {
                 throw new IllegalArgumentException("Using HornetQ consumerThreadLocal you must provide a valid HornetQ massage handler");
@@ -199,7 +205,7 @@ class HornetQMessageConsumer implements MessageConsumer {
     public void close() {
         if (consumerThreadLocal != null) {
             try {
-                for (ClientConsumer clientConsumer : consumersSet) {
+                for (ClientConsumer clientConsumer : consumers) {
                     clientConsumer.close();
                 }
             } catch (HornetQException e) {

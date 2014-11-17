@@ -18,15 +18,15 @@ package com.cisco.oss.foundation.message;
 
 import com.cisco.oss.foundation.configuration.ConfigUtil;
 import com.cisco.oss.foundation.configuration.ConfigurationFactory;
+import com.cisco.oss.foundation.configuration.FoundationConfigurationListener;
+import com.cisco.oss.foundation.configuration.FoundationConfigurationListenerRegistry;
 import com.google.common.collect.Lists;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.hornetq.api.core.HornetQException;
 import org.hornetq.api.core.TransportConfiguration;
-import org.hornetq.api.core.client.ClientSession;
-import org.hornetq.api.core.client.HornetQClient;
-import org.hornetq.api.core.client.ServerLocator;
-import org.hornetq.api.core.client.SessionFailureListener;
+import org.hornetq.api.core.client.*;
 import org.hornetq.api.core.management.ObjectNameBuilder;
 import org.hornetq.api.jms.management.JMSServerControl;
 import org.hornetq.core.remoting.impl.netty.NettyConnectorFactory;
@@ -52,7 +52,7 @@ import java.util.concurrent.*;
 public class HornetQMessagingFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HornetQMessagingFactory.class);
-    private static final Set<ClientSession> sessions = new HashSet<ClientSession>();
+    private static final List<ClientSession> sessions = new CopyOnWriteArrayList<>();
     public static ThreadLocal<List<Pair<ClientSession, SessionFailureListener>>> sessionThreadLocal = new ThreadLocal<List<Pair<ClientSession, SessionFailureListener>>>();
     public static CountDownLatch INIT_READY = new CountDownLatch(1);
 
@@ -64,7 +64,18 @@ public class HornetQMessagingFactory {
 
 
     static {
+
+        FoundationConfigurationListenerRegistry.addFoundationConfigurationListener(new FoundationConfigurationListener() {
+            @Override
+            public void configurationChanged() {
+                HornetQMessageConsumer.consumerThreadLocal.remove();
+                sessionThreadLocal.remove();
+                init();
+            }
+        });
+
         init();
+
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
             public void run() {
@@ -79,6 +90,10 @@ public class HornetQMessagingFactory {
                             producer.getValue().close();
                         }
                         for (ClientSession session : sessions) {
+                            session.close();
+                        }
+
+                        for (ClientSession session : clientSessions) {
                             session.close();
                         }
                     }
@@ -154,12 +169,14 @@ public class HornetQMessagingFactory {
     private static void init() {
         try {
 
+            cleanup();
 
 //            nettyFactory = HornetQClient.createServerLocatorWithoutHA(new TransportConfiguration(NettyConnectorFactory.class.getName())).createSessionFactory();
             Configuration configuration = ConfigurationFactory.getConfiguration();
             Configuration subset = configuration.subset("service.queue.connections");
 
             final Map<String, Map<String, String>> serverConnections = ConfigUtil.parseComplexArrayStructure("service.queue.connections");
+            boolean isVersionPrinted = false;
             if (serverConnections != null && !serverConnections.isEmpty()) {
                 if (isActiveActiveMode(subset)) {
                     final ArrayList<String> serverConnectionKeys = Lists.newArrayList(serverConnections.keySet());
@@ -167,6 +184,7 @@ public class HornetQMessagingFactory {
                     for (String serverConnectionKey : serverConnectionKeys) {
                         String host1Param = "service.queue.connections." + serverConnectionKey + ".instance1.host";
                         String port1Param = "service.queue.connections." + serverConnectionKey + ".instance1.port";
+                        String jmxPort1Param = "service.queue.connections." + serverConnectionKey + ".instance1.jmxPort";
                         String host2Param = "service.queue.connections." + serverConnectionKey + ".instance2.host";
                         String port2Param = "service.queue.connections." + serverConnectionKey + ".instance2.port";
                         String host1 = configuration.getString(host1Param, null);
@@ -179,7 +197,9 @@ public class HornetQMessagingFactory {
                         }
 
 
-                        printHQVersion(host1, port1);
+                        if (!isVersionPrinted) {
+                            printHQVersion(host1, configuration.getString(jmxPort1Param, "3900"));
+                        }
                         transportConfigurationsArray = new TransportConfiguration[2];
                         List<TransportConfiguration> transportConfigurations = new ArrayList<TransportConfiguration>();
 
@@ -233,11 +253,72 @@ public class HornetQMessagingFactory {
                 throw new IllegalArgumentException("'service.queue.connections' must contain at least on host/port pair.");
             }
 
+            setupConsumers();
+
         } catch (Exception e) {
             LOGGER.error("can't create hornetq service locator: {}", e, e);
             throw new QueueException(e);
         }
 
+    }
+
+    private static void setupConsumers() {
+        for (Map.Entry<String, MessageHandler> consumers : HornetQMessageConsumer.consumerInfo.entrySet()) {
+            String consumerName = consumers.getKey();
+            MessageHandler messageHandler = consumers.getValue();
+            MessageConsumer consumer = HornetQMessagingFactory.createConsumer(consumerName);
+            consumer.registerMessageHandler(messageHandler);
+        }
+    }
+
+    private static void cleanup() {
+        if(serverLocators != null){
+            for (ServerLocator serverLocator : serverLocators) {
+                try {
+                    serverLocator.close();
+                } catch (Exception e) {
+                    LOGGER.debug("can't close server locator: " + e.toString());
+                }
+            }
+            serverLocators.clear();
+        }
+
+        if (sessions != null){
+            for (ClientSession session : sessions) {
+                try {
+                    session.close();
+                } catch (HornetQException e) {
+                    LOGGER.debug("can't close session: " + e.toString());
+                }
+            }
+            sessions.clear();
+        }
+
+        if (clientSessions != null){
+            for (ClientSession session : clientSessions) {
+                try {
+                    session.close();
+                } catch (HornetQException e) {
+                    LOGGER.debug("can't close session: " + e.toString());
+                }
+            }
+            clientSessions.clear();
+        }
+
+        if(HornetQMessageConsumer.consumers != null && !HornetQMessageConsumer.consumers.isEmpty()){
+            for (ClientConsumer consumer : HornetQMessageConsumer.consumers) {
+                try {
+                    consumer.close();
+                } catch (HornetQException e) {
+                    LOGGER.debug("can't close consumer: " + e.toString());
+                }
+            }
+        }
+
+        consumers.clear();
+        producers.clear();
+
+//        HornetQMessageConsumer.consumerInfo.clear();
     }
 
     private static void printHQVersion(final String host, final String port) {
