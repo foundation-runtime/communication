@@ -49,7 +49,7 @@ public class TraceLogger implements Closeable, AsyncListener {
     }
 
     public void log(String format, Object... args) {
-        LOGGER.debug(format, args);
+        LOGGER.trace(format, args);
     }
 
     public void log(Throwable t) {
@@ -288,7 +288,7 @@ public class TraceLogger implements Closeable, AsyncListener {
             } else {
                 processBuf(true);
                 LOGGER.trace("Response Content: " + body.toString());
-                LOGGER.debug("[{}] Closed :: Seen {} characters", mode, length);
+                LOGGER.trace("[{}] Closed :: Seen {} characters", mode, length);
             }
             closed = true;
         }
@@ -325,7 +325,7 @@ public class TraceLogger implements Closeable, AsyncListener {
                 buf.flip();
                 String msg = line.toString();
                 body.append(msg);
-                LOGGER.debug(msg);
+//                LOGGER.debug(msg);
             }
         }
     }

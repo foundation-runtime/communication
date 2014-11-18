@@ -36,11 +36,18 @@ public class TraceServletReader extends BufferedReader {
             tracer.logRequestContentClose();
             super.close();
             tracer.log("Content: {}", builder.toString());
-            tracer.log("Closed: %s", delegate);
+            tracer.log("Closed: {}", delegate);
         } catch (IOException e) {
             tracer.log(e);
             throw e;
         }
+    }
+
+    @Override
+    public int read(char[] cbuf, int off, int len) throws IOException {
+        int read = super.read(cbuf, off, len);
+        builder.append(cbuf);
+        return read;
     }
 
     @Override
