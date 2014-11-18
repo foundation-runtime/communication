@@ -58,13 +58,14 @@
         </developer>
     </developers>
     <properties>
-        <http-client-apache-version>1.0.2-3</http-client-apache-version>
+        <http-client-apache-version>1.0.2-5-SNAPSHOT</http-client-apache-version>
         <logging-log4j-version>1.0.2-1</logging-log4j-version>
         <logging-api-version>1.0.2-1</logging-api-version>
         <jetty-version>9.2.4.v20141103</jetty-version>
-        <http-server-api-version>1.0.2-2</http-server-api-version>
-        <configuration-lib-version>1.0.2-4-SNAPSHOT</configuration-lib-version>
-        <monitoring-api-version>1.0.2-1</monitoring-api-version>
+        <http-server-api-version>1.0.2-3-SNAPSHOT</http-server-api-version>
+        <configuration-lib-version>1.0.2-4</configuration-lib-version>
+        <monitoring-api-version>1.0.2-2-SNAPSHOT</monitoring-api-version>
+        <monitoring-jmx-lib-version>1.0.2-2-SNAPSHOT</monitoring-jmx-lib-version>
     </properties>
     <scm>
         <connection>scm:git:git@github.com:foundation-runtime/communication.git</connection>
@@ -239,6 +240,11 @@
             <groupId>org.joda</groupId>
             <artifactId>joda-convert</artifactId>
             <version>1.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.cisco.oss.foundation</groupId>
+            <artifactId>monitoring-jmx-lib</artifactId>
+            <version>${monitoring-jmx-lib-version}</version>
         </dependency>
     </dependencies>
 </project>
