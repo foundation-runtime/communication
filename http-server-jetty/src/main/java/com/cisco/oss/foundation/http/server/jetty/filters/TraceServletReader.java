@@ -35,8 +35,8 @@ public class TraceServletReader extends BufferedReader {
         try {
             tracer.logRequestContentClose();
             super.close();
-            tracer.log("Content: {}", builder.toString());
-            tracer.log("Closed: {}", delegate);
+            tracer.log("Request Content: {}", builder.toString());
+//            tracer.log("Closed: {}", delegate);
         } catch (IOException e) {
             tracer.log(e);
             throw e;
