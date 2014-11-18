@@ -57,7 +57,7 @@
         </developer>
     </developers>
     <properties>        
-        <configuration-api-version>1.0.2-3-SNAPSHOT</configuration-api-version>
+        <configuration-api-version>1.0.2-3</configuration-api-version>
         <logging-log4j-version>1.0.2-1</logging-log4j-version>
         <monitoring-api-version>1.0.2-2-SNAPSHOT</monitoring-api-version>
         <javaVersion>1.6</javaVersion>
