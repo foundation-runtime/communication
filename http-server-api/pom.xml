@@ -60,8 +60,8 @@
         <logging-api-version>1.0.2-1</logging-api-version>
         <commons-version>1.0.2-1</commons-version>
         <configuration-api-version>1.0.2-3</configuration-api-version>
-        <monitoring-api-version>1.0.2-2-SNAPSHOT</monitoring-api-version>
-        <monitoring-jmx-lib-version>1.0.2-2-SNAPSHOT</monitoring-jmx-lib-version>
+        <monitoring-api-version>1.0.2-2</monitoring-api-version>
+        <monitoring-jmx-lib-version>1.0.2-2</monitoring-jmx-lib-version>
         <javaVersion>1.6</javaVersion>
     </properties>
     <scm>
