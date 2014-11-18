@@ -19,7 +19,7 @@ package com.cisco.oss.foundation.http.server;
 import com.cisco.oss.foundation.configuration.ConfigUtil;
 import com.cisco.oss.foundation.configuration.ConfigurationFactory;
 import com.cisco.oss.foundation.monitoring.CommunicationInfo;
-import com.cisco.oss.foundation.monitoring.RMIMonitoringAgent;
+import com.cisco.oss.foundation.monitoring.MonitoringAgentFactory;
 import com.cisco.oss.foundation.monitoring.services.ServiceDetails;
 import com.cisco.oss.foundation.string.utils.BoyerMoore;
 import org.apache.commons.lang3.tuple.Pair;
@@ -96,7 +96,7 @@ public class MonitoringFilter extends AbstractInfraHttpFilter {
             methodName = updateMethodName(httpServletRequest, methodName);
             LOGGER.trace("transaction method name is: {}", methodName);
 
-            RMIMonitoringAgent.getInstance().register();
+            MonitoringAgentFactory.getInstance().register();
 
 
             reqServiceDetails = serviceDetails;

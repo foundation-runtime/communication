@@ -60,7 +60,8 @@
         <logging-api-version>1.0.2-1</logging-api-version>
         <commons-version>1.0.2-1</commons-version>
         <configuration-api-version>1.0.2-3-SNAPSHOT</configuration-api-version>
-        <monitoring-jmx-lib-version>1.0.2-1</monitoring-jmx-lib-version>
+        <monitoring-api-version>1.0.2-2-SNAPSHOT</monitoring-api-version>
+        <monitoring-jmx-lib-version>1.0.2-2-SNAPSHOT</monitoring-jmx-lib-version>
         <javaVersion>1.6</javaVersion>
     </properties>
     <scm>
@@ -123,8 +124,8 @@
         </dependency>
         <dependency>
             <groupId>com.cisco.oss.foundation</groupId>
-            <artifactId>monitoring-jmx-lib</artifactId>
-            <version>${monitoring-jmx-lib-version}</version>
+            <artifactId>monitoring-api</artifactId>
+            <version>${monitoring-api-version}</version>
         </dependency>
     </dependencies>
 </project>

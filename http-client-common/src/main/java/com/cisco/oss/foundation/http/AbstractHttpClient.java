@@ -22,6 +22,7 @@ import com.cisco.oss.foundation.configuration.FoundationConfigurationListenerReg
 import com.cisco.oss.foundation.configuration.ConfigurationFactory;
 import com.cisco.oss.foundation.loadbalancer.*;
 import com.cisco.oss.foundation.monitoring.CommunicationInfo;
+import com.cisco.oss.foundation.monitoring.MonitoringAgentFactory;
 import com.cisco.oss.foundation.monitoring.RMIMonitoringAgent;
 import com.cisco.oss.foundation.monitoring.serverconnection.ServerConnectionDetails;
 import com.cisco.oss.foundation.string.utils.BoyerMoore;
@@ -61,7 +62,7 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
         this(apiName, LoadBalancerStrategy.STRATEGY_TYPE.ROUND_ROBIN, configuration, enableLoadBalancing);
         exposeStatisticsToMonitor = getExposeStatisticsToMonitor();
         if(exposeStatisticsToMonitor){
-            RMIMonitoringAgent.getInstance().register();
+            MonitoringAgentFactory.getInstance().register();
         }
     }
 
@@ -75,7 +76,7 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
         }
         exposeStatisticsToMonitor = getExposeStatisticsToMonitor();
         if(exposeStatisticsToMonitor){
-            RMIMonitoringAgent.getInstance().register(this.configuration);
+            MonitoringAgentFactory.getInstance().register(this.configuration);
         }
         loadBalancerStrategy = fromHighAvailabilityStrategyType(strategyType);
         createServerListFromConfig();

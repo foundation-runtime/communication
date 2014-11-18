@@ -62,6 +62,7 @@
         <logging-log4j-version>1.0.2-1</logging-log4j-version>
         <jetty-version>8.1.16.v20140903</jetty-version>
         <configuration-api-version>1.0.2-3-SNAPSHOT</configuration-api-version>
+        <monitoring-jmx-lib-version>1.0.2-2-SNAPSHOT</monitoring-jmx-lib-version>
         <javaVersion>1.6</javaVersion>
     </properties>
     <scm>
@@ -187,6 +188,11 @@
             <artifactId>jetty-servlets</artifactId>
             <version>${jetty-version}</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.cisco.oss.foundation</groupId>
+            <artifactId>monitoring-jmx-lib</artifactId>
+            <version>${monitoring-jmx-lib-version}</version>
         </dependency>
     </dependencies>    
 </project>
