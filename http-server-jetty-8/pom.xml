@@ -25,7 +25,7 @@
     <groupId>com.cisco.oss.foundation</groupId>
     <artifactId>http-server-jetty-8</artifactId>
     <name>http-server-jetty-8</name>
-    <version>1.0.3-1</version>
+    <version>1.0.3-2-SNAPSHOT</version>
     <packaging>jar</packaging>
     <description>This project is the http jetty server (version 8.x) implementation library in the cisco vss foundation runtime</description>
     <url>https://github.com/foundation-runtime/communication/http-server-jetty</url>
@@ -70,7 +70,7 @@
         <connection>scm:git:git@github.com:foundation-runtime/communication.git</connection>
         <developerConnection>scm:git:git@github.com:foundation-runtime/communication.git</developerConnection>
         <url>https://github.com/foundation-runtime/communication.git</url>
-        <tag>http-server-jetty-8-1.0.3-1</tag>
+        <tag>HEAD</tag>
     </scm>
     <organization>
         <name>Cisco</name>
