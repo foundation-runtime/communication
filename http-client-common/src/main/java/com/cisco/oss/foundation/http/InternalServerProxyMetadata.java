@@ -118,6 +118,11 @@ public class InternalServerProxyMetadata {
         this.followRedirects = followRedirects;
         this.autoCloseable = autoCloseable;
         this.staleConnectionCheckEnabled = staleConnectionCheckEnabled;
+        
+        this.trustStorePassword = trustStorePassword;
+        this.trustStorePath = trustStorePath;
+        this.keyStorePassword = keyStorePassword;
+        this.keyStorePath = keyStorePath;
     }
 
     public int getNumberOfAttempts() {
