@@ -63,12 +63,7 @@
         </plugins>
     </build>
     <dependencies>
-        <dependency>
-            <groupId>com.cisco.oss.foundation</groupId>
-            <artifactId>client-common</artifactId>
-            <version>1.0.1-1-SNAPSHOT</version>
-        </dependency>
-        <dependency>
+       <dependency>
             <groupId>com.cisco.oss.foundation</groupId>
             <artifactId>configuration-api</artifactId>
             <version>1.0.2-1</version>
