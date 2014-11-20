@@ -18,7 +18,6 @@ package com.cisco.oss.foundation.loadbalancer;
 
 import com.cisco.oss.foundation.flowcontext.FlowContext;
 import com.cisco.oss.foundation.flowcontext.FlowContextFactory;
-import com.cisco.oss.foundation.http.HttpRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +30,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Yair Ogen
  */
-public class StickyRoundRobinStrategy<S extends HttpRequest> extends RoundRobinStrategy<S> {
+public class StickyRoundRobinStrategy<S extends ClientRequest> extends RoundRobinStrategy<S> {
 
     private static final String FLOW_CONTEXT = "FLOW_CONTEXT";
     private static final long serialVersionUID = -4176790456291346233L;

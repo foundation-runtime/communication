@@ -25,7 +25,7 @@
     <groupId>com.cisco.oss.foundation</groupId>
     <artifactId>http-client-api</artifactId>
     <name>http-client-api</name>
-    <version>1.0.2-3-SNAPSHOT</version>
+    <version>1.0.2-4-SNAPSHOT</version>
     <description>This project is the api library for http client in the cisco vss foundation runtime</description>
     <url>https://github.com/foundation-runtime/communication/http-client-api</url>
     <packaging>jar</packaging>
@@ -58,6 +58,7 @@
     </developers>
     <properties>
         <commons-version>1.0.2-1</commons-version>
+        <client-common-version>1.0.1-1</client-common-version>
         <javaVersion>1.6</javaVersion>
     </properties>
     <scm>
@@ -129,6 +130,11 @@
         </plugins>
     </build>
     <dependencies>
+        <dependency>
+            <groupId>com.cisco.oss.foundation</groupId>
+            <artifactId>client-common</artifactId>
+            <version>${client-common-version}</version>
+        </dependency>
         <dependency>
             <groupId>com.cisco.oss.foundation</groupId>
             <artifactId>commons</artifactId>

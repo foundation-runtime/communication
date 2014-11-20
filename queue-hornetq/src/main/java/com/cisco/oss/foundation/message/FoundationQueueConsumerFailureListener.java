@@ -17,6 +17,7 @@
 package com.cisco.oss.foundation.message;
 
 import com.cisco.oss.foundation.configuration.ConfigurationFactory;
+import org.apache.commons.lang3.tuple.Pair;
 import org.hornetq.api.core.HornetQException;
 import org.hornetq.api.core.client.*;
 import org.hornetq.api.core.client.MessageHandler;
@@ -55,16 +56,19 @@ public class FoundationQueueConsumerFailureListener implements SessionFailureLis
                 LOGGER.trace("attempting to reconnect to HornetQ");
                 HornetQMessagingFactory.sessionThreadLocal.set(null);
                 try {
-                    FoundationQueueConsumerFailureListener foundationQueueConsumerFailureListener = new FoundationQueueConsumerFailureListener();;
-                    foundationQueueConsumerFailureListener.setReconnectProperties(queueName,clientConsumer);
+//                    FoundationQueueConsumerFailureListener foundationQueueConsumerFailureListener = new FoundationQueueConsumerFailureListener();;
                     MessageHandler handler = null;
                     if (this.messageHandler == null) {
                         handler = clientConsumer.getMessageHandler();
                         this.messageHandler = handler;
                     }
-                    foundationQueueConsumerFailureListener.setMessageHandler(messageHandler);
-                    ClientConsumer consumer = HornetQMessagingFactory.getSession(foundationQueueConsumerFailureListener).createConsumer(queueName);
-                    consumer.setMessageHandler(messageHandler);
+                    for (Pair<ClientSession,SessionFailureListener> clientSessionSessionFailureListenerPair : HornetQMessagingFactory.getSession(FoundationQueueConsumerFailureListener.class)) {
+                        FoundationQueueConsumerFailureListener foundationQueueConsumerFailureListener = (FoundationQueueConsumerFailureListener)clientSessionSessionFailureListenerPair.getRight();
+                        foundationQueueConsumerFailureListener.setReconnectProperties(queueName,clientConsumer);
+                        foundationQueueConsumerFailureListener.setMessageHandler(messageHandler);
+                        ClientConsumer consumer = clientSessionSessionFailureListenerPair.getLeft().createConsumer(queueName);
+                        consumer.setMessageHandler(messageHandler);
+                    }
                     done = true;
                 } catch (Exception e) {
                     LOGGER.trace("failed to reconnect. retrying...", e);

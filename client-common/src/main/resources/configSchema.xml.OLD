@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+  ~ Copyright 2014 Cisco Systems, Inc.
+  ~
+  ~  Licensed under the Apache License, Version 2.0 (the "License");
+  ~  you may not use this file except in compliance with the License.
+  ~  You may obtain a copy of the License at
+  ~
+  ~  http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  -->
+
+<NamespaceDefinitions xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/foundation-runtime/configuration/master/ccp_schema/CCP_XML.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<NamespaceDefinition>
+		<NamespaceIdentifier version="TBD" name="TBD" />
+        <ParameterType name="service.http.client.base" type="STRUCTURE" description="Base structure for http clients">
+            <StructureDefinition>
+                <StructureMemberDefinition name="http.waitingTime"
+                                           description="The time in milliseconds to wait after a server was passivated before trying to activate it again. This parameter is very important. It is advised to set it for a long period of time. If a server passivated it means that it timed out for X times. This means it is something fatal. It is advised to set this value for at least 60000 milliseconds (1 minute)"
+                                           unit="milliseconds" type="INTEGER" required="false">
+                    <DefaultValue>
+                        <PrimitiveValue value="60000"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
+                <StructureMemberDefinition name="http.numberOfAttempts" type="INTEGER" description="The number of times to try and call a server before it will be passivated. Each server will be called several times in case of a failure to be sure that it failed for something that was not random"
+                                           required="false">
+                    <DefaultValue>
+                        <PrimitiveValue value="3"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
+                <StructureMemberDefinition name="http.retryDelay" type="INTEGER"
+                                           description="The time in milliseconds to wait between retries. In order to make sure that the server is not temporarily unstable or maybe failed due to a random reason we wait for X milliseconds and try again. It is advised to set a small number here (no more than 1000-5000 milliseconds)" unit="milliseconds"
+                                           required="false">
+                    <DefaultValue>
+                        <PrimitiveValue value="500"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
+                <StructureMemberDefinition name="http.readTimeout" type="INTEGER" description="The time to wait before request is time out in the client" required="false">
+                    <DefaultValue>
+                        <PrimitiveValue value="5000"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
+                <StructureMemberDefinition name="http.connectTimeout" type="INTEGER" description="The time to wait before timeouting an attemp to establish a new connection" required="false">
+                    <DefaultValue>
+                        <PrimitiveValue value="5000"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
+                <!-- <StructureMemberDefinition name="strategy" type="STRING" advanced="true" description="the load balancing strategy. can be either failOverStrategy or roundRobinStrategy" required="false"> <DefaultValue> <PrimitiveValue value="failOverStrategy" /> </DefaultValue> <Range> <StringEnum value="failOverStrategy"
+                    /> <StringEnum value="roundRobinStrategy" /> <StringEnum value="activeActiveStrategy" /> <StringEnum value="stickyRoundRobinStrategy" /> </Range> </StructureMemberDefinition> -->
+                <StructureMemberDefinition name="http.idleTimeout" type="INTEGER" unit="milliseconds" description="The timeout for idle connections" required="false">
+                    <DefaultValue>
+                        <PrimitiveValue value="180000"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
+                <StructureMemberDefinition name="http.maxConnectionsPerAddress" description="The maximum connections kept open per address (address is a server hot:port pair)" type="INTEGER" required="false">
+                    <DefaultValue>
+                        <PrimitiveValue value="1000"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
+                <StructureMemberDefinition name="http.maxConnectionsTotal" description="The maximum connections kept in total. Relevant in Apache client only" type="INTEGER" required="false">
+                    <DefaultValue>
+                        <PrimitiveValue value="3000"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
+                <StructureMemberDefinition name="http.maxQueueSizePerAddress" description="The maximum queue size of pending requests when all connections in the pool are currently used" type="INTEGER" required="false">
+                    <DefaultValue>
+                        <PrimitiveValue value="1000"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
+                <StructureMemberDefinition name="http.maxClientThreads" description="The maximum number of threads a client will open to handle the async requests" type="INTEGER" required="false">
+                    <DefaultValue>
+                        <PrimitiveValue value="16"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
+                <StructureMemberDefinition name="http.monitoringBaseUri" type="STRING" isArray="true" advanced="true" description="A list of base Uri's . If the list is not empty the infrastructure will try and match the base uri with the actual uri. if found the base uri will be the monitoring service/api name." required="false" />
+                <StructureMemberDefinition name="http.exposeStatisticsToMonitor" type="BOOLEAN" advanced="true" description="Set to true if you wnt to monitor client connections." required="false">
+                    <DefaultValue>
+                        <PrimitiveValue value="true"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
+                <StructureMemberDefinition name="http.followRedirects" type="BOOLEAN" advanced="true" description="Set to true if you client to redirected to a new location in response to an HTTP response received from the target." required="false">
+                    <DefaultValue>
+                        <PrimitiveValue value="false"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
+                <StructureMemberDefinition name="http.keyStorePath" type="STRING" advanced="true" description="the path to the keystore file." required="false" />
+                <StructureMemberDefinition name="http.keyStorePassword" type="STRING" advanced="true" description="the password to the keystore file." required="false" />
+                <StructureMemberDefinition name="http.trustStorePath" type="STRING" advanced="true" description="the path to the trust-store file." required="false" />
+                <StructureMemberDefinition name="http.trustStorePassword" type="STRING" advanced="true" description="the password to the trust-store file." required="false" />
+                <StructureMemberDefinition name="server" type="STRUCTURE" isArray="true" ignoreName="true">
+                    <StructureDefinition>
+                        <StructureMemberDefinition name="host" type="STRING" description="the http server host" />
+                        <StructureMemberDefinition name="port" type="INTEGER" description="the http server listener port" />
+                    </StructureDefinition>
+                </StructureMemberDefinition>
+            </StructureDefinition>
+        </ParameterType>
+
+	</NamespaceDefinition>
+</NamespaceDefinitions>

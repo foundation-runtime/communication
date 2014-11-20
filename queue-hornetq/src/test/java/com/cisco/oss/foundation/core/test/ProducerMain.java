@@ -21,6 +21,8 @@ import com.cisco.oss.foundation.message.MessageProducer;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Created by Yair Ogen on 23/04/2014.
@@ -31,9 +33,11 @@ public class ProducerMain {
 
         final MessageProducer producer = HornetQMessagingFactory.createProducer("example");
 
+        ExecutorService threadPool = Executors.newFixedThreadPool(2);
+
         while(true){
 
-            byte[] bytes = new byte[100];
+            final byte[] bytes = new byte[100];
             System.in.read(bytes);
 //            producer.sendMessage("hello: " + new String(bytes));
 
@@ -41,12 +45,21 @@ public class ProducerMain {
 //                sendMessage(producer, bytes,"1");
 //                Thread.sleep(1000);
 //            }
+            Runnable target = new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        sendMessage(producer, bytes, "1");
+                    } catch (Exception e) {
+                        System.err.println(e.toString());
+                    }
+                }
+            };
 
-            try {
-                sendMessage(producer, bytes,"1");
-            } catch (Exception e) {
-                System.err.println(e.toString());
-            }
+//            new Thread(target).start();
+
+            threadPool.execute(target);
+
 
 
 //            sendMessage(producer, bytes,"1");

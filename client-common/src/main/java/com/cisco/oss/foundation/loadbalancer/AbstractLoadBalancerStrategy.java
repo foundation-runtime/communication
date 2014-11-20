@@ -16,8 +16,6 @@
 
 package com.cisco.oss.foundation.loadbalancer;
 
-import com.cisco.oss.foundation.http.ClientException;
-import com.cisco.oss.foundation.http.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.remoting.RemoteAccessException;
@@ -33,7 +31,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * 
  * @author Yair Ogen
  */
-public abstract class AbstractLoadBalancerStrategy<S extends HttpRequest> implements LoadBalancerStrategy<S> {
+public abstract class AbstractLoadBalancerStrategy<S extends ClientRequest> implements LoadBalancerStrategy<S> {
 
 	private static final long serialVersionUID = -4787963395573781601L;
 

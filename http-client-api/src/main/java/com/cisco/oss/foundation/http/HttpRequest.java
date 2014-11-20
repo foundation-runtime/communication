@@ -18,6 +18,7 @@ package com.cisco.oss.foundation.http;
 
 import com.cisco.oss.foundation.flowcontext.FlowContext;
 import com.cisco.oss.foundation.flowcontext.FlowContextFactory;
+import com.cisco.oss.foundation.loadbalancer.ClientRequest;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 
@@ -31,7 +32,7 @@ import java.util.Map;
  * Representation of a Http Request. This class is immutable. you should build it using the builder.
  * Created by Yair Ogen on 12/30/13.
  */
-public class HttpRequest {
+public class HttpRequest implements ClientRequest{
 
     protected URI uri;
     private Multimap<String, String> headers = ArrayListMultimap.create();

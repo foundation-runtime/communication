@@ -93,7 +93,7 @@ class HttpServerRestTest extends FeatureSpec with GivenWhenThen with BeforeAndAf
     config setProperty("serverTest1.http.flowContextFilter.isEnabled", "true")
     config setProperty("serverTest1.http.traceFilter.isEnabled", "true")
     config setProperty("serverTest1.http.traceFilter.textContentTypes.1", "text/plain")
-    config setProperty("serverTest1.http.monitoringFilter.isEnabled", "false");
+    config setProperty("serverTest1.http.monitoringFilter.isEnabled", "true");
 
 
     config setProperty("service.serverTest1-client.http.readTimeout", "30000")
