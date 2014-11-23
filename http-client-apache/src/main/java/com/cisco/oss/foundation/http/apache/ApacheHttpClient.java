@@ -16,17 +16,31 @@
 
 package com.cisco.oss.foundation.http.apache;
 
-import com.cisco.oss.foundation.http.*;
+import com.cisco.oss.foundation.http.AbstractHttpClient;
+import com.cisco.oss.foundation.http.ClientException;
+import com.cisco.oss.foundation.http.HttpRequest;
+import com.cisco.oss.foundation.http.HttpResponse;
+import com.cisco.oss.foundation.http.ResponseCallback;
 import com.cisco.oss.foundation.loadbalancer.InternalServerProxy;
 import com.cisco.oss.foundation.loadbalancer.LoadBalancerStrategy;
 import com.google.common.base.Joiner;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.*;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpHead;
+import org.apache.http.client.methods.HttpOptions;
+import org.apache.http.client.methods.HttpPatch;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.concurrent.FutureCallback;
 import org.apache.http.conn.ssl.SSLContexts;
+import org.apache.http.conn.ssl.X509HostnameVerifier;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -53,6 +67,7 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
     private static final Logger LOGGER = LoggerFactory.getLogger(ApacheHttpClient.class);
     CloseableHttpAsyncClient httpAsyncClient = null;
     private CloseableHttpClient httpClient = null;
+    private X509HostnameVerifier hostnameVerifier;
 
     public boolean isAutoCloseable() {
         return autoCloseable;
@@ -61,14 +76,16 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
     private boolean autoCloseable = true;
 
 
-    ApacheHttpClient(String apiName, Configuration configuration, boolean enableLoadBalancing) {
+    ApacheHttpClient(String apiName, Configuration configuration, boolean enableLoadBalancing, X509HostnameVerifier hostnameVerifier) {
         super(apiName, configuration, enableLoadBalancing);
+        this.hostnameVerifier = hostnameVerifier;
         configureClient();
     }
 
 
-    ApacheHttpClient(String apiName, LoadBalancerStrategy.STRATEGY_TYPE strategyType, Configuration configuration, boolean enableLoadBalancing) {
+    ApacheHttpClient(String apiName, LoadBalancerStrategy.STRATEGY_TYPE strategyType, Configuration configuration, boolean enableLoadBalancing, X509HostnameVerifier hostnameVerifier) {
         super(apiName, strategyType, configuration, enableLoadBalancing);
+        this.hostnameVerifier = hostnameVerifier;
         configureClient();
     }
 
@@ -139,6 +156,10 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
                 .setDefaultRequestConfig(requestConfig)
                 .setKeepAliveStrategy(new InfraConnectionKeepAliveStrategy(metadata.getIdleTimeout()))
                 .setSslcontext(sslContext);
+
+        if (hostnameVerifier != null) {
+            httpClientBuilder.setHostnameVerifier(hostnameVerifier);
+        }
 
         if (!followRedirects) {
             httpClientBuilder.disableRedirectHandling();
