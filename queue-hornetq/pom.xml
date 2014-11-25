@@ -87,7 +87,7 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-jms</artifactId>
-            <version>4.1.1.RELEASE</version>
+            <version>4.1.2.RELEASE</version>
         </dependency>
         <dependency>
             <groupId>org.hornetq</groupId>
@@ -119,7 +119,7 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
-            <version>4.1.1.RELEASE</version>
+            <version>4.1.2.RELEASE</version>
             <scope>test</scope>
         </dependency>
         <dependency>
