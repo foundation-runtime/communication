@@ -201,7 +201,7 @@ public enum JettyHttpServerFactory implements HttpServerFactory, JettyHttpServer
 
         ServletContextHandler context = new ServletContextHandler();
 
-        JettyHttpThreadPool jettyHttpThreadPool = new JettyHttpThreadPool(serviceName);
+        JettyHttpThreadPool jettyHttpThreadPool = new JettyHttpThreadPool(serviceName).init();
 
         for (Map.Entry<String, Servlet> entry : servlets.entries()) {
 
@@ -224,7 +224,7 @@ public enum JettyHttpServerFactory implements HttpServerFactory, JettyHttpServer
             context.addFilter(new FilterHolder(filterEntry.getValue()), filterEntry.getKey(), EnumSet.allOf(DispatcherType.class));
         }
 
-        Server server = new Server(jettyHttpThreadPool.threadPool);
+        Server server = new Server(jettyHttpThreadPool.getThreadPool());
 
         try {
             Configuration configuration = ConfigurationFactory.getConfiguration();

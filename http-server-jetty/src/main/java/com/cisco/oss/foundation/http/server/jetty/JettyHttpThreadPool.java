@@ -20,7 +20,6 @@ import com.cisco.oss.foundation.configuration.ConfigurationFactory;
 import com.cisco.oss.foundation.http.server.HttpThreadPool;
 import org.apache.commons.configuration.Configuration;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
-import org.eclipse.jetty.util.thread.ThreadPool;
 
 /**
  * a jetty base implementation to the common HttpThreadPool interface
@@ -30,11 +29,17 @@ public class JettyHttpThreadPool implements HttpThreadPool{
 
     private String serviceName;
 
+
+    private QueuedThreadPool threadPool;
+
     public JettyHttpThreadPool(String serviceName){
         this.serviceName = serviceName;
     }
 
-    QueuedThreadPool threadPool = createThreadPool();
+    public JettyHttpThreadPool init() {
+        threadPool = createThreadPool();
+        return this;
+    }
 
     private QueuedThreadPool createThreadPool() {
         Configuration configuration = ConfigurationFactory.getConfiguration();
@@ -47,6 +52,9 @@ public class JettyHttpThreadPool implements HttpThreadPool{
 
 
         return new QueuedThreadPool(maxThreads, minThreads);
+    }
+    public QueuedThreadPool getThreadPool() {
+        return threadPool;
     }
 
     /**
