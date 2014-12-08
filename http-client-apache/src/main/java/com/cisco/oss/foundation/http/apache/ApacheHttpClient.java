@@ -46,6 +46,7 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
+import org.apache.http.impl.nio.client.HttpAsyncClientBuilder;
 import org.apache.http.impl.nio.client.HttpAsyncClients;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -157,8 +158,24 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
                 .setKeepAliveStrategy(new InfraConnectionKeepAliveStrategy(metadata.getIdleTimeout()))
                 .setSslcontext(sslContext);
 
+
+
+        HttpAsyncClientBuilder httpAsyncClientBuilder = HttpAsyncClients.custom();
+
+        httpAsyncClientBuilder.setDefaultRequestConfig(requestConfig)
+                .setMaxConnPerRoute(metadata.getMaxConnectionsPerAddress())
+                .setMaxConnTotal(metadata.getMaxConnectionsTotal())
+                .setKeepAliveStrategy(new InfraConnectionKeepAliveStrategy(metadata.getIdleTimeout()))
+                .setSSLContext(sslContext);
+
+        if(metadata.isDisableCookies()){
+            httpClientBuilder.disableCookieManagement();
+            httpAsyncClientBuilder.disableCookieManagement();
+        }
+
         if (hostnameVerifier != null) {
             httpClientBuilder.setHostnameVerifier(hostnameVerifier);
+            httpAsyncClientBuilder.setHostnameVerifier(hostnameVerifier);
         }
 
         if (!followRedirects) {
@@ -167,13 +184,7 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
 
         httpClient = httpClientBuilder.build();
 
-        httpAsyncClient = HttpAsyncClients.custom()
-                .setDefaultRequestConfig(requestConfig)
-                .setMaxConnPerRoute(metadata.getMaxConnectionsPerAddress())
-                .setMaxConnTotal(metadata.getMaxConnectionsTotal())
-                .setKeepAliveStrategy(new InfraConnectionKeepAliveStrategy(metadata.getIdleTimeout()))
-                .setSSLContext(sslContext)
-                .build();
+        httpAsyncClient = httpAsyncClientBuilder.build();
 
         httpAsyncClient.start();
 
