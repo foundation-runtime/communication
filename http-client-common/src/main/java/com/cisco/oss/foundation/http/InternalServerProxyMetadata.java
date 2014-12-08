@@ -43,6 +43,8 @@ public class InternalServerProxyMetadata {
     private String trustStorePassword = "";
     private boolean staleConnectionCheckEnabled = false;
     private boolean autoCloseable = true;
+    private boolean followRedirects = false;
+    private boolean disableCookies = false;
 
     private List<Pair<String, Integer>> hostAndPortPairs = null;
 
@@ -57,8 +59,6 @@ public class InternalServerProxyMetadata {
     public boolean isFollowRedirects() {
         return followRedirects;
     }
-
-    private boolean followRedirects = false;
 
     public long getIdleTimeout() {
         return idleTimeout;
@@ -104,7 +104,11 @@ public class InternalServerProxyMetadata {
         return waitingTime;
     }
 
-    public InternalServerProxyMetadata(int readTimeout, int connectTimeout, long idleTimeout, int maxConnectionsPerAddress, int maxConnectionsTotal, int maxQueueSizePerAddress, long waitingTime, int numberOfAttempts, long retryDelay, List<Pair<String, Integer>> hostAndPortPairs, String keyStorePath, String keyStorePassword,String trustStorePath,String trustStorePassword, boolean followRedirects, boolean autoCloseable, boolean staleConnectionCheckEnabled) {
+    public boolean isDisableCookies() {
+        return disableCookies;
+    }
+
+    public InternalServerProxyMetadata(int readTimeout, int connectTimeout, long idleTimeout, int maxConnectionsPerAddress, int maxConnectionsTotal, int maxQueueSizePerAddress, long waitingTime, int numberOfAttempts, long retryDelay, List<Pair<String, Integer>> hostAndPortPairs, String keyStorePath, String keyStorePassword,String trustStorePath,String trustStorePassword, boolean followRedirects, boolean autoCloseable, boolean staleConnectionCheckEnabled, boolean disableCookies) {
         this.readTimeout = readTimeout;
         this.connectTimeout = connectTimeout;
         this.idleTimeout = idleTimeout;
@@ -118,6 +122,8 @@ public class InternalServerProxyMetadata {
         this.followRedirects = followRedirects;
         this.autoCloseable = autoCloseable;
         this.staleConnectionCheckEnabled = staleConnectionCheckEnabled;
+        this.disableCookies = disableCookies;
+
         
         this.trustStorePassword = trustStorePassword;
         this.trustStorePath = trustStorePath;
