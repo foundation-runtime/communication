@@ -101,7 +101,7 @@ class BasicHttpTestUtil[S <: HttpRequest, R <: HttpResponse] {
       for (x <- 1 to 9) {
         runRequest(request)
       }
-      //println("***************")
+      println("1: ***************")
 
       assertEquals(9, results.size)
 
@@ -119,7 +119,7 @@ class BasicHttpTestUtil[S <: HttpRequest, R <: HttpResponse] {
       for (x <- 1 to 9) {
         runRequest(request)
       }
-      //println("***************")
+      println("2: ***************")
 
       assertEquals(9, results.size)
 
@@ -137,7 +137,7 @@ class BasicHttpTestUtil[S <: HttpRequest, R <: HttpResponse] {
       for (x <- 1 to 9) {
         runRequest(request)
       }
-      //println("***************")
+      println("3:***************")
 
       assertEquals(9, results.size)
 
@@ -155,7 +155,7 @@ class BasicHttpTestUtil[S <: HttpRequest, R <: HttpResponse] {
       for (x <- 1 to 9) {
         runRequest(request)
       }
-      //println("***************")
+      println("4:***************")
 
       assertEquals(9, results.size)
 
@@ -166,6 +166,7 @@ class BasicHttpTestUtil[S <: HttpRequest, R <: HttpResponse] {
         assertEquals(3, value.size)
       }
 
+      println("4.1:***************")
 
 
       props.load(configURL.openStream())
@@ -173,15 +174,17 @@ class BasicHttpTestUtil[S <: HttpRequest, R <: HttpResponse] {
       props.setProperty("clientRoundRobinSyncTest.4.port", "13348")
       props.store(new FileOutputStream(new File(configURL.getFile)), "")
 
+      println("4.2:***************")
       Thread.sleep(3000)
       configuration.getString("clientRoundRobinSyncTest.4.port")
 
+      println("4.3:***************")
       results = List[String]()
 
       for (x <- 1 to 12) {
         runRequest(request)
       }
-      //println("***************")
+      println("5:***************")
 
       assertEquals(12, results.size)
 
@@ -192,15 +195,18 @@ class BasicHttpTestUtil[S <: HttpRequest, R <: HttpResponse] {
         assertEquals(3, value.size)
       }
 
-    } finally {
-      props.remove("clientRoundRobinSyncTest.4.host")
-      props.remove("clientRoundRobinSyncTest.4.port")
-      props.store(new FileOutputStream(new File(configURL.getFile)), "")
+    }catch {
+      case e:Exception  => e.printStackTrace()
+    } finally{
 
       server1.stop
       server2.stop
       server3.stop
       server4.stop
+
+      props.remove("clientRoundRobinSyncTest.4.host")
+      props.remove("clientRoundRobinSyncTest.4.port")
+      props.store(new FileOutputStream(new File(configURL.getFile)), "")
     }
 
 
