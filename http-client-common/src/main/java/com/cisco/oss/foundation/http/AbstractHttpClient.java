@@ -164,7 +164,8 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
 
         URI origUri = request.getUri();
         String host = serverProxy.getHost();
-        String scheme = origUri.getScheme() == null ? "http" : origUri.getScheme();
+        String scheme = origUri.getScheme() == null ? (request.isHttpsEnabled() ?"https" : "http") : origUri.getScheme();
+
         int port = serverProxy.getPort();
 
         String urlPath = "";
