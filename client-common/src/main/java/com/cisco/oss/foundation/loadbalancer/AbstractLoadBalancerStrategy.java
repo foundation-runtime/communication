@@ -35,6 +35,21 @@ public abstract class AbstractLoadBalancerStrategy<S extends ClientRequest> impl
 
 	private static final long serialVersionUID = -4787963395573781601L;
 
+	public AbstractLoadBalancerStrategy(boolean serviceDirectoryEnabled, String serviceName){
+		this.serviceDirectoryEnabled = serviceDirectoryEnabled;
+		this.serviceName = serviceName;
+	}
+
+	private String serviceName = "UNKNOWN";
+	private boolean serviceDirectoryEnabled = false;
+
+	public String getServiceName() {
+		return serviceName;
+	}
+
+	public boolean isServiceDirectoryEnabled() {
+		return serviceDirectoryEnabled;
+	}
 
 	protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractLoadBalancerStrategy.class);
 

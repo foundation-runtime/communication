@@ -24,7 +24,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.cisco.oss.foundation</groupId>
     <artifactId>client-common</artifactId>
-    <version>1.0.1-2-SNAPSHOT</version>
+    <version>1.1.0-1-SNAPSHOT</version>
     <name>client-common</name>
     <description>This project is the common library for http client in the cisco oss foundation runtime</description>
     <url>https://github.com/foundation-runtime/communication/client-common</url>
@@ -158,6 +158,11 @@
             <artifactId>scala-library</artifactId>
             <version>2.11.1</version>
             <scope>test</scope>
-        </dependency>        
+        </dependency>
+        <dependency>
+            <groupId>com.cisco.oss.foundation.directory</groupId>
+            <artifactId>sd-api</artifactId>
+            <version>1.1.0-3</version>
+        </dependency>
     </dependencies>
 </project>

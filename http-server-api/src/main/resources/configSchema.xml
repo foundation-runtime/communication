@@ -211,6 +211,12 @@
                         <PrimitiveValue value="6144"/>
                     </DefaultValue>
                 </StructureMemberDefinition>
+                <StructureMemberDefinition name="http.serviceDirectory.isEnabled" type="BOOLEAN" advanced="true"
+                                           description="Determines whether the server should register against a service directory">
+                    <DefaultValue>
+                        <PrimitiveValue value="false"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
             </StructureDefinition>
 
         </ParameterType>

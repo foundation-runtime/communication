@@ -93,6 +93,12 @@
                         <PrimitiveValue value="false"/>
                     </DefaultValue>
                 </StructureMemberDefinition>
+                <StructureMemberDefinition name="http.serviceDirectory.isEnabled" type="BOOLEAN" advanced="true" description="Set to true if you want LB based on service directory and not based on static configuration" required="false">
+                    <DefaultValue>
+                        <PrimitiveValue value="false"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
+                <StructureMemberDefinition name="http.serviceDirectory.serviceName" type="STRING" advanced="true" description="Sets the service name of the server this client wants to connect to. Relevant only if 'serviceDirectory.isEnabled' is true." required="false"/>
                 <StructureMemberDefinition name="http.followRedirects" type="BOOLEAN" advanced="true" description="Set to true if you client to redirected to a new location in response to an HTTP response received from the target." required="false">
                     <DefaultValue>
                         <PrimitiveValue value="false"/>

@@ -47,6 +47,10 @@ public class FailOverStrategy<S extends ClientRequest> extends AbstractLoadBalan
 
     private final AtomicBoolean firstTime = new AtomicBoolean(true);
 
+    public FailOverStrategy(boolean serviceDirectoryEnabled, String serviceName) {
+        super(serviceDirectoryEnabled, serviceName);
+    }
+
     @Override
     public InternalServerProxy getServerProxy(S request) {
 

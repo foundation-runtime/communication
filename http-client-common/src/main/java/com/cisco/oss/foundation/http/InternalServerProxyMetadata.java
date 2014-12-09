@@ -46,6 +46,13 @@ public class InternalServerProxyMetadata {
     private boolean followRedirects = false;
     private boolean disableCookies = false;
 
+
+    private boolean serviceDirectoryEnabled = false;
+
+
+
+    private String serviceName = "UNKNOWN";
+
     private List<Pair<String, Integer>> hostAndPortPairs = null;
 
     public boolean isAutoCloseable() {
@@ -108,7 +115,15 @@ public class InternalServerProxyMetadata {
         return disableCookies;
     }
 
-    public InternalServerProxyMetadata(int readTimeout, int connectTimeout, long idleTimeout, int maxConnectionsPerAddress, int maxConnectionsTotal, int maxQueueSizePerAddress, long waitingTime, int numberOfAttempts, long retryDelay, List<Pair<String, Integer>> hostAndPortPairs, String keyStorePath, String keyStorePassword,String trustStorePath,String trustStorePassword, boolean followRedirects, boolean autoCloseable, boolean staleConnectionCheckEnabled, boolean disableCookies) {
+    public boolean isServiceDirectoryEnabled() {
+        return serviceDirectoryEnabled;
+    }
+
+    public String getServiceName() {
+        return serviceName;
+    }
+
+    public InternalServerProxyMetadata(int readTimeout, int connectTimeout, long idleTimeout, int maxConnectionsPerAddress, int maxConnectionsTotal, int maxQueueSizePerAddress, long waitingTime, int numberOfAttempts, long retryDelay, List<Pair<String, Integer>> hostAndPortPairs, String keyStorePath, String keyStorePassword, String trustStorePath, String trustStorePassword, boolean followRedirects, boolean autoCloseable, boolean staleConnectionCheckEnabled, boolean disableCookies, boolean serviceDirectoryEnabled, String serviceName) {
         this.readTimeout = readTimeout;
         this.connectTimeout = connectTimeout;
         this.idleTimeout = idleTimeout;
@@ -123,6 +138,8 @@ public class InternalServerProxyMetadata {
         this.autoCloseable = autoCloseable;
         this.staleConnectionCheckEnabled = staleConnectionCheckEnabled;
         this.disableCookies = disableCookies;
+        this.serviceDirectoryEnabled = serviceDirectoryEnabled;
+        this.serviceName = serviceName;
 
         
         this.trustStorePassword = trustStorePassword;

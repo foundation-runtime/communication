@@ -23,7 +23,6 @@ import com.cisco.oss.foundation.configuration.ConfigurationFactory;
 import com.cisco.oss.foundation.loadbalancer.*;
 import com.cisco.oss.foundation.monitoring.CommunicationInfo;
 import com.cisco.oss.foundation.monitoring.MonitoringAgentFactory;
-import com.cisco.oss.foundation.monitoring.RMIMonitoringAgent;
 import com.cisco.oss.foundation.monitoring.serverconnection.ServerConnectionDetails;
 import com.cisco.oss.foundation.string.utils.BoyerMoore;
 import com.google.common.collect.Lists;
@@ -48,11 +47,10 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
 
     public static final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractHttpClient.class);
-    protected LoadBalancerStrategy loadBalancerStrategy = new RoundRobinStrategy();
+    private static Map<String, List<BoyerMoore>> boyersMap = new ConcurrentHashMap<String, List<BoyerMoore>>();
+    protected LoadBalancerStrategy loadBalancerStrategy = null;
     protected String apiName = "HTTP";
     protected boolean exposeStatisticsToMonitor = false;
-    private static Map<String, List<BoyerMoore>> boyersMap = new ConcurrentHashMap<String, List<BoyerMoore>>();
-
     protected InternalServerProxyMetadata metadata;
     protected Configuration configuration;
     protected boolean enableLoadBalancing = true;
@@ -61,7 +59,7 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
     public AbstractHttpClient(String apiName, Configuration configuration, boolean enableLoadBalancing) {
         this(apiName, LoadBalancerStrategy.STRATEGY_TYPE.ROUND_ROBIN, configuration, enableLoadBalancing);
         exposeStatisticsToMonitor = getExposeStatisticsToMonitor();
-        if(exposeStatisticsToMonitor){
+        if (exposeStatisticsToMonitor) {
             MonitoringAgentFactory.getInstance().register();
         }
     }
@@ -69,29 +67,30 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
     public AbstractHttpClient(String apiName, LoadBalancerStrategy.STRATEGY_TYPE strategyType, Configuration configuration, boolean enableLoadBalancing) {
         this.apiName = apiName;
         this.enableLoadBalancing = enableLoadBalancing;
-        if(configuration == null){
+        if (configuration == null) {
             this.configuration = ConfigurationFactory.getConfiguration();
-        }else{
+        } else {
             this.configuration = configuration;
         }
         exposeStatisticsToMonitor = getExposeStatisticsToMonitor();
-        if(exposeStatisticsToMonitor){
+        if (exposeStatisticsToMonitor) {
             MonitoringAgentFactory.getInstance().register(this.configuration);
         }
-        loadBalancerStrategy = fromHighAvailabilityStrategyType(strategyType);
         createServerListFromConfig();
+        loadBalancerStrategy = fromHighAvailabilityStrategyType(strategyType);
         followRedirects = metadata.isFollowRedirects();
         FoundationConfigurationListenerRegistry.addFoundationConfigurationListener(new LoadBalancerConfigurationListener());
     }
 
-    private LoadBalancerStrategy fromHighAvailabilityStrategyType(LoadBalancerStrategy.STRATEGY_TYPE strategyType){
+    private LoadBalancerStrategy fromHighAvailabilityStrategyType(LoadBalancerStrategy.STRATEGY_TYPE strategyType) {
+
         switch (strategyType) {
             case FAIL_OVER:
-                return new FailOverStrategy();
+                return new FailOverStrategy(metadata.isServiceDirectoryEnabled(), metadata.getServiceName());
             case STICKY_ROUND_ROBIN:
-                return new StickyRoundRobinStrategy();
+                return new StickyRoundRobinStrategy(metadata.isServiceDirectoryEnabled(), metadata.getServiceName());
             default:
-                return new RoundRobinStrategy();
+                return new RoundRobinStrategy(metadata.isServiceDirectoryEnabled(), metadata.getServiceName());
         }
     }
 
@@ -126,13 +125,13 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
 
                 request = updateRequestUri(request, serverProxy);
 
-                LOGGER.info("sending request: {}-{}", request.getHttpMethod(),request.getUri());
+                LOGGER.info("sending request: {}-{}", request.getHttpMethod(), request.getUri());
                 ServerConnectionDetails connectionDetails = new ServerConnectionDetails(apiName, "HTTP:" + request.getHttpMethod(), request.getUri().getHost(), -1, request.getUri().getPort());
                 if (exposeStatisticsToMonitor) {
                     CommunicationInfo.getCommunicationInfo().transactionStarted(connectionDetails, getMonioringApiName(request));
                 }
                 result = executeDirect(request);
-                LOGGER.info("got response status: {} for request: {}",result.getStatus(), result.getRequestedURI());
+                LOGGER.info("got response status: {} for request: {}", result.getStatus(), result.getRequestedURI());
                 if (exposeStatisticsToMonitor) {
 
                     int responseStatus = result.getStatus();
@@ -164,7 +163,7 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
 
         URI origUri = request.getUri();
         String host = serverProxy.getHost();
-        String scheme = origUri.getScheme() == null ? (request.isHttpsEnabled() ?"https" : "http") : origUri.getScheme();
+        String scheme = origUri.getScheme() == null ? (request.isHttpsEnabled() ? "https" : "http") : origUri.getScheme();
 
         int port = serverProxy.getPort();
 
@@ -207,9 +206,9 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
 
     @Override
     public R execute(S request) {
-        if(enableLoadBalancing){
+        if (enableLoadBalancing) {
             return executeWithLoadBalancer(request);
-        }else{
+        } else {
             return executeDirect(request);
         }
     }
@@ -223,24 +222,28 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
 
     private void createServerListFromConfig() {
 
-        List<InternalServerProxy> serversList = Lists.newCopyOnWriteArrayList();
-
         metadata = loadServersMetadataConfiguration();
 
-        // based on the data collected from the config file - updates the server
-        // list
-        AbstractLoadBalancerStrategy.readWriteLock.writeLock().lock();
-        try {
-            serversList = updateServerListBasedOnConfig(serversList, metadata);
-        } finally {
-            AbstractLoadBalancerStrategy.readWriteLock.writeLock().unlock();
-        }
+        if (!metadata.isServiceDirectoryEnabled()) {
 
-        if (serversList.isEmpty()) {
-            LOGGER.debug("No hosts defined for api: \"" + apiName + "\". Please check your config files!");
-        }
+            List<InternalServerProxy> serversList = Lists.newCopyOnWriteArrayList();
 
-        loadBalancerStrategy.setServerProxies(serversList);
+
+            // based on the data collected from the config file - updates the server
+            // list
+            AbstractLoadBalancerStrategy.readWriteLock.writeLock().lock();
+            try {
+                serversList = updateServerListBasedOnConfig(serversList, metadata);
+            } finally {
+                AbstractLoadBalancerStrategy.readWriteLock.writeLock().unlock();
+            }
+
+            if (serversList.isEmpty()) {
+                LOGGER.debug("No hosts defined for api: \"" + apiName + "\". Please check your config files!");
+            }
+
+            loadBalancerStrategy.setServerProxies(serversList);
+        }
 
     }
 
@@ -262,9 +265,11 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
         int maxConnectionsTotal = subset.getInt("http." + LoadBalancerConstants.MAX_CONNECTIONS_TOTAL, LoadBalancerConstants.DEFAULT_MAX_CONNECTIONS_TOTAL);
         int maxQueueSizePerAddress = subset.getInt("http." + LoadBalancerConstants.MAX_QUEUE_PER_ADDRESS, LoadBalancerConstants.DEFAULT_MAX_QUEUE_PER_ADDRESS);
         boolean followRedirects = subset.getBoolean("http." + LoadBalancerConstants.FOLLOW_REDIRECTS, false);
-        boolean disableCookies = subset.getBoolean("http.disableCookies", false);
+        boolean disableCookies = subset.getBoolean("http." + LoadBalancerConstants.DISABLE_COOKIES, false);
         boolean autoCloseable = subset.getBoolean("http." + LoadBalancerConstants.AUTO_CLOSEABLE, true);
         boolean staleConnectionCheckEnabled = subset.getBoolean("http." + LoadBalancerConstants.IS_STALE_CONN_CHECK_ENABLED, false);
+        boolean serviceDirectoryEnabled = subset.getBoolean("http." + LoadBalancerConstants.SERVICE_DIRECTORY_IS_ENABLED, false);
+        String serviceName = subset.getString("http." + LoadBalancerConstants.SERVICE_DIRECTORY_SERVICE_NAME, "UNKNOWN");
 
         String keyStorePath = subset.getString("http." + LoadBalancerConstants.KEYSTORE_PATH, "");
         String keyStorePassword = subset.getString("http." + LoadBalancerConstants.KEYSTORE_PASSWORD, "");
@@ -303,7 +308,7 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
 
         }
 
-        InternalServerProxyMetadata metadata = new InternalServerProxyMetadata(readTimeout, connectTimeout, idleTimeout, maxConnectionsPerAddress, maxConnectionsTotal, maxQueueSizePerAddress, waitingTime, numberOfAttempts, retryDelay, hostAndPortPairs, keyStorePath, keyStorePassword, trustStorePath, trustStorePassword, followRedirects, autoCloseable, staleConnectionCheckEnabled, disableCookies);
+        InternalServerProxyMetadata metadata = new InternalServerProxyMetadata(readTimeout, connectTimeout, idleTimeout, maxConnectionsPerAddress, maxConnectionsTotal, maxQueueSizePerAddress, waitingTime, numberOfAttempts, retryDelay, hostAndPortPairs, keyStorePath, keyStorePassword, trustStorePath, trustStorePassword, followRedirects, autoCloseable, staleConnectionCheckEnabled, disableCookies, serviceDirectoryEnabled, serviceName);
 //        metadata.getHostAndPortPairs().addAll(hostAndPortPairs);
 //        metadata.setReadTimeout(readTimeout);
 //        metadata.setConnectTimeout(connectTimeout);
@@ -339,6 +344,60 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
         }
 
         return serversList;
+    }
+
+    private boolean getExposeStatisticsToMonitor() {
+        boolean monitor = configuration.getBoolean(apiName + ".http.exposeStatisticsToMonitor", true);
+        return monitor;
+    }
+
+    protected String getMonioringApiName(S request) {
+
+        if (apiName != null) {
+
+            if (!boyersMap.containsKey(apiName)) {
+
+                List<BoyerMoore> boyers = populateBoyersList();
+                if (boyers != null) {
+                    boyersMap.put(apiName, boyers);
+                }
+            }
+
+            List<BoyerMoore> boyers = boyersMap.get(apiName);
+            if (boyers != null && !boyers.isEmpty()) {
+                String uri = request.getUri().toString();
+                for (BoyerMoore boyerMoore : boyers) {
+                    int match = boyerMoore.search(uri);
+                    if (match >= 0) {
+                        return boyerMoore.getPattern();
+                    }
+                }
+
+            }
+
+        }
+
+        String path = request.getUri().getPath();
+        int secondsSlashIndex = path.indexOf('/', 1);
+        return secondsSlashIndex > 0 ? path.substring(0, secondsSlashIndex) : path;
+    }
+
+    private List<BoyerMoore> populateBoyersList() {
+        List<BoyerMoore> boyers = new ArrayList<BoyerMoore>();
+        Map<String, String> parseSimpleArrayAsMap = ConfigUtil.parseSimpleArrayAsMap(configuration, apiName + ".http.monitoringBaseUri");
+        List<String> keys = new ArrayList<String>(parseSimpleArrayAsMap.keySet());
+//		Collections.sort(keys);
+        Collections.sort(keys, new Comparator<String>() {
+            // Overriding the compare method to sort the age
+            public int compare(String str1, String str2) {
+                return Integer.parseInt(str1) - Integer.parseInt(str2);
+            }
+        });
+        for (String key : keys) {
+            String baseUri = parseSimpleArrayAsMap.get(key);
+            boyers.add(new BoyerMoore(baseUri));
+        }
+        return boyers;
     }
 
     /**
@@ -408,60 +467,6 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
 
         }
 
-    }
-
-    private boolean getExposeStatisticsToMonitor() {
-        boolean monitor = configuration.getBoolean(apiName + ".http.exposeStatisticsToMonitor", true);
-        return monitor;
-    }
-
-    protected String getMonioringApiName(S request) {
-
-        if (apiName != null) {
-
-            if (!boyersMap.containsKey(apiName)) {
-
-                List<BoyerMoore> boyers = populateBoyersList();
-                if (boyers != null) {
-                    boyersMap.put(apiName, boyers);
-                }
-            }
-
-            List<BoyerMoore> boyers = boyersMap.get(apiName);
-            if (boyers != null && !boyers.isEmpty()) {
-                String uri = request.getUri().toString();
-                for (BoyerMoore boyerMoore : boyers) {
-                    int match = boyerMoore.search(uri);
-                    if (match >= 0) {
-                        return boyerMoore.getPattern();
-                    }
-                }
-
-            }
-
-        }
-
-        String path = request.getUri().getPath();
-        int secondsSlashIndex = path.indexOf('/', 1);
-        return secondsSlashIndex > 0 ? path.substring(0,secondsSlashIndex) : path;
-    }
-
-    private List<BoyerMoore> populateBoyersList() {
-        List<BoyerMoore> boyers = new ArrayList<BoyerMoore>();
-        Map<String, String> parseSimpleArrayAsMap = ConfigUtil.parseSimpleArrayAsMap(configuration, apiName + ".http.monitoringBaseUri");
-        List<String> keys = new ArrayList<String>(parseSimpleArrayAsMap.keySet());
-//		Collections.sort(keys);
-        Collections.sort(keys,new Comparator<String>() {
-            // Overriding the compare method to sort the age
-            public int compare(String str1, String str2) {
-                return Integer.parseInt(str1) - Integer.parseInt(str2);
-            }
-        });
-        for (String key : keys) {
-            String baseUri = parseSimpleArrayAsMap.get(key);
-            boyers.add(new BoyerMoore(baseUri));
-        }
-        return boyers;
     }
 
 }
