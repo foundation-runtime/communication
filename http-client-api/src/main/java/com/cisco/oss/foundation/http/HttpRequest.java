@@ -43,6 +43,8 @@ public class HttpRequest implements ClientRequest{
     private FlowContext flowContext;
     private String contentType = "application/json";
 
+    protected boolean httpsEnabled = false;
+
     public String getContentType() {
         return contentType;
     }
@@ -122,6 +124,10 @@ public class HttpRequest implements ClientRequest{
                 '}';
     }
 
+    public boolean isHttpsEnabled() {
+        return httpsEnabled;
+    }
+
     /**
      * The builder for the HttpRequest
      */
@@ -195,6 +201,11 @@ public class HttpRequest implements ClientRequest{
 
         public Builder httpMethod(HttpMethod HttpMethod) {
             request.httpMethod = HttpMethod;
+            return this;
+        }
+
+        public Builder https() {
+            request.httpsEnabled = true;
             return this;
         }
 
