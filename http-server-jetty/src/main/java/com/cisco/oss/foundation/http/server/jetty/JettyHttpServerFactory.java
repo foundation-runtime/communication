@@ -230,6 +230,7 @@ public enum JettyHttpServerFactory implements HttpServerFactory, JettyHttpServer
 
         Server server = new Server(jettyHttpThreadPool.getThreadPool());
 
+
         try {
             Configuration configuration = ConfigurationFactory.getConfiguration();
 
@@ -245,6 +246,7 @@ public enum JettyHttpServerFactory implements HttpServerFactory, JettyHttpServer
 
             HttpConfiguration http_config = new HttpConfiguration();
             http_config.setRequestHeaderSize(configuration.getInt(serviceName + ".http.requestHeaderSize", http_config.getRequestHeaderSize()));
+            http_config.setSendServerVersion(false);
 
             ServerConnector httpConnector = getServerConnector(serviceName, server, configuration, host, port, connectionIdleTime, numberOfAcceptors, numberOfSelectors, acceptQueueSize, new HttpConnectionFactory(http_config));
 
@@ -271,7 +273,8 @@ public enum JettyHttpServerFactory implements HttpServerFactory, JettyHttpServer
                 HttpConfiguration httpsConfig = new HttpConfiguration();
                 httpsConfig.setSecurePort(sslPort);
                 httpsConfig.setSecureScheme("https");
-                http_config.setRequestHeaderSize(configuration.getInt(serviceName + ".http.requestHeaderSize", http_config.getRequestHeaderSize()));
+                httpsConfig.setRequestHeaderSize(configuration.getInt(serviceName + ".http.requestHeaderSize", http_config.getRequestHeaderSize()));
+                httpsConfig.setSendServerVersion(false);
 
 
                 SslConnectionFactory sslConnectionFactory = new SslConnectionFactory(sslContextFactory, "HTTP/1.1");
@@ -321,6 +324,8 @@ public enum JettyHttpServerFactory implements HttpServerFactory, JettyHttpServer
 
 // Setting the service instance URI. URI is defined as tcp://address:port for the TCP end point
         instance.setUri("http://" + host + ":" + port + "");
+        instance.setAddress(host);
+        instance.setPort(port);
 
 // Setting the service instance metadata
 //        Map<String, String> meta = new HashMap<String, String>();
