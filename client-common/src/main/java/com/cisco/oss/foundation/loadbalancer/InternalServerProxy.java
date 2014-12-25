@@ -55,17 +55,17 @@ public class InternalServerProxy {
     private int currentNumberOfAttempts;
     private String host;
     private Integer port;
-    private String serviceName;
+    private String clientName;
 
     /**
      * InternalServer ctor.
      *
      * @param waitingTime         - the time to wait while inactive before re activating.
-     * @param serviceName 
+     * @param clientName
      */
-    public InternalServerProxy(final long waitingTime, String serviceName) {
+    public InternalServerProxy(final long waitingTime, String clientName) {
         this.waitingTime = waitingTime;
-        this.serviceName = serviceName;
+        this.clientName = clientName;
     }
 
     /**
@@ -79,7 +79,7 @@ public class InternalServerProxy {
             passivationTimeStamp = System.currentTimeMillis();
 
 //            LoggingHelper.warn(AUDITOR, "Lost connection to host: [%s], port [%s]", getHost(), getPort());
-            LOGGER.warn("Invocation of service '{}' at [{}:{}] has failed {} consecutive times. [{}:{}] will be blacklisted for {} milliseconds", serviceName, getHost(), getPort(), getMaxNumberOfAttempts(), getHost(), getPort(), waitingTime);
+            LOGGER.warn("Invocation of service '{}' at [{}:{}] has failed {} consecutive times. [{}:{}] will be blacklisted for {} milliseconds", clientName, getHost(), getPort(), getMaxNumberOfAttempts(), getHost(), getPort(), waitingTime);
 
             if (LOGGER.isDebugEnabled()) {
                 final Date passTimeAndWaitTime = new Date(passivationTimeStamp);
@@ -280,4 +280,13 @@ public class InternalServerProxy {
         return reactivated;
     }
 
+    @Override
+    public String toString() {
+        return "InternalServerProxy{" +
+                "clientName='" + clientName + '\'' +
+                ", port=" + port +
+                ", host='" + host + '\'' +
+                ", active=" + active +
+                '}';
+    }
 }

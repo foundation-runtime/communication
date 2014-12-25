@@ -37,9 +37,10 @@ public class StickyRoundRobinStrategy<S extends ClientRequest> extends RoundRobi
     private static final Logger LOGGER = LoggerFactory.getLogger(StickyRoundRobinStrategy.class);
     private String hashField = FLOW_CONTEXT;
 
-    public StickyRoundRobinStrategy(boolean serviceDirectoryEnabled, String serviceName) {
-        super(serviceDirectoryEnabled, serviceName);
+    public StickyRoundRobinStrategy(String serviceName, boolean serviceDirectoryEnabled, long waitingTime, String clientName, long retryDelay, int numberOfAttempts) {
+        super(serviceName, serviceDirectoryEnabled, waitingTime, clientName, retryDelay, numberOfAttempts);
     }
+
 
     @Override
     protected int nextNode(int serverProxisListSize, S request) {

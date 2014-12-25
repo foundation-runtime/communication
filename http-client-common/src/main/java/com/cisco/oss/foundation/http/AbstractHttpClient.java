@@ -76,8 +76,11 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
         if (exposeStatisticsToMonitor) {
             MonitoringAgentFactory.getInstance().register(this.configuration);
         }
-        createServerListFromConfig();
+
+        metadata = loadServersMetadataConfiguration();
+
         loadBalancerStrategy = fromHighAvailabilityStrategyType(strategyType);
+        createServerListFromConfig();
         followRedirects = metadata.isFollowRedirects();
         FoundationConfigurationListenerRegistry.addFoundationConfigurationListener(new LoadBalancerConfigurationListener());
     }
@@ -86,11 +89,11 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
 
         switch (strategyType) {
             case FAIL_OVER:
-                return new FailOverStrategy(metadata.isServiceDirectoryEnabled(), metadata.getServiceName());
+                return new FailOverStrategy(metadata.getServiceName(), metadata.isServiceDirectoryEnabled(), metadata.getWaitingTime(), apiName, metadata.getRetryDelay(), metadata.getNumberOfAttempts());
             case STICKY_ROUND_ROBIN:
-                return new StickyRoundRobinStrategy(metadata.isServiceDirectoryEnabled(), metadata.getServiceName());
+                return new StickyRoundRobinStrategy(metadata.getServiceName(), metadata.isServiceDirectoryEnabled(), metadata.getWaitingTime(), apiName, metadata.getRetryDelay(), metadata.getNumberOfAttempts());
             default:
-                return new RoundRobinStrategy(metadata.isServiceDirectoryEnabled(), metadata.getServiceName());
+                return new RoundRobinStrategy(metadata.getServiceName(), metadata.isServiceDirectoryEnabled(), metadata.getWaitingTime(), apiName, metadata.getRetryDelay(), metadata.getNumberOfAttempts());
         }
     }
 
@@ -221,8 +224,6 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
     }
 
     private void createServerListFromConfig() {
-
-        metadata = loadServersMetadataConfiguration();
 
         if (!metadata.isServiceDirectoryEnabled()) {
 
