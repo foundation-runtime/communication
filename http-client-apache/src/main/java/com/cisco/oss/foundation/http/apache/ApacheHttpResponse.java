@@ -22,9 +22,12 @@ import com.google.common.collect.ImmutableListMultimap;
 import org.apache.http.Header;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.util.EntityUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.util.Collection;
 import java.util.Map;
@@ -34,9 +37,11 @@ import java.util.Map;
  */
 public class ApacheHttpResponse implements HttpResponse {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ApacheHttpResponse.class);
+
     private org.apache.http.HttpResponse httpResponse = null;
     private URI requestUri = null;
-    private String responseBody;
+    private byte[] responseBody;
     private boolean isClosed = false;
 
     public ApacheHttpResponse(org.apache.http.HttpResponse httpResponse, URI requestUri, boolean autoCloseable) {
@@ -44,7 +49,7 @@ public class ApacheHttpResponse implements HttpResponse {
         this.requestUri = requestUri;
         if (autoCloseable) {
             if (hasResponseBody()) {
-                responseBody = getResponseAsString();
+                responseBody = getResponse();
             }
             close();
         }
@@ -85,7 +90,7 @@ public class ApacheHttpResponse implements HttpResponse {
                     throw new ClientException(e.toString(), e);
                 }
             } else {
-                return responseBody.getBytes();
+                return responseBody;
             }
         } else {
             return new byte[0];
@@ -102,7 +107,29 @@ public class ApacheHttpResponse implements HttpResponse {
                     throw new ClientException(e.toString(), e);
                 }
             } else {
-                return responseBody;
+                return new String(responseBody);
+            }
+        } else {
+            return "";
+        }
+    }
+
+    @Override
+    public String getResponseAsString(String charset) {
+        if (hasResponseBody()) {
+            if (!isClosed) {
+                try {
+                    return EntityUtils.toString(httpResponse.getEntity(), charset);
+                } catch (IOException e) {
+                    throw new ClientException(e.toString(), e);
+                }
+            } else {
+                try {
+                    return new String(responseBody,charset);
+                } catch (UnsupportedEncodingException e) {
+                    LOGGER.error("can't return string representation of the response with the charset: {}. error is: {}. Using default charset.", charset, e);
+                    return new String(responseBody);
+                }
             }
         } else {
             return "";

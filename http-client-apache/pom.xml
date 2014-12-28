@@ -25,7 +25,7 @@
     <groupId>com.cisco.oss.foundation</groupId>
     <artifactId>http-client-apache</artifactId>
     <name>http-client-apache</name>
-    <version>1.0.2-6-SNAPSHOT</version>
+    <version>1.0.3-2-SNAPSHOT</version>
     <description>This project is the apache http client implementation library in the cisco vss foundation runtime</description>
     <url>https://github.com/foundation-runtime/communication/http-client-apache</url>
     <packaging>jar</packaging>
@@ -58,6 +58,7 @@
     </developers>
     <properties>
         <http-client-common-version>1.1.0-1-SNAPSHOT</http-client-common-version>
+        <http-client-api-version>1.1.0-1-SNAPSHOT</http-client-api-version>
         <logging-api-version>1.0.2-1</logging-api-version>
         <logging-log4j-version>1.0.2-1</logging-log4j-version>
         <jetty-version>8.1.16.v20140903</jetty-version>
@@ -120,6 +121,11 @@
         </plugins>
     </build>
     <dependencies>
+        <dependency>
+            <groupId>com.cisco.oss.foundation</groupId>
+            <artifactId>http-client-api</artifactId>
+            <version>${http-client-api-version}</version>
+        </dependency>
         <dependency>
             <groupId>com.cisco.oss.foundation</groupId>
             <artifactId>http-client-common</artifactId>
