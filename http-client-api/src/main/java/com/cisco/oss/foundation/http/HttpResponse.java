@@ -57,6 +57,14 @@ public interface HttpResponse {
      */
     String getResponseAsString();
 
+
+    /**
+     * get the HTTP response as a String
+     * @param charset use this charset is possible when creating the string response
+     * @return
+     */
+    String getResponseAsString(String charset);
+
     /**
      * get the HTTP response as an InputStream
      * @return
