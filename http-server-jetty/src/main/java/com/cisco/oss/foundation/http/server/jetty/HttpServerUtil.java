@@ -39,6 +39,7 @@ public class HttpServerUtil {
 
 	public static void addFiltersToServletContextHandler(String serviceName, HttpThreadPool threadPool, ServletContextHandler context) {
 
+		context.addFilter(new FilterHolder(new AsyncHandlerSupportFilter(serviceName)), "/*", EnumSet.allOf(DispatcherType.class));
 		context.addFilter(new FilterHolder(new FlowContextFilter(serviceName)), "/*", EnumSet.allOf(DispatcherType.class));
 		context.addFilter(new FilterHolder(new ErrorHandlingFilter(serviceName)), "/*", EnumSet.allOf(DispatcherType.class));
         context.addFilter(new FilterHolder(new MonitoringFilter(serviceName, threadPool)), "/*", EnumSet.allOf(DispatcherType.class));
