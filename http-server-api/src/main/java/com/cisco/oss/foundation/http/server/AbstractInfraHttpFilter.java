@@ -56,11 +56,19 @@ public abstract class AbstractInfraHttpFilter implements Filter {
 
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-		String defaultValue = isEnabledByDefault() + "";
-		boolean enabled = getConfigValue(enabledKey, Boolean.valueOf(defaultValue));
-		if (enabled) {
-			doFilterImpl(request, response, chain);
-		} else {
+
+		Boolean firstRequestProcessing = (Boolean)request.getAttribute("firstRequestProcessing");
+
+		if(firstRequestProcessing == null || (firstRequestProcessing != null && firstRequestProcessing)) {
+
+//			String defaultValue = isEnabledByDefault() + "";
+			boolean enabled = getConfigValue(enabledKey, isEnabledByDefault());
+			if (enabled) {
+				doFilterImpl(request, response, chain);
+			} else {
+				chain.doFilter(request, response);
+			}
+		}else{
 			chain.doFilter(request, response);
 		}
 	}
