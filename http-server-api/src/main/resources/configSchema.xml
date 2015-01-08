@@ -53,6 +53,12 @@
                         <PrimitiveValue value="false"/>
                     </DefaultValue>
                 </StructureMemberDefinition>
+                <StructureMemberDefinition name="http.pingFilter.proxyPingFilterHeader" type="STRING" advanced="true"
+                                           description="optional custom header for the ping filter.">
+                    <DefaultValue>
+                        <PrimitiveValue value="x-Ping"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
                 <StructureMemberDefinition name="http.requestValidityFilter.isEnabled" type="BOOLEAN" advanced="true"
                                            description="Determines whether the 'RequestValidityFilter' is enabled or not">
                     <DefaultValue>
