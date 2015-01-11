@@ -58,7 +58,7 @@
         </developer>
     </developers>
     <properties>
-        <http-client-apache-version>1.0.2-5</http-client-apache-version>
+        <http-client-apache-version>1.0.2-6-SNAPSHOT</http-client-apache-version>
         <logging-log4j-version>1.0.2-1</logging-log4j-version>
         <logging-api-version>1.0.2-1</logging-api-version>
         <jetty-version>9.2.4.v20141103</jetty-version>
@@ -121,6 +121,10 @@
             </plugin>
         </plugins>
     </build>
+    <dependencyManagement>
+        <dependencies>
+        </dependencies>
+    </dependencyManagement>
     <dependencies>
         <dependency>
             <groupId>com.cisco.oss.foundation</groupId>
@@ -169,6 +173,16 @@
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-servlets</artifactId>
             <version>${jetty-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.cisco.oss.foundation.directory</groupId>
+            <artifactId>sd-api</artifactId>
+            <version>1.1.0-4</version>
+        </dependency>
+        <dependency>
+            <groupId>com.cisco.oss.foundation.directory</groupId>
+            <artifactId>sd-core</artifactId>
+            <version>1.1.0-4</version>
         </dependency>
         <dependency>
             <groupId>org.scala-lang</groupId>

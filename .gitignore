@@ -1,3 +1,4 @@
 target/
 log/
 *.iml
+http-client-apache/src/main/java/com/cisco/oss/foundation/http/apache/IdleConnectionMonitorThread.java

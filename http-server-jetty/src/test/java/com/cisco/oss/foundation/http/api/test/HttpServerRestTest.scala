@@ -94,11 +94,14 @@ class HttpServerRestTest extends FeatureSpec with GivenWhenThen with BeforeAndAf
     config setProperty("serverTest1.http.traceFilter.isEnabled", "true")
     config setProperty("serverTest1.http.traceFilter.textContentTypes.1", "text/plain")
     config setProperty("serverTest1.http.monitoringFilter.isEnabled", "true");
+    config setProperty("serverTest1.http.serviceDirectory.isEnabled", "true");
 
 
+    config setProperty("service.serverTest1-client.http.serviceDirectory.isEnabled", "true");
     config setProperty("service.serverTest1-client.http.readTimeout", "30000")
-    config setProperty("service.serverTest1-client.1.port", port)
-    config setProperty("service.serverTest1-client.1.host", IpUtils.getIpAddress)
+    config setProperty("service.serverTest1-client.http.serviceDirectory.serviceName", "serverTest1");
+    //    config setProperty("service.serverTest1-client.1.port", port)
+//    config setProperty("service.serverTest1-client.1.host", IpUtils.getIpAddress)
 
     val map: ArrayListMultimap[String, Servlet] = ArrayListMultimap.create()
     //    val scripts.sh = new ServletContextHandler
@@ -146,6 +149,44 @@ class HttpServerRestTest extends FeatureSpec with GivenWhenThen with BeforeAndAf
       assert(result.getResponseAsString.contains("psSms"))
 
 
+    }
+
+
+  }
+
+  feature("test InterfacesResource with SD support") {
+
+    info("starting serverTest1 server")
+    info("using MyServlet servlet")
+
+    scenario("calling get return resource result") {
+
+      given("server is running")
+
+      when("client sends a request")
+
+      FlowContextFactory.createFlowContext()
+
+      val client = ApacheHttpClientFactory.createHttpClient("service.serverTest1-client")
+      val request = HttpRequest.newBuilder()
+        .uri("/ps/ifs")
+        .httpMethod(HttpMethod.POST)
+        .entity("hello *************")
+        .build()
+
+      val result = client.execute(request)
+
+      then("the server should return a message")
+
+
+      assert(result != null)
+      assert(result.getResponseAsString.contains("psSms"))
+
+      JettyHttpServerFactory.INSTANCE.stopHttpServer("serverTest1")
+
+      Thread.sleep(2500)
+
+      client.execute(request)
     }
 
 

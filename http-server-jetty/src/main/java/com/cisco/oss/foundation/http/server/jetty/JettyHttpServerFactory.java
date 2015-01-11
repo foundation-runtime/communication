@@ -17,10 +17,18 @@
 package com.cisco.oss.foundation.http.server.jetty;
 
 import com.cisco.oss.foundation.configuration.ConfigurationFactory;
+import com.cisco.oss.foundation.directory.RegistrationManager;
+import com.cisco.oss.foundation.directory.ServiceDirectory;
+import com.cisco.oss.foundation.directory.ServiceInstanceHealth;
+import com.cisco.oss.foundation.directory.entity.OperationalStatus;
+import com.cisco.oss.foundation.directory.entity.ProvidedServiceInstance;
+import com.cisco.oss.foundation.directory.entity.ServiceInstance;
+import com.cisco.oss.foundation.directory.exception.ServiceException;
 import com.cisco.oss.foundation.http.server.HttpServerFactory;
 import com.cisco.oss.foundation.http.server.ServerFailedToStartException;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jetty.server.*;
@@ -52,7 +60,7 @@ public enum JettyHttpServerFactory implements HttpServerFactory, JettyHttpServer
 
     private final static Logger LOGGER = LoggerFactory.getLogger(JettyHttpServerFactory.class);
 
-    private static final Map<String, Server> servers = new ConcurrentHashMap<String, Server>();
+    private static final Map<String, Pair<Server,ProvidedServiceInstance>> servers = new ConcurrentHashMap<String, Pair<Server,ProvidedServiceInstance>>();
 
     private JettyHttpServerFactory() {
     }
@@ -73,7 +81,7 @@ public enum JettyHttpServerFactory implements HttpServerFactory, JettyHttpServer
     }
 
     @Override
-    public void startHttpServer(String serviceName, ListMultimap<String, Servlet> servlets, Map<String,String> initParams) {
+    public void startHttpServer(String serviceName, ListMultimap<String, Servlet> servlets, Map<String, String> initParams) {
 
         ArrayListMultimap<String, Filter> filterMap = ArrayListMultimap.create();
         startHttpServer(serviceName, servlets, filterMap, Collections.<EventListener>emptyList(), initParams);
@@ -88,7 +96,7 @@ public enum JettyHttpServerFactory implements HttpServerFactory, JettyHttpServer
     @Override
     public void startHttpServer(String serviceName, ListMultimap<String, Servlet> servlets, List<EventListener> eventListeners) {
         ArrayListMultimap<String, Filter> filterMap = ArrayListMultimap.create();
-        startHttpServer(serviceName, servlets, filterMap,eventListeners);
+        startHttpServer(serviceName, servlets, filterMap, eventListeners);
 
     }
 
@@ -116,19 +124,17 @@ public enum JettyHttpServerFactory implements HttpServerFactory, JettyHttpServer
     }
 
 
-
-
     /**
      * start a new http server
      *
-     * @param serviceName - the http logical service name
-     * @param servlets    - a mapping between servlet path and servlet instance. This mapping uses the google collections {@link com.google.common.collect.ListMultimap}.
-     *                    <br>Example of usage:
-     *                    {@code ArrayListMultimap<String,Servlet> servletMap = ArrayListMultimap.create()}
-     * @param filters     - a mapping between filter path and filter instance. This mapping uses the google collections {@link com.google.common.collect.ListMultimap}.
-     *                    <br>Example of usage:
-     *                    {@code ArrayListMultimap<String,Filter> filterMap = ArrayListMultimap.create()}
-     * @param keyStorePath - a path to the keystore file
+     * @param serviceName      - the http logical service name
+     * @param servlets         - a mapping between servlet path and servlet instance. This mapping uses the google collections {@link com.google.common.collect.ListMultimap}.
+     *                         <br>Example of usage:
+     *                         {@code ArrayListMultimap<String,Servlet> servletMap = ArrayListMultimap.create()}
+     * @param filters          - a mapping between filter path and filter instance. This mapping uses the google collections {@link com.google.common.collect.ListMultimap}.
+     *                         <br>Example of usage:
+     *                         {@code ArrayListMultimap<String,Filter> filterMap = ArrayListMultimap.create()}
+     * @param keyStorePath     - a path to the keystore file
      * @param keyStorePassword - the keystore password
      */
     @Override
@@ -153,11 +159,11 @@ public enum JettyHttpServerFactory implements HttpServerFactory, JettyHttpServer
     /**
      * start a new http server
      *
-     * @param serviceName - the http logical service name
-     * @param servlets    - a mapping between servlet path and servlet instance. This mapping uses the google collections {@link com.google.common.collect.ListMultimap}.
-     *                    <br>Example of usage:
-     *                    {@code ArrayListMultimap<String,Servlet> servletMap = ArrayListMultimap.create()}
-     * @param keyStorePath - a path to the keystore file
+     * @param serviceName      - the http logical service name
+     * @param servlets         - a mapping between servlet path and servlet instance. This mapping uses the google collections {@link com.google.common.collect.ListMultimap}.
+     *                         <br>Example of usage:
+     *                         {@code ArrayListMultimap<String,Servlet> servletMap = ArrayListMultimap.create()}
+     * @param keyStorePath     - a path to the keystore file
      * @param keyStorePassword - the keystore password
      */
     @Override
@@ -169,20 +175,20 @@ public enum JettyHttpServerFactory implements HttpServerFactory, JettyHttpServer
     /**
      * start a new http server
      *
-     * @param serviceName - the http logical service name
-     * @param servlets    - a mapping between servlet path and servlet instance. This mapping uses the google collections {@link com.google.common.collect.ListMultimap}.
-     *                    <br>Example of usage:
-     *                    {@code ArrayListMultimap<String,Servlet> servletMap = ArrayListMultimap.create()}
-     * @param filters     - a mapping between filter path and filter instance. This mapping uses the google collections {@link com.google.common.collect.ListMultimap}.
-     *                    <br>Example of usage:
-     *                    {@code ArrayListMultimap<String,Filter> filterMap = ArrayListMultimap.create()}
-     * @param keyStorePath - a path to the keystore file
-     * @param keyStorePassword - the keystore password
-     * @param trustStorePath - the trust store file path
+     * @param serviceName        - the http logical service name
+     * @param servlets           - a mapping between servlet path and servlet instance. This mapping uses the google collections {@link com.google.common.collect.ListMultimap}.
+     *                           <br>Example of usage:
+     *                           {@code ArrayListMultimap<String,Servlet> servletMap = ArrayListMultimap.create()}
+     * @param filters            - a mapping between filter path and filter instance. This mapping uses the google collections {@link com.google.common.collect.ListMultimap}.
+     *                           <br>Example of usage:
+     *                           {@code ArrayListMultimap<String,Filter> filterMap = ArrayListMultimap.create()}
+     * @param keyStorePath       - a path to the keystore file
+     * @param keyStorePassword   - the keystore password
+     * @param trustStorePath     - the trust store file path
      * @param trustStorePassword - the trust store password
      */
     @Override
-    public void startHttpServer(String serviceName, ListMultimap<String, Servlet> servlets, ListMultimap<String, Filter> filters, String keyStorePath, String keyStorePassword, String trustStorePath, String trustStorePassword){
+    public void startHttpServer(String serviceName, ListMultimap<String, Servlet> servlets, ListMultimap<String, Filter> filters, String keyStorePath, String keyStorePassword, String trustStorePath, String trustStorePassword) {
         startHttpServer(serviceName, servlets, filters, Collections.<EventListener>emptyList(), keyStorePath, keyStorePassword, trustStorePath, trustStorePassword);
     }
 
@@ -206,7 +212,7 @@ public enum JettyHttpServerFactory implements HttpServerFactory, JettyHttpServer
         for (Map.Entry<String, Servlet> entry : servlets.entries()) {
 
 
-            if (eventListeners!= null && !eventListeners.isEmpty()){
+            if (eventListeners != null && !eventListeners.isEmpty()) {
                 context.setEventListeners(eventListeners.toArray(new EventListener[0]));
             }
 
@@ -226,6 +232,7 @@ public enum JettyHttpServerFactory implements HttpServerFactory, JettyHttpServer
 
         Server server = new Server(jettyHttpThreadPool.getThreadPool());
 
+
         try {
             Configuration configuration = ConfigurationFactory.getConfiguration();
 
@@ -237,9 +244,11 @@ public enum JettyHttpServerFactory implements HttpServerFactory, JettyHttpServer
             int numberOfAcceptors = configuration.getInt(serviceName + ".http.numberOfAcceptors", 1);
             int numberOfSelectors = configuration.getInt(serviceName + ".http.numberOfSelectors", -1);
             int acceptQueueSize = configuration.getInt(serviceName + ".http.acceptQueueSize", 0);
+            boolean serviceDirectoryEnabled = configuration.getBoolean(serviceName + ".http.serviceDirectory.isEnabled", false);
 
             HttpConfiguration http_config = new HttpConfiguration();
             http_config.setRequestHeaderSize(configuration.getInt(serviceName + ".http.requestHeaderSize", http_config.getRequestHeaderSize()));
+            http_config.setSendServerVersion(false);
 
             ServerConnector httpConnector = getServerConnector(serviceName, server, configuration, host, port, connectionIdleTime, numberOfAcceptors, numberOfSelectors, acceptQueueSize, new HttpConnectionFactory(http_config));
 
@@ -257,7 +266,7 @@ public enum JettyHttpServerFactory implements HttpServerFactory, JettyHttpServer
                 sslContextFactory.setKeyStorePassword(keyStorePassword);
 
                 boolean addTrustStoreSupport = StringUtils.isNotEmpty(trustStorePath) && StringUtils.isNotEmpty(trustStorePassword);
-                if(addTrustStoreSupport){
+                if (addTrustStoreSupport) {
                     sslContextFactory.setTrustStorePath(trustStorePath);
                     sslContextFactory.setTrustStorePassword(trustStorePassword);
                     sslContextFactory.setNeedClientAuth(true);
@@ -266,7 +275,8 @@ public enum JettyHttpServerFactory implements HttpServerFactory, JettyHttpServer
                 HttpConfiguration httpsConfig = new HttpConfiguration();
                 httpsConfig.setSecurePort(sslPort);
                 httpsConfig.setSecureScheme("https");
-                http_config.setRequestHeaderSize(configuration.getInt(serviceName + ".http.requestHeaderSize", http_config.getRequestHeaderSize()));
+                httpsConfig.setRequestHeaderSize(configuration.getInt(serviceName + ".http.requestHeaderSize", http_config.getRequestHeaderSize()));
+                httpsConfig.setSendServerVersion(false);
 
 
                 SslConnectionFactory sslConnectionFactory = new SslConnectionFactory(sslContextFactory, "HTTP/1.1");
@@ -289,7 +299,13 @@ public enum JettyHttpServerFactory implements HttpServerFactory, JettyHttpServer
             server.setHandler(context);
 
             server.start();
-            servers.put(serviceName, server);
+
+            ProvidedServiceInstance instance = null;
+            if (serviceDirectoryEnabled) {
+                instance = registerWithSDServer(serviceName, host, port);
+            }
+
+            servers.put(serviceName, Pair.of(server,instance));
             LOGGER.info("Http server: {} started on {}", serviceName, port);
 
             // server.join();
@@ -299,16 +315,61 @@ public enum JettyHttpServerFactory implements HttpServerFactory, JettyHttpServer
         }
     }
 
+    private ProvidedServiceInstance registerWithSDServer(final String serviceName, String host, int port) throws Exception {
+        // Get a RegistrationManager instance from ServiceDirectory.
+// The ServiceDirectory will load a default ServiceDirectoryConfig and instantialize a RegistrationManager instance.
+        final RegistrationManager registrationManager = ServiceDirectory.getRegistrationManager();
+
+
+// Construct the service instance. serviceName and providerId together uniquely identify a service instance where providerId is defined as "address-port".
+        final ProvidedServiceInstance instance = new ProvidedServiceInstance(serviceName, host, port);
+
+// Setting the service instance URI. URI is defined as tcp://address:port for the TCP end point
+        instance.setUri("http://" + host + ":" + port + "");
+        instance.setAddress(host);
+        instance.setPort(port);
+
+        instance.setStatus(OperationalStatus.UP);
+
+        registrationManager.registerService(instance, null);
+
+
+// Update the OperationalStatus of the instance to DOWN, this instance will be removed from the ServiceInstance lookup.
+//        registrationManager.updateServiceOperationalStatus(serviceName, instance.getProviderId(), OperationalStatus.DOWN);
+
+
+// Update the instance: OperationalStatus to UP, and the "version" metadata to "2.5.1"
+//        instance.setStatus(OperationalStatus.UP);
+//        instance.getMetadata().put("version", "2.5.1");
+//        instance.getMetadata().put("datacenter", "dc01");
+//        registrationManager.updateService(instance);
+
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            public void run() {
+                // Unregister the instance.
+                try {
+                    registrationManager.unregisterService(serviceName, instance.getProviderId());
+                } catch (ServiceException e) {
+                    LOGGER.error("can't un-register the service in service directory server. error is: {}", e);
+                }
+            }
+        });
+
+        return instance;
+
+
+    }
+
     /**
      * start a new http server
      *
-     * @param serviceName - the http logical service name
-     * @param servlets    - a mapping between servlet path and servlet instance. This mapping uses the google collections {@link com.google.common.collect.ListMultimap}.
-     *                    <br>Example of usage:
-     *                    {@code ArrayListMultimap<String,Servlet> servletMap = ArrayListMultimap.create()}
-     * @param keyStorePath - a path to the keystore file
-     * @param keyStorePassword - the keystore password
-     * @param trustStorePath - the trust store file path
+     * @param serviceName        - the http logical service name
+     * @param servlets           - a mapping between servlet path and servlet instance. This mapping uses the google collections {@link com.google.common.collect.ListMultimap}.
+     *                           <br>Example of usage:
+     *                           {@code ArrayListMultimap<String,Servlet> servletMap = ArrayListMultimap.create()}
+     * @param keyStorePath       - a path to the keystore file
+     * @param keyStorePassword   - the keystore password
+     * @param trustStorePath     - the trust store file path
      * @param trustStorePassword - the trust store password
      */
     @Override
@@ -318,7 +379,6 @@ public enum JettyHttpServerFactory implements HttpServerFactory, JettyHttpServer
     }
 
 
-
     /**
      * stop the http server
      *
@@ -326,14 +386,26 @@ public enum JettyHttpServerFactory implements HttpServerFactory, JettyHttpServer
      */
     @Override
     public void stopHttpServer(String serviceName) {
-        Server server = servers.get(serviceName);
-        if (server != null) {
-            try {
-                server.stop();
-                servers.remove(serviceName);
-                LOGGER.info("Http server: {} stopped", serviceName);
-            } catch (Exception e) {
-                LOGGER.error("Problem stoping the http {} server. Error is {}.", serviceName, e);
+        Pair<Server, ProvidedServiceInstance> pair = servers.get(serviceName);
+        if (pair != null) {
+            Server server = pair.getLeft();
+            if (server != null) {
+                try {
+                    server.stop();
+                    servers.remove(serviceName);
+                    LOGGER.info("Http server: {} stopped", serviceName);
+                } catch (Exception e) {
+                    LOGGER.error("Problem stopping the http {} server. Error is {}.", serviceName, e);
+                }
+            }
+            ProvidedServiceInstance instance = pair.getRight();
+            if(instance != null){
+                try {
+                    final RegistrationManager registrationManager = ServiceDirectory.getRegistrationManager();
+                    registrationManager.updateServiceOperationalStatus(instance.getServiceName(),instance.getProviderId(),OperationalStatus.DOWN);
+                } catch (ServiceException e) {
+                    LOGGER.error("Problem stopping the http {} server. Error is {}.", serviceName, e);
+                }
             }
         }
     }
@@ -341,7 +413,7 @@ public enum JettyHttpServerFactory implements HttpServerFactory, JettyHttpServer
 
     @Override
     public void setErrorHandler(String serviceName, ErrorHandler errorHandler) {
-        Server server = servers.get(serviceName);
+        Server server = servers.get(serviceName).getLeft();
         if (server != null) {
             server.addBean(errorHandler);
         }

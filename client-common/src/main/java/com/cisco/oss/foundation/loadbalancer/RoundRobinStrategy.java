@@ -34,6 +34,11 @@ public class RoundRobinStrategy<S extends ClientRequest> extends AbstractLoadBal
 	private static final long serialVersionUID = 6806126762594591923L;
     private AtomicInteger nextIndex = new AtomicInteger(0);
 
+	public RoundRobinStrategy(String serviceName, boolean serviceDirectoryEnabled, long waitingTime, String clientName, long retryDelay, int numberOfAttempts) {
+		super(serviceName, serviceDirectoryEnabled, waitingTime, clientName, retryDelay, numberOfAttempts);
+	}
+
+
 	protected int nextNode(int serverProxisListSize, S request) {
         int index = nextIndex.incrementAndGet() % serverProxisListSize;
         return index;

@@ -239,6 +239,7 @@ public enum JettyHttpServerFactory implements HttpServerFactory {
         }
 
         Server server = new Server();
+        server.setSendServerVersion(false);
 
         try {
             Configuration configuration = ConfigurationFactory.getConfiguration();
