@@ -402,7 +402,8 @@ public enum JettyHttpServerFactory implements HttpServerFactory, JettyHttpServer
             if(instance != null){
                 try {
                     final RegistrationManager registrationManager = ServiceDirectory.getRegistrationManager();
-                    registrationManager.updateServiceOperationalStatus(instance.getServiceName(),instance.getProviderId(),OperationalStatus.DOWN);
+//                    registrationManager.updateServiceOperationalStatus(instance.getServiceName(),instance.getProviderId(),OperationalStatus.DOWN);
+                    registrationManager.unregisterService(instance.getServiceName(),instance.getProviderId());
                 } catch (ServiceException e) {
                     LOGGER.error("Problem stopping the http {} server. Error is {}.", serviceName, e);
                 }

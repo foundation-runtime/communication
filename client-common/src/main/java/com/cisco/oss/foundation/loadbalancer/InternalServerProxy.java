@@ -289,4 +289,26 @@ public class InternalServerProxy {
                 ", active=" + active +
                 '}';
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof InternalServerProxy)) return false;
+
+        InternalServerProxy that = (InternalServerProxy) o;
+
+        if (!clientName.equals(that.clientName)) return false;
+        if (!host.equals(that.host)) return false;
+        if (!port.equals(that.port)) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = host.hashCode();
+        result = 31 * result + port.hashCode();
+        result = 31 * result + clientName.hashCode();
+        return result;
+    }
 }

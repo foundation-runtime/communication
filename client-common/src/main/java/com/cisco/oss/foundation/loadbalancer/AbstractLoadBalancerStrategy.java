@@ -96,11 +96,12 @@ public abstract class AbstractLoadBalancerStrategy<S extends ClientRequest> impl
                         AbstractLoadBalancerStrategy.readWriteLock.writeLock().unlock();
                     }
                     LOGGER.info(internalServerProxy + " is now un-available");
+
                 }
 
                 @Override
                 public void serviceInstanceChange(ServiceInstance serviceInstance) {
-
+                    LOGGER.info("{} has changed status to: {}", serviceInstance.getServiceName(), serviceInstance.getStatus());
                 }
             });
         } catch (ServiceException e) {
