@@ -174,7 +174,9 @@ class HttpServerRestTest extends FeatureSpec with GivenWhenThen with BeforeAndAf
         .entity("hello *************")
         .build()
 
+      println("first invoke")
       val result = client.execute(request)
+      println("post first invoke")
 
       then("the server should return a message")
 
@@ -184,9 +186,11 @@ class HttpServerRestTest extends FeatureSpec with GivenWhenThen with BeforeAndAf
 
       JettyHttpServerFactory.INSTANCE.stopHttpServer("serverTest1")
 
-      Thread.sleep(2500)
+      Thread.sleep(12500)
 
+      println("second invoke")
       client.execute(request)
+      println("post second invoke")
     }
 
 
