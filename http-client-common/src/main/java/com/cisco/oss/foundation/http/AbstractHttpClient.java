@@ -47,10 +47,12 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
 
     public static final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractHttpClient.class);
-    private static Map<String, List<BoyerMoore>> boyersMap = new ConcurrentHashMap<String, List<BoyerMoore>>();
     protected LoadBalancerStrategy loadBalancerStrategy = null;
     protected String apiName = "HTTP";
     protected boolean exposeStatisticsToMonitor = false;
+    protected boolean autoEncodeUri = true;
+    private static Map<String, List<BoyerMoore>> boyersMap = new ConcurrentHashMap<String, List<BoyerMoore>>();
+
     protected InternalServerProxyMetadata metadata;
     protected Configuration configuration;
     protected boolean enableLoadBalancing = true;
@@ -59,7 +61,8 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
     public AbstractHttpClient(String apiName, Configuration configuration, boolean enableLoadBalancing) {
         this(apiName, LoadBalancerStrategy.STRATEGY_TYPE.ROUND_ROBIN, configuration, enableLoadBalancing);
         exposeStatisticsToMonitor = getExposeStatisticsToMonitor();
-        if (exposeStatisticsToMonitor) {
+        autoEncodeUri = metadata.isAutoEncodeUri();
+        if(exposeStatisticsToMonitor){
             MonitoringAgentFactory.getInstance().register();
         }
     }
@@ -81,6 +84,7 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
 
         loadBalancerStrategy = fromHighAvailabilityStrategyType(strategyType);
         createServerListFromConfig();
+        autoEncodeUri = metadata.isAutoEncodeUri();
         followRedirects = metadata.isFollowRedirects();
         FoundationConfigurationListenerRegistry.addFoundationConfigurationListener(new LoadBalancerConfigurationListener());
     }
@@ -179,7 +183,17 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
 
         URI newURI = null;
         try {
-            newURI = new URI(scheme, origUri.getUserInfo(), host, port, urlPath, origUri.getQuery(), origUri.getFragment());
+            String query = origUri.getRawQuery();
+            if(autoEncodeUri){
+                newURI = new URI(scheme, origUri.getUserInfo(), host, port, urlPath, query, origUri.getFragment());
+            }else{
+                if (query != null){
+                    newURI = new URI(scheme + "://" + host + ":" + port + urlPath + "?" + query);
+                }else{
+                    newURI = new URI(scheme + "://" + host + ":" + port + urlPath);
+                }
+
+            }
         } catch (URISyntaxException e) {
             throw new ClientException(e.toString());
         }
@@ -268,6 +282,7 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
         boolean followRedirects = subset.getBoolean("http." + LoadBalancerConstants.FOLLOW_REDIRECTS, false);
         boolean disableCookies = subset.getBoolean("http." + LoadBalancerConstants.DISABLE_COOKIES, false);
         boolean autoCloseable = subset.getBoolean("http." + LoadBalancerConstants.AUTO_CLOSEABLE, true);
+        boolean autoEncodeUri = subset.getBoolean("http." + LoadBalancerConstants.AUTO_ENCODE_URI, true);
         boolean staleConnectionCheckEnabled = subset.getBoolean("http." + LoadBalancerConstants.IS_STALE_CONN_CHECK_ENABLED, false);
         boolean serviceDirectoryEnabled = subset.getBoolean("http." + LoadBalancerConstants.SERVICE_DIRECTORY_IS_ENABLED, false);
         String serviceName = subset.getString("http." + LoadBalancerConstants.SERVICE_DIRECTORY_SERVICE_NAME, "UNKNOWN");
@@ -309,7 +324,7 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
 
         }
 
-        InternalServerProxyMetadata metadata = new InternalServerProxyMetadata(readTimeout, connectTimeout, idleTimeout, maxConnectionsPerAddress, maxConnectionsTotal, maxQueueSizePerAddress, waitingTime, numberOfAttempts, retryDelay, hostAndPortPairs, keyStorePath, keyStorePassword, trustStorePath, trustStorePassword, followRedirects, autoCloseable, staleConnectionCheckEnabled, disableCookies, serviceDirectoryEnabled, serviceName);
+        InternalServerProxyMetadata metadata = new InternalServerProxyMetadata(readTimeout, connectTimeout, idleTimeout, maxConnectionsPerAddress, maxConnectionsTotal, maxQueueSizePerAddress, waitingTime, numberOfAttempts, retryDelay, hostAndPortPairs, keyStorePath, keyStorePassword, trustStorePath, trustStorePassword, followRedirects, autoCloseable, staleConnectionCheckEnabled, disableCookies, serviceDirectoryEnabled, serviceName, autoEncodeUri);
 //        metadata.getHostAndPortPairs().addAll(hostAndPortPairs);
 //        metadata.setReadTimeout(readTimeout);
 //        metadata.setConnectTimeout(connectTimeout);

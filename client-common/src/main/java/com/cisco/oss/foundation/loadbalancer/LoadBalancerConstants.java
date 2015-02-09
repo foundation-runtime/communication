@@ -64,6 +64,7 @@ public final class LoadBalancerConstants {
     public static final String MAX_QUEUE_PER_ADDRESS = "http.maxQueueSizePerAddress";
     public static final int DEFAULT_MAX_QUEUE_PER_ADDRESS = 1000;
     public static final String AUTO_CLOSEABLE = "autoCloseable";
+    public static final String AUTO_ENCODE_URI = "autoEncodeUri";
     public static final String IS_STALE_CONN_CHECK_ENABLED = "staleConnectionCheckEnabled";
     public static final String DISABLE_COOKIES = "disableCookies";
     public static final String SERVICE_DIRECTORY_IS_ENABLED = "serviceDirectory.isEnabled";
