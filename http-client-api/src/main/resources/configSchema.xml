@@ -88,6 +88,11 @@
                         <PrimitiveValue value="true"/>
                     </DefaultValue>
                 </StructureMemberDefinition>
+                <StructureMemberDefinition name="http.autoEncodeUri" type="BOOLEAN" advanced="true" description="Set to true if you want the client to encode the uri." required="false">
+                    <DefaultValue>
+                        <PrimitiveValue value="true"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
                 <StructureMemberDefinition name="http.staleConnectionCheckEnabled" type="BOOLEAN" advanced="true" description="Set to true if you want Client connections to be tested before re-used from the pool. Currently supported only in Apache client.." required="false">
                     <DefaultValue>
                         <PrimitiveValue value="false"/>

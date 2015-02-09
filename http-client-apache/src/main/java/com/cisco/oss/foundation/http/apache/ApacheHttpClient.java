@@ -26,6 +26,8 @@ import com.cisco.oss.foundation.loadbalancer.LoadBalancerStrategy;
 import com.google.common.base.Joiner;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpEntityEnclosingRequest;
+import org.apache.http.HttpHost;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
@@ -48,6 +50,8 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 import org.apache.http.impl.nio.client.HttpAsyncClientBuilder;
 import org.apache.http.impl.nio.client.HttpAsyncClients;
+import org.apache.http.message.BasicHttpEntityEnclosingRequest;
+import org.apache.http.message.BasicHttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,6 +79,7 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
     }
 
     private boolean autoCloseable = true;
+
 
 
     ApacheHttpClient(String apiName, Configuration configuration, boolean enableLoadBalancing, X509HostnameVerifier hostnameVerifier) {
@@ -105,6 +110,7 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
         boolean addTrustSupport = StringUtils.isNotEmpty(metadata.getTrustStorePath()) && StringUtils.isNotEmpty(metadata.getTrustStorePassword());
 
         autoCloseable = metadata.isAutoCloseable();
+
 
         SSLContext sslContext = null;
 
@@ -193,16 +199,18 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
     @Override
     public HttpResponse executeDirect(HttpRequest request) {
 
-        HttpUriRequest httpUriRequest = null;
+        org.apache.http.HttpRequest httpRequest = null;
 
         Joiner joiner = Joiner.on(",").skipNulls();
         URI requestUri = buildUri(request, joiner);
 
-        httpUriRequest = buildHttpUriRequest(request, joiner, requestUri);
+        httpRequest = buildHttpUriRequest(request, joiner, requestUri);
 
         try {
 //            LOGGER.info("sending request: {}", request.getUri());
-            CloseableHttpResponse response = httpClient.execute(httpUriRequest);
+
+            HttpHost httpHost = new HttpHost(requestUri.getHost(),requestUri.getPort(),requestUri.getScheme());
+            CloseableHttpResponse response = httpClient.execute(httpHost, httpRequest);
             ApacheHttpResponse apacheHttpResponse = new ApacheHttpResponse(response, requestUri, autoCloseable);
 //            LOGGER.info("got response status: {} for request: {}",apacheHttpResponse.getStatus(), apacheHttpResponse.getRequestedURI());
             return apacheHttpResponse;
@@ -211,38 +219,53 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
         }
     }
 
-    private HttpUriRequest buildHttpUriRequest(HttpRequest request, Joiner joiner, URI requestUri) {
-        HttpUriRequest httpUriRequest;
-        switch (request.getHttpMethod()) {
-            case GET:
-                httpUriRequest = new HttpGet(requestUri);
-                break;
-            case POST:
-                httpUriRequest = new HttpPost(requestUri);
-                break;
-            case PUT:
-                httpUriRequest = new HttpPut(requestUri);
-                break;
-            case DELETE:
-                httpUriRequest = new HttpDelete(requestUri);
-                break;
-            case HEAD:
-                httpUriRequest = new HttpHead(requestUri);
-                break;
-            case OPTIONS:
-                httpUriRequest = new HttpOptions(requestUri);
-                break;
-            case PATCH:
-                httpUriRequest = new HttpPatch(requestUri);
-                break;
-            default:
-                throw new ClientException("You have to one of the REST verbs such as GET, POST etc.");
+    private org.apache.http.HttpRequest buildHttpUriRequest(HttpRequest request, Joiner joiner, URI requestUri) {
+        org.apache.http.HttpRequest httpRequest;
+        if(autoEncodeUri){
+            switch (request.getHttpMethod()) {
+                case GET:
+                    httpRequest = new HttpGet(requestUri);
+                    break;
+                case POST:
+                    httpRequest = new HttpPost(requestUri);
+                    break;
+                case PUT:
+                    httpRequest = new HttpPut(requestUri);
+                    break;
+                case DELETE:
+                    httpRequest = new HttpDelete(requestUri);
+                    break;
+                case HEAD:
+                    httpRequest = new HttpHead(requestUri);
+                    break;
+                case OPTIONS:
+                    httpRequest = new HttpOptions(requestUri);
+                    break;
+                case PATCH:
+                    httpRequest = new HttpPatch(requestUri);
+                    break;
+                default:
+                    throw new ClientException("You have to one of the REST verbs such as GET, POST etc.");
+            }
+        }else{
+            switch (request.getHttpMethod()) {
+                case POST:
+                case PUT:
+                case DELETE:
+                case PATCH:
+                    httpRequest = new BasicHttpEntityEnclosingRequest(request.getHttpMethod().method(), requestUri.toString());
+                    break;
+                default:
+                    httpRequest = new BasicHttpRequest(request.getHttpMethod().method(), requestUri.toString());
+            }
+
         }
+
 
         byte[] entity = request.getEntity();
         if (entity != null) {
-            if (httpUriRequest instanceof HttpEntityEnclosingRequestBase) {
-                HttpEntityEnclosingRequestBase httpEntityEnclosingRequestBase = (HttpEntityEnclosingRequestBase) httpUriRequest;
+            if (httpRequest instanceof HttpEntityEnclosingRequest) {
+                HttpEntityEnclosingRequest httpEntityEnclosingRequestBase = (HttpEntityEnclosingRequest) httpRequest;
                 httpEntityEnclosingRequestBase.setEntity(new ByteArrayEntity(entity, ContentType.create(request.getContentType())));
             } else {
                 throw new ClientException("sending content for request type " + request.getHttpMethod() + " is not supported!");
@@ -255,9 +278,9 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
             String key = stringCollectionEntry.getKey();
             Collection<String> stringCollection = stringCollectionEntry.getValue();
             String value = joiner.join(stringCollection);
-            httpUriRequest.setHeader(key, value);
+            httpRequest.setHeader(key, value);
         }
-        return httpUriRequest;
+        return httpRequest;
     }
 
     private URI buildUri(HttpRequest request, Joiner joiner) {
@@ -266,11 +289,14 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
         Map<String, Collection<String>> queryParams = request.getQueryParams();
         if (queryParams != null && !queryParams.isEmpty()) {
             URIBuilder uriBuilder = new URIBuilder();
+            StringBuilder queryStringBuilder = new StringBuilder();
+            boolean hasQuery = !queryParams.isEmpty();
             for (Map.Entry<String, Collection<String>> stringCollectionEntry : queryParams.entrySet()) {
                 String key = stringCollectionEntry.getKey();
                 Collection<String> stringCollection = stringCollectionEntry.getValue();
                 String value = joiner.join(stringCollection);
                 uriBuilder.addParameter(key, value);
+                queryStringBuilder.append(key).append("=").append(value).append("&");
             }
             uriBuilder.setFragment(requestUri.getFragment());
             uriBuilder.setHost(requestUri.getHost());
@@ -279,7 +305,24 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
             uriBuilder.setScheme(requestUri.getScheme());
             uriBuilder.setUserInfo(requestUri.getUserInfo());
             try {
-                requestUri = uriBuilder.build();
+
+                if(!autoEncodeUri){
+                    String urlPath = "";
+                    if (requestUri.getRawPath() != null && requestUri.getRawPath().startsWith("/")) {
+                        urlPath = requestUri.getRawPath();
+                    } else {
+                        urlPath = "/" + requestUri.getRawPath();
+                    }
+
+                    if (hasQuery){
+                        String query = queryStringBuilder.substring(0,queryStringBuilder.length()-1);
+                        requestUri = new URI(requestUri.getScheme() + "://" + requestUri.getHost() + ":" + requestUri.getPort() + urlPath + "?" + query);
+                    }else{
+                        requestUri = new URI(requestUri.getScheme() + "://" + requestUri.getHost() + ":" + requestUri.getPort() + urlPath);
+                    }
+                }else{
+                    requestUri = uriBuilder.build();
+                }
             } catch (URISyntaxException e) {
                 LOGGER.warn("could not update uri: {}", requestUri);
             }
@@ -324,15 +367,16 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
 //            }
 //        });
 
-        HttpUriRequest httpUriRequest = null;
+        org.apache.http.HttpRequest httpRequest = null;
 
         Joiner joiner = Joiner.on(",").skipNulls();
         URI requestUri = buildUri(request, joiner);
 
-        httpUriRequest = buildHttpUriRequest(request, joiner, requestUri);
+        httpRequest = buildHttpUriRequest(request, joiner, requestUri);
 
+        HttpHost httpHost = new HttpHost(requestUri.getHost(),requestUri.getPort(),requestUri.getScheme());
 
-        httpAsyncClient.execute(httpUriRequest, new FoundationFutureCallBack(this,request, responseCallback, serverProxy, loadBalancerStrategy, apiName));
+        httpAsyncClient.execute(httpHost, httpRequest, new FoundationFutureCallBack(this,request, responseCallback, serverProxy, loadBalancerStrategy, apiName));
 
     }
 

@@ -43,6 +43,12 @@ public class InternalServerProxyMetadata {
     private String trustStorePassword = "";
     private boolean staleConnectionCheckEnabled = false;
     private boolean autoCloseable = true;
+
+    public boolean isAutoEncodeUri() {
+        return autoEncodeUri;
+    }
+
+    private boolean autoEncodeUri = true;
     private boolean followRedirects = false;
     private boolean disableCookies = false;
 
@@ -108,7 +114,7 @@ public class InternalServerProxyMetadata {
         return disableCookies;
     }
 
-    public InternalServerProxyMetadata(int readTimeout, int connectTimeout, long idleTimeout, int maxConnectionsPerAddress, int maxConnectionsTotal, int maxQueueSizePerAddress, long waitingTime, int numberOfAttempts, long retryDelay, List<Pair<String, Integer>> hostAndPortPairs, String keyStorePath, String keyStorePassword,String trustStorePath,String trustStorePassword, boolean followRedirects, boolean autoCloseable, boolean staleConnectionCheckEnabled, boolean disableCookies) {
+    public InternalServerProxyMetadata(int readTimeout, int connectTimeout, long idleTimeout, int maxConnectionsPerAddress, int maxConnectionsTotal, int maxQueueSizePerAddress, long waitingTime, int numberOfAttempts, long retryDelay, List<Pair<String, Integer>> hostAndPortPairs, String keyStorePath, String keyStorePassword,String trustStorePath,String trustStorePassword, boolean followRedirects, boolean autoCloseable, boolean staleConnectionCheckEnabled, boolean disableCookies, boolean autoEncodeUri) {
         this.readTimeout = readTimeout;
         this.connectTimeout = connectTimeout;
         this.idleTimeout = idleTimeout;
@@ -121,6 +127,7 @@ public class InternalServerProxyMetadata {
         this.hostAndPortPairs = hostAndPortPairs;
         this.followRedirects = followRedirects;
         this.autoCloseable = autoCloseable;
+        this.autoEncodeUri = autoEncodeUri;
         this.staleConnectionCheckEnabled = staleConnectionCheckEnabled;
         this.disableCookies = disableCookies;
 
