@@ -94,14 +94,14 @@ class HttpServerRestTest extends FeatureSpec with GivenWhenThen with BeforeAndAf
     config setProperty("serverTest1.http.traceFilter.isEnabled", "true")
     config setProperty("serverTest1.http.traceFilter.textContentTypes.1", "text/plain")
     config setProperty("serverTest1.http.monitoringFilter.isEnabled", "true");
-    config setProperty("serverTest1.http.serviceDirectory.isEnabled", "true");
+    config setProperty("serverTest1.http.serviceDirectory.isEnabled", "false");
 
 
-    config setProperty("service.serverTest1-client.http.serviceDirectory.isEnabled", "true");
+    config setProperty("service.serverTest1-client.http.serviceDirectory.isEnabled", "false");
     config setProperty("service.serverTest1-client.http.readTimeout", "30000")
     config setProperty("service.serverTest1-client.http.serviceDirectory.serviceName", "serverTest1");
-    //    config setProperty("service.serverTest1-client.1.port", port)
-//    config setProperty("service.serverTest1-client.1.host", IpUtils.getIpAddress)
+        config setProperty("service.serverTest1-client.1.port", port)
+    config setProperty("service.serverTest1-client.1.host", IpUtils.getIpAddress)
 
     val map: ArrayListMultimap[String, Servlet] = ArrayListMultimap.create()
     //    val scripts.sh = new ServletContextHandler
