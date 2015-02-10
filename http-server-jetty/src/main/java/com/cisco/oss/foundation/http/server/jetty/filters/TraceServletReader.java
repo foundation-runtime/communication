@@ -60,7 +60,7 @@ public class TraceServletReader extends BufferedReader {
 //                tracer.logRequestContentChar((char)ret);
             } else {
 //                tracer.log("Content: {}", builder.toString());
-//                tracer.log("EOF reached on %s",delegate);
+//                tracer.log("EOF reached on {}",delegate);
             }
 
             return ret;

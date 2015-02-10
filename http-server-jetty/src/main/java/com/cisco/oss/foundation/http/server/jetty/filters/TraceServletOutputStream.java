@@ -39,7 +39,7 @@ public class TraceServletOutputStream extends ServletOutputStream
         {
             tracer.logResponseContentClose();
             super.close();
-            tracer.log("Closed: %s",delegate);
+            tracer.log("Closed: {}",delegate);
         }
         catch (IOException e)
         {
@@ -54,7 +54,7 @@ public class TraceServletOutputStream extends ServletOutputStream
         try
         {
             super.flush();
-            tracer.log("Flushed: %s",delegate);
+            tracer.log("Flushed: {}",delegate);
         }
         catch (IOException e)
         {
