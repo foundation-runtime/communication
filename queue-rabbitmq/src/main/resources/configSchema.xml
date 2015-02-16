@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<NamespaceDefinitions
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/foundation-runtime/configuration/master/ccp_schema/CCP_XML.xsd"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <NamespaceDefinition>
+        <NamespaceIdentifier version="TBD" name="TBD"/>
+
+
+        <ParameterType name="queue.consumer.base" type="STRUCTURE" description="base structure for queue consumers">
+            <StructureDefinition>
+                <StructureMemberDefinition name="queue.name" type="STRING" advanced="true" required="false"/>
+                <StructureMemberDefinition name="queue.filter" type="STRING" advanced="true" required="false"/>
+                <StructureMemberDefinition name="queue.isMonitoringEnabled" type="BOOLEAN" advanced="true"
+                                           required="false">
+                    <DefaultValue>
+                        <PrimitiveValue value="false"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
+                <StructureMemberDefinition name="queue.isSubscription" type="BOOLEAN" advanced="true">
+                    <DefaultValue>
+                        <PrimitiveValue value="false"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
+                <StructureMemberDefinition name="queue.isDurable" type="BOOLEAN" advanced="true">
+                    <DefaultValue>
+                        <PrimitiveValue value="true"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
+                <StructureMemberDefinition name="queue.subscribedTo" type="STRING" required="false" advanced="true"/>
+            </StructureDefinition>
+        </ParameterType>
+
+        <ParameterType name="queue.producer.base" type="STRUCTURE" description="base structure for queue producers">
+            <StructureDefinition>
+                <StructureMemberDefinition name="queue.name" type="STRING" advanced="true"/>
+                <StructureMemberDefinition name="queue.groupId" type="STRING" advanced="true"/>
+                <StructureMemberDefinition name="queue.expiration" type="LONG" advanced="true" unit="milliseconds">
+                    <DefaultValue>
+                        <PrimitiveValue value="1800000"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
+                <StructureMemberDefinition name="queue.isDurable" type="BOOLEAN" advanced="true">
+                    <DefaultValue>
+                        <PrimitiveValue value="true"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
+                <StructureMemberDefinition name="queue.isMonitoringEnabled" type="BOOLEAN" advanced="true"
+                                           required="false">
+                    <DefaultValue>
+                        <PrimitiveValue value="false"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
+            </StructureDefinition>
+        </ParameterType>
+
+
+        <Parameter name="service.queue.security.isEnabled" type="BOOLEAN" description="Enable security authentication">
+            <DefaultValue>
+                <PrimitiveValue value="false"></PrimitiveValue>
+            </DefaultValue>
+        </Parameter>
+
+        <Parameter name="service.queue.security.userName" type="STRING"
+                   description="User name for accessing the Queue with security">
+            <DefaultValue>
+                <PrimitiveValue value="hquser"/>
+            </DefaultValue>
+        </Parameter>
+
+        <Parameter name="service.queue.security.password" type="STRING"
+                   description="Password for accessing the Queue with security">
+            <DefaultValue>
+                <PrimitiveValue value="hquser"/>
+            </DefaultValue>
+            <EnabledBy parameterName="service.queue.security.isEnabled" operator="E">
+                <Value>
+                    <PrimitiveValue value="true"/>
+                </Value>
+            </EnabledBy>
+        </Parameter>
+
+
+        <Parameter name="service.queue.connections" isArray="true" type="STRUCTURE"
+                   description="Connection identifier for queue server(s). For HornetQ this is the connection to HornetQ's jndi service.">
+            <StructureDefinition>
+                <StructureMemberDefinition name="host" type="STRING" required="false"/>
+                <StructureMemberDefinition name="port" type="INTEGER" required="false">
+                    <!--<DefaultValue>
+                        <PrimitiveValue value="5900"/>
+                    </DefaultValue>-->
+                </StructureMemberDefinition>
+                <StructureMemberDefinition name="jmxPort" type="INTEGER" required="false">
+                    <!--<DefaultValue>
+                        <PrimitiveValue value="3900"/>
+                    </DefaultValue>-->
+                </StructureMemberDefinition>
+                <StructureMemberDefinition name="instance1" type="STRUCTURE" required="false">
+                    <StructureDefinition>
+                        <StructureMemberDefinition name="host" type="STRING" required="false"/>
+                        <StructureMemberDefinition name="port" type="INTEGER" required="false">
+                            <DefaultValue>
+                                <PrimitiveValue value="5900"/>
+                            </DefaultValue>
+                        </StructureMemberDefinition>
+                        <StructureMemberDefinition name="jmxPort" type="INTEGER" required="false">
+                            <DefaultValue>
+                                <PrimitiveValue value="3900"/>
+                            </DefaultValue>
+                        </StructureMemberDefinition>
+                    </StructureDefinition>
+                </StructureMemberDefinition>
+                <StructureMemberDefinition name="instance2" type="STRUCTURE" required="false">
+                    <StructureDefinition>
+                        <StructureMemberDefinition name="host" type="STRING" required="false"/>
+                        <StructureMemberDefinition name="port" type="INTEGER" required="false">
+                            <DefaultValue>
+                                <PrimitiveValue value="5900"/>
+                            </DefaultValue>
+                        </StructureMemberDefinition>
+                        <StructureMemberDefinition name="jmxPort" type="INTEGER" required="false">
+                            <DefaultValue>
+                                <PrimitiveValue value="3900"/>
+                            </DefaultValue>
+                        </StructureMemberDefinition>
+                    </StructureDefinition>
+                </StructureMemberDefinition>
+            </StructureDefinition>
+            <!--<DefaultValue>
+                <StructureValue index="1">
+                    <StructureMemberValue name="host" value="vgc1a"/>
+                    <StructureMemberValue name="port" value="5902"/>
+                    <StructureMemberValue name="jmxPort" value="3900"/>
+                </StructureValue>
+            </DefaultValue>-->
+        </Parameter>
+
+        <Parameter name="service.queue.attachRetryDelay" type="INTEGER" unit="MILLISECONDS"
+                   description="Delay between attempts to attach to the queue server(s)"
+                   advanced="true">
+            <DefaultValue>
+                <PrimitiveValue value="10000"/>
+            </DefaultValue>
+        </Parameter>
+
+        <Parameter name="messageHandling.threadpool.size" type="INTEGER"
+                   description="set the maximun size of a thread pool that will get application messages"
+                   advanced="true">
+            <DefaultValue>
+                <PrimitiveValue value="50"/>
+            </DefaultValue>
+        </Parameter>
+        <Parameter name="messageHandling.threadpool.waitingQueueSize" type="INTEGER"
+                   description="set the size of a waiting queue to handle messages till a thread from the thread pool will be available. Should be the same value as the thread pool size."
+                   advanced="true">
+            <DefaultValue>
+                <PrimitiveValue value="50"/>
+            </DefaultValue>
+        </Parameter>
+        <Parameter name="messageHandling.synchronizeStyle" type="STRING" description="The inner synchronization type"
+                   advanced="true">
+            <DefaultValue>
+                <PrimitiveValue value="JavaConcurrency"/>
+            </DefaultValue>
+            <Range>
+                <StringEnum value="LOCK"/>
+                <StringEnum value="JavaConcurrency"/>
+            </Range>
+        </Parameter>
+        <Parameter name="messageHandling.messageIdentifierProperty" type="STRING"
+                   description="The property name that is used as a key of a message. It is used when a consumer uses a thread-pool to process messages asynchronously but messages with same key can't be processed in parallel. The key is stored as a message header and must be set by the producer.">
+            <DefaultValue>
+                <PrimitiveValue value="hh"/>
+            </DefaultValue>
+        </Parameter>
+    </NamespaceDefinition>
+</NamespaceDefinitions>
