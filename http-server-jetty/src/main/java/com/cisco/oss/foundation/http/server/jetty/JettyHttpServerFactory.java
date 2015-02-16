@@ -252,14 +252,16 @@ public enum JettyHttpServerFactory implements HttpServerFactory, JettyHttpServer
 
             ServerConnector httpConnector = getServerConnector(serviceName, server, configuration, host, port, connectionIdleTime, numberOfAcceptors, numberOfSelectors, acceptQueueSize, new HttpConnectionFactory(http_config));
 
-            boolean useSSLOnly = configuration.getBoolean(serviceName + ".https.useHttpsOnly", false);
+            boolean useHttpsOnly = configuration.getBoolean(serviceName + ".https.useHttpsOnly", false);
 
             boolean isSSL = StringUtils.isNotBlank(keyStorePath) && StringUtils.isNotBlank(keyStorePassword);
+            int sslPort = -1;
             Connector[] connectors = null;
+            SslConnectionFactory sslConnectionFactory = null;
 
             if (isSSL) {
                 String sslHost = configuration.getString(serviceName + ".https.host", "0.0.0.0");
-                int sslPort = configuration.getInt(serviceName + ".https.port", 8090);
+                sslPort = configuration.getInt(serviceName + ".https.port", 8090);
 
                 SslContextFactory sslContextFactory = new SslContextFactory();
                 sslContextFactory.setKeyStorePath(keyStorePath);
@@ -279,10 +281,10 @@ public enum JettyHttpServerFactory implements HttpServerFactory, JettyHttpServer
                 httpsConfig.setSendServerVersion(false);
 
 
-                SslConnectionFactory sslConnectionFactory = new SslConnectionFactory(sslContextFactory, "HTTP/1.1");
+                sslConnectionFactory = new SslConnectionFactory(sslContextFactory, "HTTP/1.1");
                 ServerConnector sslConnector = getServerConnector(serviceName, server, configuration, sslHost, sslPort, connectionIdleTime, numberOfAcceptors, numberOfSelectors, acceptQueueSize, sslConnectionFactory, new HttpConnectionFactory(httpsConfig));
 
-                if (useSSLOnly) {
+                if (useHttpsOnly) {
                     connectors = new Connector[]{sslConnector};
                 } else {
                     connectors = new Connector[]{httpConnector, sslConnector};
@@ -306,7 +308,13 @@ public enum JettyHttpServerFactory implements HttpServerFactory, JettyHttpServer
             }
 
             servers.put(serviceName, Pair.of(server,instance));
-            LOGGER.info("Http server: {} started on {}", serviceName, port);
+            if (sslPort != -1 && sslConnectionFactory != null) {
+                LOGGER.info("Https server: {} started on {}", serviceName, sslPort);
+            }
+
+            if(!useHttpsOnly){
+                LOGGER.info("Http server: {} started on {}", serviceName, port);
+            }
 
             // server.join();
         } catch (Exception e) {

@@ -269,13 +269,16 @@ public enum JettyHttpServerFactory implements HttpServerFactory {
 
             Connector[] connectors = null;
 
-            boolean useSSLOnly = configuration.getBoolean(serviceName + ".https.useHttpsOnly", false);
+            boolean useHttpsOnly = configuration.getBoolean(serviceName + ".https.useHttpsOnly", false);
 
             boolean isSSL = StringUtils.isNotBlank(keyStorePath) && StringUtils.isNotBlank(keyStorePassword);
+            int sslPort = -1;
+
+            SslSelectChannelConnector sslSelectChannelConnector = null;
 
             if (isSSL) {
                 String sslHost = configuration.getString(serviceName + ".https.host", "0.0.0.0");
-                int sslPort = configuration.getInt(serviceName + ".https.port", 8090);
+                sslPort = configuration.getInt(serviceName + ".https.port", 8090);
 
                 SslContextFactory sslContextFactory = new SslContextFactory();
                 sslContextFactory.setKeyStorePath(keyStorePath);
@@ -288,11 +291,11 @@ public enum JettyHttpServerFactory implements HttpServerFactory {
                     sslContextFactory.setNeedClientAuth(true);
                 }
 
-                SslSelectChannelConnector sslSelectChannelConnector = new SslSelectChannelConnector(sslContextFactory);
+                sslSelectChannelConnector = new SslSelectChannelConnector(sslContextFactory);
                 sslSelectChannelConnector.setHost(sslHost);
                 sslSelectChannelConnector.setPort(sslPort);
 
-                if (useSSLOnly) {
+                if (useHttpsOnly) {
                     connectors = new Connector[]{sslSelectChannelConnector};
                 } else {
                     connectors = new Connector[]{connector, sslSelectChannelConnector};
@@ -312,7 +315,14 @@ public enum JettyHttpServerFactory implements HttpServerFactory {
 
             server.start();
             servers.put(serviceName, server);
-            LOGGER.info("Http server: {} started on {}", serviceName, port);
+
+            if (sslPort != -1 && sslSelectChannelConnector != null) {
+                LOGGER.info("Https server: {} started on {}", serviceName, sslPort);
+            }
+
+            if(!useHttpsOnly){
+                LOGGER.info("Http server: {} started on {}", serviceName, port);
+            }
 
             // server.join();
         } catch (Exception e) {
