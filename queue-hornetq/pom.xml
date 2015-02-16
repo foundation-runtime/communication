@@ -11,7 +11,7 @@
     <name>queue-hornetq</name>
     <version>1.0.3-1-SNAPSHOT</version>
     <description>This project is a hornetq implementation for the queue-api library.</description>
-    <url>http://maven-doc.nds.com/maven_sites/${project.groupId}/${project.artifactId}/${project.version}</url>
+    <url>https://github.com/foundation-runtime/communication/tree/master/queue-hornetq</url>
     <issueManagement>
         <system>Github</system>
     </issueManagement>
