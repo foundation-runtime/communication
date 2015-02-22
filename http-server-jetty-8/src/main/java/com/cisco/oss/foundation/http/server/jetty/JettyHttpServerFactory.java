@@ -27,6 +27,7 @@ import org.eclipse.jetty.server.AbstractConnector;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
+import org.eclipse.jetty.server.handler.ErrorHandler;
 import org.eclipse.jetty.server.nio.BlockingChannelConnector;
 import org.eclipse.jetty.server.nio.SelectChannelConnector;
 import org.eclipse.jetty.server.ssl.SslSelectChannelConnector;
@@ -48,7 +49,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @author Yair Ogen
  */
-public enum JettyHttpServerFactory implements HttpServerFactory {
+public enum JettyHttpServerFactory implements HttpServerFactory , JettyHttpServerFactoryExtensions {
 
     INSTANCE;
 
@@ -364,6 +365,14 @@ public enum JettyHttpServerFactory implements HttpServerFactory {
             } catch (Exception e) {
                 LOGGER.error("Problem stoping the http {} server. Error is {}.", serviceName, e);
             }
+        }
+    }
+
+    @Override
+    public void setErrorHandler(String serviceName, ErrorHandler errorHandler) {
+        Server server = servers.get(serviceName);
+        if (server != null) {
+            server.addBean(errorHandler);
         }
     }
 
