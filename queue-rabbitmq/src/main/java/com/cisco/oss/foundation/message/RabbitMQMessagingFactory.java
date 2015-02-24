@@ -21,10 +21,7 @@ import com.cisco.oss.foundation.configuration.ConfigurationFactory;
 import com.cisco.oss.foundation.configuration.FoundationConfigurationListener;
 import com.cisco.oss.foundation.configuration.FoundationConfigurationListenerRegistry;
 import com.google.common.collect.Lists;
-import com.rabbitmq.client.AMQP;
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.Connection;
-import com.rabbitmq.client.ConnectionFactory;
+import com.rabbitmq.client.*;
 import org.apache.commons.configuration.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -91,6 +88,8 @@ public class RabbitMQMessagingFactory {
     private static void init() {
         try {
             ConnectionFactory connectionFactory = new ConnectionFactory();
+            connectionFactory.setAutomaticRecoveryEnabled(true);
+            connectionFactory.setTopologyRecoveryEnabled(true);
 
             Configuration configuration = ConfigurationFactory.getConfiguration();
             Configuration subsetBase = configuration.subset("service.queue");
@@ -104,24 +103,26 @@ public class RabbitMQMessagingFactory {
             final ArrayList<String> serverConnectionKeys = Lists.newArrayList(serverConnections.keySet());
             Collections.sort(serverConnectionKeys);
 
+            if(isEnabled){
+                connectionFactory.setUsername(userName);
+                connectionFactory.setPassword(password);
+
+            }
+
+            List<Address> addresses = new ArrayList<>(5);
+
             for (String serverConnectionKey : serverConnectionKeys) {
 
                 Map<String, String> serverConnection = serverConnections.get(serverConnectionKey);
 
                 String host = serverConnection.get("host");
-                String port = serverConnection.get("port");
-                connectionFactory.setHost(host);
-                connectionFactory.setPort(Integer.parseInt(port));
-
-                if(isEnabled){
-                    connectionFactory.setUsername(userName);
-                    connectionFactory.setPassword(password);
-
-                }
-
-
-                connection = connectionFactory.newConnection();
+                int port = Integer.parseInt(serverConnection.get("port"));
+                addresses.add(new Address(host,port));
+//              connectionFactory.setHost(host);
+//              connectionFactory.setPort(Integer.parseInt(port));
             }
+            Address[] addrs = new Address[0];
+            connection = connectionFactory.newConnection(addresses.toArray(addrs));
 
         } catch (Exception e) {
             LOGGER.error("can't create RabbitMQ Connection: {}", e, e);

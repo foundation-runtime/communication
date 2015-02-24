@@ -19,6 +19,7 @@ package com.cisco.oss.foundation.message;
 import com.cisco.oss.foundation.configuration.ConfigurationFactory;
 import com.cisco.oss.foundation.flowcontext.FlowContextFactory;
 import com.rabbitmq.client.AMQP;
+import com.rabbitmq.client.AlreadyClosedException;
 import com.rabbitmq.client.Channel;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.lang3.StringUtils;
@@ -93,6 +94,10 @@ class RabbitMQMessageProducer extends AbstractMessageProducer {
         try {
             AMQP.BasicProperties basicProperties = new AMQP.BasicProperties.Builder().headers(messageHeaders).deliveryMode(2).build();
             RabbitMQMessagingFactory.getChannel().basicPublish(queueName, "", basicProperties, message);
+        } catch (AlreadyClosedException e) {
+            LOGGER.warn("an error occurred trying to publish message: {}", e);
+            RabbitMQMessagingFactory.channelThreadLocal.set(null);
+            sendMessage(message, messageHeaders);
         } catch (IOException e) {
             throw new QueueException("can't send message: {}" + e, e);
         }
