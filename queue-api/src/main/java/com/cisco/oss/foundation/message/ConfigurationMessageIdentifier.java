@@ -37,7 +37,8 @@ public class ConfigurationMessageIdentifier implements MessageIdentifier {
             return null;
         }
 
-        return (String) message.getProperties().get(identifierProperty);
+        Object identifierPropertyValue = message.getProperties().get(identifierProperty);
+        return identifierPropertyValue != null ? identifierPropertyValue.toString(): null;
     }
 
 }
