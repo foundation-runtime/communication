@@ -34,7 +34,7 @@
         <hornetq-version>2.4.4.Final</hornetq-version>
         <logging-api-version>1.0.2-1</logging-api-version>
         <logging-log4j-version>1.0.2-1</logging-log4j-version>
-        <configuration-lib-version>1.0.2-5-SNAPSHOT</configuration-lib-version>
+        <configuration-lib-version>1.0.2-5</configuration-lib-version>
     </properties>
     <scm>
         <connection>scm:git:git@github.com:foundation-runtime/communication.git</connection>
@@ -72,7 +72,7 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>queue-api</artifactId>
-            <version>1.0.1-1-SNAPSHOT</version>
+            <version>1.0.2-1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.cisco.oss.foundation</groupId>
