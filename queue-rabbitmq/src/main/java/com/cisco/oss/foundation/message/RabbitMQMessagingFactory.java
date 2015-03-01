@@ -30,6 +30,8 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * This is the main API tp be used to instantiate new consumers and producers.
@@ -44,6 +46,8 @@ public class RabbitMQMessagingFactory {
     public static ThreadLocal<Channel> channelThreadLocal = new ThreadLocal<>();
     private static List<Channel> channels = new CopyOnWriteArrayList<>();
     private static Connection connection = null;
+    static AtomicBoolean IS_RECONNECT_THREAD_RUNNING = new AtomicBoolean(false);
+    static CountDownLatch INIT_LATCH = new CountDownLatch(1);
 
 
 
@@ -52,7 +56,7 @@ public class RabbitMQMessagingFactory {
         FoundationConfigurationListenerRegistry.addFoundationConfigurationListener(new FoundationConfigurationListener() {
             @Override
             public void configurationChanged() {
-                init();
+                connect();
             }
         });
 
@@ -86,6 +90,14 @@ public class RabbitMQMessagingFactory {
      * this is where we read the ost port list from configuration
      */
     private static void init() {
+        try {
+            connect();
+        } catch (Exception e) {
+            LOGGER.warn("Initial connect has failed. Attempting reconnect in another thread.");
+        }
+    }
+
+    static void connect() {
         try {
             ConnectionFactory connectionFactory = new ConnectionFactory();
             connectionFactory.setAutomaticRecoveryEnabled(true);
@@ -123,12 +135,15 @@ public class RabbitMQMessagingFactory {
             }
             Address[] addrs = new Address[0];
             connection = connectionFactory.newConnection(addresses.toArray(addrs));
+            IS_RECONNECT_THREAD_RUNNING.set(false);
+            INIT_LATCH.countDown();
+            INIT_LATCH = new CountDownLatch(1);
 
         } catch (Exception e) {
             LOGGER.error("can't create RabbitMQ Connection: {}", e, e);
+            triggerReconnectThread();
             throw new QueueException(e);
         }
-
     }
 
     static Channel getChannel(){
@@ -179,6 +194,35 @@ public class RabbitMQMessagingFactory {
             producers.put(producerName, new RabbitMQMessageProducer(producerName));
         }
         return producers.get(producerName);
+    }
+
+    static void triggerReconnectThread (){
+      if (IS_RECONNECT_THREAD_RUNNING.compareAndSet(false,true)){
+          Thread reconnectThread = new Thread(new Runnable() {
+              @Override
+              public void run() {
+
+                  boolean isInReconnect = IS_RECONNECT_THREAD_RUNNING.get();
+                  while(isInReconnect){
+                      try {
+                          connect();
+                      } catch (Exception e) {
+                          LOGGER.trace("reconnect failed: " + e);
+                          try {
+                              Thread.sleep(ConfigurationFactory.getConfiguration().getInt("service.queue.attachRetryDelay", 10000));
+                              isInReconnect = IS_RECONNECT_THREAD_RUNNING.get();
+                          } catch (InterruptedException e1) {
+                              LOGGER.trace("thread interrupted!!!", e1);
+                          }
+                      }
+                  }
+
+              }
+          }, "RabbitMQ-Reconnect");
+
+          reconnectThread.start();
+
+      }
     }
 
 

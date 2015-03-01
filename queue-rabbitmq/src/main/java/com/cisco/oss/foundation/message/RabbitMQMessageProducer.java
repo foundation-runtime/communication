@@ -91,17 +91,26 @@ class RabbitMQMessageProducer extends AbstractMessageProducer {
 
 
 
+        AMQP.BasicProperties basicProperties = new AMQP.BasicProperties.Builder().headers(messageHeaders).deliveryMode(2).build();
         try {
-            AMQP.BasicProperties basicProperties = new AMQP.BasicProperties.Builder().headers(messageHeaders).deliveryMode(2).build();
             RabbitMQMessagingFactory.getChannel().basicPublish(queueName, "", basicProperties, message);
         } catch (AlreadyClosedException e) {
             LOGGER.warn("an error occurred trying to publish message: {}", e);
             RabbitMQMessagingFactory.channelThreadLocal.set(null);
-            sendMessage(message, messageHeaders);
+            try {
+                RabbitMQMessagingFactory.getChannel().basicPublish(queueName, "", basicProperties, message);
+            } catch (Exception e1) {
+                startReConnectThread();
+                throw new QueueException("an error occurred trying to publish message: " + e1, e1);
+            }
         } catch (IOException e) {
             throw new QueueException("can't send message: {}" + e, e);
         }
 
+    }
+
+    private void startReConnectThread() {
+        RabbitMQMessagingFactory.triggerReconnectThread();
     }
 
     @Override

@@ -57,6 +57,11 @@ class RabbitMQMessageConsumer implements MessageConsumer {
             boolean isSubscription = subset.getBoolean("queue.isSubscription", false);
             String subscribedTo = isSubscription ? subset.getString("queue.subscribedTo", "") : queueName;
             String exchangeType = isSubscription ? "topic" : "direct";
+            try {
+                RabbitMQMessagingFactory.INIT_LATCH.await();
+            } catch (InterruptedException e) {
+                LOGGER.error("error waiting for init to finish: " + e);
+            }
             Channel channel = RabbitMQMessagingFactory.getChannel();
             channel.exchangeDeclare(subscribedTo, exchangeType, true, false, false, null);
             String queue = channel.queueDeclare(queueName, true, false, false, null).getQueue();
