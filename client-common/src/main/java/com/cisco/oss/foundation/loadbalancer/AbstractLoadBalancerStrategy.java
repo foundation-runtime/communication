@@ -101,7 +101,7 @@ public abstract class AbstractLoadBalancerStrategy<S extends ClientRequest> impl
 
                 @Override
                 public void serviceInstanceChange(ServiceInstance serviceInstance) {
-                    LOGGER.info("{} has changed status to: {}", serviceInstance.getServiceName(), serviceInstance.getStatus());
+                    LOGGER.info("{} has changed metadata to: {}", serviceInstance.getServiceName(), serviceInstance.getMetadata());
                 }
             });
         } catch (ServiceException e) {
@@ -234,7 +234,7 @@ public abstract class AbstractLoadBalancerStrategy<S extends ClientRequest> impl
 
                 try {
                     // Look up all ServiceInstances of the Service.
-                    List<ServiceInstance> allServiceInstances = lookupManager.getAllInstances(serviceName);
+                    List<ServiceInstance> allServiceInstances = lookupManager.lookupInstances(serviceName);
 
                     List<InternalServerProxy> serversList = Lists.newCopyOnWriteArrayList();
 
