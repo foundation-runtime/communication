@@ -137,7 +137,6 @@ public class RabbitMQMessagingFactory {
             connection = connectionFactory.newConnection(addresses.toArray(addrs));
             IS_RECONNECT_THREAD_RUNNING.set(false);
             INIT_LATCH.countDown();
-            INIT_LATCH = new CountDownLatch(1);
 
         } catch (Exception e) {
             LOGGER.error("can't create RabbitMQ Connection: {}", e, e);
