@@ -148,9 +148,13 @@ public class RabbitMQMessagingFactory {
     static Channel getChannel(){
         try {
             if(channelThreadLocal.get() == null){
-                Channel channel = connection.createChannel();
-                channelThreadLocal.set(channel);
-                channels.add(channel);
+                if (connection != null) {
+                    Channel channel = connection.createChannel();
+                    channelThreadLocal.set(channel);
+                    channels.add(channel);
+                }else{
+                    throw new QueueException("RabbitMQ appears to be down. Please try again later.");
+                }
             }
 
             return channelThreadLocal.get();

@@ -59,11 +59,6 @@ class RabbitMQMessageProducer extends AbstractMessageProducer {
         groupId = subset.getString("queue.groupId", "");
 
         try {
-            try {
-                RabbitMQMessagingFactory.INIT_LATCH.await();
-            } catch (InterruptedException e) {
-                LOGGER.error("error waiting for init to finish: " + e);
-            }
             Channel channel = RabbitMQMessagingFactory.getChannel();
             channel.exchangeDeclare(queueName, "topic", true, false, false, null);
             LOGGER.info("created rabbitmq producer: {} on exchange: {}", producerName, queueName);
