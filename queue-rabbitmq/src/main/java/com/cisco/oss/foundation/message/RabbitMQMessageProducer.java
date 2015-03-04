@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -43,6 +44,7 @@ class RabbitMQMessageProducer extends AbstractMessageProducer {
     private Configuration configuration = ConfigurationFactory.getConfiguration();
     private String groupId = "";
     private long expiration = 1800000;
+    private AtomicBoolean isInitialized = new AtomicBoolean(false);
 
 
     RabbitMQMessageProducer(String producerName) {
@@ -61,10 +63,14 @@ class RabbitMQMessageProducer extends AbstractMessageProducer {
         try {
             Channel channel = RabbitMQMessagingFactory.getChannel();
             channel.exchangeDeclare(queueName, "topic", true, false, false, null);
-            LOGGER.info("created rabbitmq producer: {} on exchange: {}", producerName, queueName);
+            isInitialized.set(true);
+        } catch (QueueException e) {
+            LOGGER.debug("can't init producer as it is underlying connection is not ready");
         } catch (IOException e) {
             throw new QueueException("Can't create producer: " + e, e);
         }
+
+        LOGGER.info("created rabbitmq producer: {} on exchange: {}", producerName, queueName);
 
     }
 
@@ -90,7 +96,22 @@ class RabbitMQMessageProducer extends AbstractMessageProducer {
     public void sendMessage(byte[] message, Map<String, Object> messageHeaders) {
 
 
+        if (isInitialized.get()) {
+            sendMessageInternal(message, messageHeaders);
+        }else{
+            try {
+                Channel channel = RabbitMQMessagingFactory.getChannel();
+                channel.exchangeDeclare(queueName, "topic", true, false, false, null);
+                isInitialized.set(true);
+                sendMessageInternal(message, messageHeaders);
+            } catch (Exception e) {
+                LOGGER.debug("can't init producer as it is underlying connection is not ready");
+            }
+        }
 
+    }
+
+    private void sendMessageInternal(byte[] message, Map<String, Object> messageHeaders) {
         AMQP.BasicProperties basicProperties = new AMQP.BasicProperties.Builder().headers(messageHeaders).deliveryMode(2).build();
         try {
             RabbitMQMessagingFactory.getChannel().basicPublish(queueName, "", basicProperties, message);
@@ -106,7 +127,6 @@ class RabbitMQMessageProducer extends AbstractMessageProducer {
         } catch (IOException e) {
             throw new QueueException("can't send message: {}" + e, e);
         }
-
     }
 
     private void startReConnectThread() {
