@@ -47,6 +47,7 @@ public class RabbitMQMessagingFactory {
     private static List<Channel> channels = new CopyOnWriteArrayList<>();
     private static Connection connection = null;
     static AtomicBoolean IS_RECONNECT_THREAD_RUNNING = new AtomicBoolean(false);
+    static AtomicBoolean IS_CONNETED = new AtomicBoolean(false);
     static CountDownLatch INIT_LATCH = new CountDownLatch(1);
 
 
@@ -135,12 +136,12 @@ public class RabbitMQMessagingFactory {
             }
             Address[] addrs = new Address[0];
             connection = connectionFactory.newConnection(addresses.toArray(addrs));
-            IS_RECONNECT_THREAD_RUNNING.set(false);
+            IS_CONNETED.set(true);
             INIT_LATCH.countDown();
 
         } catch (Exception e) {
             LOGGER.error("can't create RabbitMQ Connection: {}", e, e);
-            triggerReconnectThread();
+//            triggerReconnectThread();
             throw new QueueException(e);
         }
     }
@@ -204,25 +205,26 @@ public class RabbitMQMessagingFactory {
           Thread reconnectThread = new Thread(new Runnable() {
               @Override
               public void run() {
-
-                  boolean isInReconnect = IS_RECONNECT_THREAD_RUNNING.get();
-                  while(isInReconnect){
+                  boolean isConnected = IS_CONNETED.get();
+                  while(!isConnected){
                       try {
                           connect();
                       } catch (Exception e) {
                           LOGGER.trace("reconnect failed: " + e);
                           try {
                               Thread.sleep(ConfigurationFactory.getConfiguration().getInt("service.queue.attachRetryDelay", 10000));
-                              isInReconnect = IS_RECONNECT_THREAD_RUNNING.get();
+                              isConnected = IS_CONNETED.get();
                           } catch (InterruptedException e1) {
                               LOGGER.trace("thread interrupted!!!", e1);
                           }
                       }
                   }
+                  IS_RECONNECT_THREAD_RUNNING.set(false);
 
               }
           }, "RabbitMQ-Reconnect");
 
+          reconnectThread.setDaemon(false);
           reconnectThread.start();
 
       }
