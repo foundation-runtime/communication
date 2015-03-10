@@ -183,10 +183,11 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
 
         URI newURI = null;
         try {
-            String query = origUri.getRawQuery();
             if(autoEncodeUri){
+                String query = origUri.getQuery();
                 newURI = new URI(scheme, origUri.getUserInfo(), host, port, urlPath, query, origUri.getFragment());
             }else{
+                String query = origUri.getRawQuery();
                 if (query != null){
                     newURI = new URI(scheme + "://" + host + ":" + port + urlPath + "?" + query);
                 }else{
