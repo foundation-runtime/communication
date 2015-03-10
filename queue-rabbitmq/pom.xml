@@ -9,7 +9,7 @@
     <groupId>com.cisco.oss.foundation.queue</groupId>
     <artifactId>queue-rabbitmq</artifactId>
     <name>queue-rabbitmq</name>
-    <version>1.0.1-7-SNAPSHOT</version>
+    <version>1.0.1-8-SNAPSHOT</version>
     <description>This project is a rabbitmq implementation for the queue-api library.</description>
     <url>https://github.com/foundation-runtime/communication/tree/master/queue-rabbitmq</url>
     <issueManagement>
@@ -83,7 +83,13 @@
             <groupId>com.cisco.oss.foundation</groupId>
             <artifactId>logging-api</artifactId>
             <version>${logging-api-version}</version>
-        </dependency>        
+        </dependency>
+        <dependency>
+            <groupId>org.hornetq</groupId>
+            <artifactId>hornetq-server</artifactId>
+            <version>2.4.4.Final</version>
+            <scope>test</scope>
+        </dependency>
 		<dependency>
   <groupId>com.rabbitmq</groupId>
   <artifactId>amqp-client</artifactId>
