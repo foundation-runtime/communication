@@ -95,6 +95,7 @@ class RabbitMQMessageProducer extends AbstractMessageProducer {
     @Override
     public void sendMessage(byte[] message, Map<String, Object> messageHeaders) {
 
+        messageHeaders.put(QueueConstants.FLOW_CONTEXT_HEADER, FlowContextFactory.serializeNativeFlowContext());
 
         if (isInitialized.get()) {
             sendMessageInternal(message, messageHeaders);
