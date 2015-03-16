@@ -107,7 +107,9 @@ class RabbitMQMessageProducer extends AbstractMessageProducer {
                 isInitialized.set(true);
                 sendMessageInternal(message, messageHeaders);
             } catch (Exception e) {
-                LOGGER.debug("can't init producer as it is underlying connection is not ready");
+                String errorMsg = "can't send message as its underlying connection is not ready";
+                LOGGER.error(errorMsg);
+                throw new QueueException(errorMsg, e);
             }
         }
 
