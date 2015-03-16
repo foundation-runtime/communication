@@ -46,7 +46,7 @@ public class RabbitMQMessagingFactory {
     public static ThreadLocal<Channel> channelThreadLocal = new ThreadLocal<>();
     private static List<Channel> channels = new CopyOnWriteArrayList<>();
     private static Connection connection = null;
-    static AtomicBoolean IS_RECONNECT_THREAD_RUNNING = new AtomicBoolean(false);
+    private static AtomicBoolean IS_RECONNECT_THREAD_RUNNING = new AtomicBoolean(false);
     static AtomicBoolean IS_CONNETED = new AtomicBoolean(false);
     static CountDownLatch INIT_LATCH = new CountDownLatch(1);
 
@@ -95,6 +95,7 @@ public class RabbitMQMessagingFactory {
             connect();
         } catch (Exception e) {
             LOGGER.warn("Initial connect has failed. Attempting reconnect in another thread.");
+            triggerReconnectThread();
         }
     }
 
@@ -201,19 +202,19 @@ public class RabbitMQMessagingFactory {
     }
 
     static void triggerReconnectThread (){
+        System.out.println("*********************************************");
       if (IS_RECONNECT_THREAD_RUNNING.compareAndSet(false,true)){
           Thread reconnectThread = new Thread(new Runnable() {
               @Override
               public void run() {
-                  boolean isConnected = IS_CONNETED.get();
-                  while(!isConnected){
+                  System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+                  while(!IS_CONNETED.get()){
                       try {
                           connect();
                       } catch (Exception e) {
                           LOGGER.trace("reconnect failed: " + e);
                           try {
                               Thread.sleep(ConfigurationFactory.getConfiguration().getInt("service.queue.attachRetryDelay", 10000));
-                              isConnected = IS_CONNETED.get();
                           } catch (InterruptedException e1) {
                               LOGGER.trace("thread interrupted!!!", e1);
                           }

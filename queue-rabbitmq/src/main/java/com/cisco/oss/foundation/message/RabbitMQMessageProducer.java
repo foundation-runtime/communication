@@ -45,7 +45,6 @@ class RabbitMQMessageProducer extends AbstractMessageProducer {
     private String groupId = "";
     private long expiration = 1800000;
     private AtomicBoolean isInitialized = new AtomicBoolean(false);
-    public static final String ROUTING_KEY = "ROUTING_KEY";
 
 
     RabbitMQMessageProducer(String producerName) {
@@ -66,7 +65,7 @@ class RabbitMQMessageProducer extends AbstractMessageProducer {
             channel.exchangeDeclare(queueName, "topic", true, false, false, null);
             isInitialized.set(true);
         } catch (QueueException e) {
-            LOGGER.debug("can't init producer as it is underlying connection is not ready");
+            LOGGER.debug("can't init producer as its underlying connection is not ready");
         } catch (IOException e) {
             throw new QueueException("Can't create producer: " + e, e);
         }
@@ -107,8 +106,8 @@ class RabbitMQMessageProducer extends AbstractMessageProducer {
                 isInitialized.set(true);
                 sendMessageInternal(message, messageHeaders);
             } catch (Exception e) {
-                String errorMsg = "can't send message as its underlying connection is not ready";
-                LOGGER.error(errorMsg);
+                String errorMsg = "can't init producer as it is underlying connection is not ready";
+                LOGGER.warn(errorMsg);
                 throw new QueueException(errorMsg, e);
             }
         }
@@ -119,7 +118,7 @@ class RabbitMQMessageProducer extends AbstractMessageProducer {
         AMQP.BasicProperties basicProperties = new AMQP.BasicProperties.Builder().headers(messageHeaders).deliveryMode(2).build();
         try {
             String routingKey = "";
-            Object routingKeyObj = messageHeaders.get(ROUTING_KEY);
+            Object routingKeyObj = messageHeaders.get(RabbitMQConstants.ROUTING_KEY);
             if(routingKeyObj!= null  && StringUtils.isNotBlank(routingKeyObj.toString())){
                 routingKey = routingKeyObj.toString();
             }
