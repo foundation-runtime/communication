@@ -9,7 +9,7 @@
     <groupId>com.cisco.oss.foundation.queue</groupId>
     <artifactId>queue-rabbitmq</artifactId>
     <name>queue-rabbitmq</name>
-    <version>1.0.1-8-SNAPSHOT</version>
+    <version>1.0.2-1-SNAPSHOT</version>
     <description>This project is a rabbitmq implementation for the queue-api library.</description>
     <url>https://github.com/foundation-runtime/communication/tree/master/queue-rabbitmq</url>
     <issueManagement>

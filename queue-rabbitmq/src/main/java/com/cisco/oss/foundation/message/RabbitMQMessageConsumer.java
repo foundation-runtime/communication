@@ -16,6 +16,7 @@
 
 package com.cisco.oss.foundation.message;
 
+import com.cisco.oss.foundation.configuration.ConfigUtil;
 import com.cisco.oss.foundation.configuration.ConfigurationFactory;
 import com.cisco.oss.foundation.flowcontext.FlowContextFactory;
 import com.rabbitmq.client.Channel;
@@ -27,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -65,7 +67,14 @@ class RabbitMQMessageConsumer implements MessageConsumer {
             Channel channel = RabbitMQMessagingFactory.getChannel();
             channel.exchangeDeclare(subscribedTo, exchangeType, true, false, false, null);
             String queue = channel.queueDeclare(queueName, true, false, false, null).getQueue();
-            channel.queueBind(queue, subscribedTo, "#");
+            Map<String, String> filters = ConfigUtil.parseSimpleArrayAsMap(consumerName + ".queue.filters");
+            if(filters != null && !filters.isEmpty()){
+                for (String routingKey : filters.values()) {
+                    channel.queueBind(queue, subscribedTo, routingKey);
+                }
+            }else{
+                channel.queueBind(queue, subscribedTo, "#");
+            }
             consumer = new QueueingConsumer(channel);
 //            channel.basicConsume(queueName, true, consumer);
             LOGGER.info("created rabbitmq consumer: {} on exchange: {}, queue-name: {}", consumerName, subscribedTo, queueName);

@@ -45,6 +45,7 @@ class RabbitMQMessageProducer extends AbstractMessageProducer {
     private String groupId = "";
     private long expiration = 1800000;
     private AtomicBoolean isInitialized = new AtomicBoolean(false);
+    public static final String ROUTING_KEY = "ROUTING_KEY";
 
 
     RabbitMQMessageProducer(String producerName) {
@@ -115,7 +116,12 @@ class RabbitMQMessageProducer extends AbstractMessageProducer {
     private void sendMessageInternal(byte[] message, Map<String, Object> messageHeaders) {
         AMQP.BasicProperties basicProperties = new AMQP.BasicProperties.Builder().headers(messageHeaders).deliveryMode(2).build();
         try {
-            RabbitMQMessagingFactory.getChannel().basicPublish(queueName, "", basicProperties, message);
+            String routingKey = "";
+            Object routingKeyObj = messageHeaders.get(ROUTING_KEY);
+            if(routingKeyObj!= null  && StringUtils.isNotBlank(routingKeyObj.toString())){
+                routingKey = routingKeyObj.toString();
+            }
+            RabbitMQMessagingFactory.getChannel().basicPublish(queueName, routingKey, basicProperties, message);
         } catch (AlreadyClosedException e) {
             LOGGER.warn("an error occurred trying to publish message: {}", e);
             RabbitMQMessagingFactory.channelThreadLocal.set(null);
