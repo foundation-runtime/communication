@@ -28,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -57,6 +58,8 @@ class RabbitMQMessageConsumer implements MessageConsumer {
             String filter = subset.getString("queue.filter", "");
             boolean isDurable = subset.getBoolean("queue.isDurable", true);
             boolean isSubscription = subset.getBoolean("queue.isSubscription", false);
+            long expiration = subset.getLong("queue.expiration",1800000);
+            long maxLength = subset.getLong("queue.maxLength",-1);
             String subscribedTo = isSubscription ? subset.getString("queue.subscribedTo", "") : queueName;
             String exchangeType = isSubscription ? "topic" : "direct";
             try {
@@ -66,7 +69,18 @@ class RabbitMQMessageConsumer implements MessageConsumer {
             }
             Channel channel = RabbitMQMessagingFactory.getChannel();
             channel.exchangeDeclare(subscribedTo, exchangeType, true, false, false, null);
-            String queue = channel.queueDeclare(queueName, true, false, false, null).getQueue();
+
+            Map<String, Object> args = new HashMap<String, Object>();
+
+            if (maxLength > 0) {
+                args.put("x-max-length", maxLength);
+            }
+
+            if(expiration > 0){
+                args.put("x-message-ttl", expiration);
+            }
+
+            String queue = channel.queueDeclare(queueName, true, false, false, args).getQueue();
             Map<String, String> filters = ConfigUtil.parseSimpleArrayAsMap(consumerName + ".queue.filters");
             if(filters != null && !filters.isEmpty()){
                 for (String routingKey : filters.values()) {
