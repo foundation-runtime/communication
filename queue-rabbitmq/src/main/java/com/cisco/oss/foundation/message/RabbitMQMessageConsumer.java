@@ -41,6 +41,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 class RabbitMQMessageConsumer implements MessageConsumer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RabbitMQMessageConsumer.class);
+    public static final String DLQ = "DLQ";
     private String consumerName = "N/A";
     private Configuration configuration = ConfigurationFactory.getConfiguration();
     private String queueName = "";
@@ -60,6 +61,7 @@ class RabbitMQMessageConsumer implements MessageConsumer {
             boolean isSubscription = subset.getBoolean("queue.isSubscription", false);
             long expiration = subset.getLong("queue.expiration",1800000);
             long maxLength = subset.getLong("queue.maxLength",-1);
+            boolean deadLetterIsEnabled = subset.getBoolean("queue.deadLetterIsEnabled", true);
             String subscribedTo = isSubscription ? subset.getString("queue.subscribedTo", "") : queueName;
             String exchangeType = isSubscription ? "topic" : "direct";
             try {
@@ -80,7 +82,14 @@ class RabbitMQMessageConsumer implements MessageConsumer {
                 args.put("x-message-ttl", expiration);
             }
 
+
+            if(deadLetterIsEnabled){
+                channel.exchangeDeclare(DLQ, exchangeType, true, false, false, null);
+                args.put("x-dead-letter-exchange",DLQ);
+            }
+
             String queue = channel.queueDeclare(queueName, true, false, false, args).getQueue();
+
             Map<String, String> filters = ConfigUtil.parseSimpleArrayAsMap(consumerName + ".queue.filters");
             if(filters != null && !filters.isEmpty()){
                 for (String routingKey : filters.values()) {
@@ -89,6 +98,12 @@ class RabbitMQMessageConsumer implements MessageConsumer {
             }else{
                 channel.queueBind(queue, subscribedTo, "#");
             }
+
+
+            if(deadLetterIsEnabled){
+                channel.queueBind(queue, DLQ, "#");
+            }
+
             consumer = new QueueingConsumer(channel);
 //            channel.basicConsume(queueName, true, consumer);
             LOGGER.info("created rabbitmq consumer: {} on exchange: {}, queue-name: {}", consumerName, subscribedTo, queueName);

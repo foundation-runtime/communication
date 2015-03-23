@@ -37,6 +37,11 @@
                         <PrimitiveValue value="true"/>
                     </DefaultValue>
                 </StructureMemberDefinition>
+                <StructureMemberDefinition name="queue.deadLetterIsEnabled" type="BOOLEAN" advanced="true">
+                    <DefaultValue>
+                        <PrimitiveValue value="true"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
                 <StructureMemberDefinition name="queue.subscribedTo" type="STRING" required="false" advanced="true"/>
             </StructureDefinition>
         </ParameterType>
