@@ -44,6 +44,7 @@ class RabbitMQMessageConsumer implements MessageConsumer {
     public static final String DLQ = "DLQ";
     private String consumerName = "N/A";
     private Configuration configuration = ConfigurationFactory.getConfiguration();
+
     private String queueName = "";
     private QueueingConsumer consumer = null;
 
@@ -97,11 +98,6 @@ class RabbitMQMessageConsumer implements MessageConsumer {
                 }
             }else{
                 channel.queueBind(queue, subscribedTo, "#");
-            }
-
-
-            if(deadLetterIsEnabled){
-                channel.queueBind(queue, DLQ, "#");
             }
 
             consumer = new QueueingConsumer(channel);
@@ -170,5 +166,9 @@ class RabbitMQMessageConsumer implements MessageConsumer {
 
     @Override
     public void close() {
+    }
+
+    public String getQueueName() {
+        return queueName;
     }
 }
