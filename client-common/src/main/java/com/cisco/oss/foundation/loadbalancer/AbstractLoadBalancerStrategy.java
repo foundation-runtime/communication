@@ -16,12 +16,16 @@
 
 package com.cisco.oss.foundation.loadbalancer;
 
+import com.cisco.oss.foundation.configuration.ConfigurationFactory;
 import com.cisco.oss.foundation.directory.LookupManager;
 import com.cisco.oss.foundation.directory.NotificationHandler;
 import com.cisco.oss.foundation.directory.ServiceDirectory;
 import com.cisco.oss.foundation.directory.entity.ServiceInstance;
 import com.cisco.oss.foundation.directory.exception.ServiceException;
+import com.cisco.oss.foundation.directory.impl.DirectoryServiceClient;
 import com.google.common.collect.Lists;
+import org.apache.commons.configuration.Configuration;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.remoting.RemoteAccessException;
@@ -39,8 +43,26 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  */
 public abstract class AbstractLoadBalancerStrategy<S extends ClientRequest> implements LoadBalancerStrategy<S> {
 
-    public static final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
     protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractLoadBalancerStrategy.class);
+
+    static{
+        try {
+            Configuration configuration = ConfigurationFactory.getConfiguration();
+            String sdHost = configuration.getString("service.sd.host", "");
+            int sdPort = configuration.getInt("service.sd.port", -1);
+
+            if(StringUtils.isNotBlank(sdHost)){
+                ServiceDirectory.getServiceDirectoryConfig().setProperty( DirectoryServiceClient.SD_API_SD_SERVER_FQDN_PROPERTY, sdHost);
+            }
+
+            if(sdPort > 0){
+                ServiceDirectory.getServiceDirectoryConfig().setProperty( DirectoryServiceClient.SD_API_SD_SERVER_PORT_PROPERTY, sdPort);
+            }
+        } catch (Exception e) {
+            LOGGER.error("Can't assign service Directory host and port properties: {}",e ,e);
+        }
+    }
+    public static final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
     private static final long serialVersionUID = -4787963395573781601L;
     protected List<InternalServerProxy> serverProxies;
     long waitingTime;

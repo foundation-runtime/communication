@@ -57,8 +57,8 @@
         </developer>
     </developers>
     <properties>
-        <http-client-common-version>1.1.0-1</http-client-common-version>
-        <http-client-api-version>1.1.0-1</http-client-api-version>
+        <http-client-common-version>1.1.1-2-SNAPSHOT</http-client-common-version>
+        <http-client-api-version>1.1.0-2-SNAPSHOT</http-client-api-version>
         <logging-api-version>1.0.2-1</logging-api-version>
         <logging-log4j-version>1.0.2-1</logging-log4j-version>
         <jetty-version>8.1.16.v20140903</jetty-version>

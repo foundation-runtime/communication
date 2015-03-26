@@ -24,6 +24,7 @@ import com.cisco.oss.foundation.directory.entity.OperationalStatus;
 import com.cisco.oss.foundation.directory.entity.ProvidedServiceInstance;
 import com.cisco.oss.foundation.directory.entity.ServiceInstance;
 import com.cisco.oss.foundation.directory.exception.ServiceException;
+import com.cisco.oss.foundation.directory.impl.DirectoryServiceClient;
 import com.cisco.oss.foundation.http.server.HttpServerFactory;
 import com.cisco.oss.foundation.http.server.ServerFailedToStartException;
 import com.google.common.collect.ArrayListMultimap;
@@ -59,6 +60,24 @@ public enum JettyHttpServerFactory implements HttpServerFactory, JettyHttpServer
     INSTANCE;
 
     private final static Logger LOGGER = LoggerFactory.getLogger(JettyHttpServerFactory.class);
+
+    static{
+        try {
+            Configuration configuration = ConfigurationFactory.getConfiguration();
+            String sdHost = configuration.getString("service.sd.host", "");
+            int sdPort = configuration.getInt("service.sd.port", -1);
+
+            if(StringUtils.isNotBlank(sdHost)){
+                ServiceDirectory.getServiceDirectoryConfig().setProperty( DirectoryServiceClient.SD_API_SD_SERVER_FQDN_PROPERTY, sdHost);
+            }
+
+            if(sdPort > 0){
+                ServiceDirectory.getServiceDirectoryConfig().setProperty( DirectoryServiceClient.SD_API_SD_SERVER_PORT_PROPERTY, sdPort);
+            }
+        } catch (Exception e) {
+            LOGGER.error("Can't assign service Directory host and port properties: {}",e ,e);
+        }
+    }
 
     private static final Map<String, Pair<Server,ProvidedServiceInstance>> servers = new ConcurrentHashMap<String, Pair<Server,ProvidedServiceInstance>>();
 

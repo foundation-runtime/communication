@@ -58,7 +58,7 @@
     </developers>
     <properties>
         <commons-version>1.0.2-1</commons-version>
-        <client-common-version>1.1.0-2</client-common-version>
+        <client-common-version>1.1.1-1-SNAPSHOT</client-common-version>
         <!--<javaVersion>1.6</javaVersion>-->
     </properties>
     <scm>

@@ -57,7 +57,7 @@
         </developer>
     </developers>
     <properties>
-        <http-client-api-version>1.1.0-1</http-client-api-version>
+        <http-client-api-version>1.1.0-2-SNAPSHOT</http-client-api-version>
         <configuration-api-version>1.0.2-4</configuration-api-version>
         <logging-log4j-version>1.0.2-1</logging-log4j-version>
         <monitoring-api-version>1.0.2-2</monitoring-api-version>

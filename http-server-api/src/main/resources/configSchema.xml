@@ -226,5 +226,22 @@
             </StructureDefinition>
 
         </ParameterType>
+
+        <Parameter name="service.sd" type="STRUCTURE" description="Host and Port configuration for Service Directory server" advanced="true" instantiationLevel="GLOBAL">
+            <StructureDefinition>
+                <StructureMemberDefinition name="host" type="STRING">
+                    <DefaultValue>
+                        <PrimitiveValue value="vcsdirsvc"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
+                <StructureMemberDefinition name="port" type="INTEGER">
+                    <DefaultValue>
+                        <PrimitiveValue value="2013"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
+            </StructureDefinition>
+        </Parameter>
+
+
     </NamespaceDefinition>
 </NamespaceDefinitions>
