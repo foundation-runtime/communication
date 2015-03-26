@@ -9,7 +9,7 @@
     <groupId>com.cisco.oss.foundation.queue</groupId>
     <artifactId>queue-api</artifactId>
     <name>queue-api</name>
-    <version>1.0.2-1</version>
+    <version>1.0.2-2-SNAPSHOT</version>
     <description>This project defines common api for queue api for foundation runtime software</description>
     <url>https://github.com/foundation-runtime/communication/tree/master/queue-api</url>
     <issueManagement>
@@ -34,7 +34,7 @@
         <connection>scm:git:git@github.com:foundation-runtime/communication.git</connection>
         <developerConnection>scm:git:git@github.com:foundation-runtime/communication.git</developerConnection>
         <url>https://github.com/foundation-runtime/communication.git</url>
-        <tag>queue-api-1.0.2-1</tag>
+        <tag>HEAD</tag>
     </scm>
     <organization>
         <name>Cisco</name>
