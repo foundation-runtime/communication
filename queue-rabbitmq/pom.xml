@@ -72,7 +72,7 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>queue-api</artifactId>
-            <version>1.0.0-4</version>
+            <version>1.0.2-1</version>
         </dependency>
         <dependency>
             <groupId>com.cisco.oss.foundation</groupId>
