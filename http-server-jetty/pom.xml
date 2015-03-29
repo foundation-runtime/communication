@@ -66,6 +66,7 @@
         <configuration-lib-version>1.0.2-4</configuration-lib-version>
         <monitoring-api-version>1.0.2-2</monitoring-api-version>
         <monitoring-jmx-lib-version>1.0.2-2</monitoring-jmx-lib-version>
+        <sd.version>1.1.0-6</sd.version>
     </properties>
     <scm>
         <connection>scm:git:git@github.com:foundation-runtime/communication.git</connection>
@@ -177,12 +178,12 @@
         <dependency>
             <groupId>com.cisco.oss.foundation.directory</groupId>
             <artifactId>sd-api</artifactId>
-            <version>1.1.0-4</version>
+            <version>${sd.version}</version>
         </dependency>
         <dependency>
             <groupId>com.cisco.oss.foundation.directory</groupId>
             <artifactId>sd-core</artifactId>
-            <version>1.1.0-4</version>
+            <version>${sd.version}</version>
         </dependency>
         <dependency>
             <groupId>org.scala-lang</groupId>
