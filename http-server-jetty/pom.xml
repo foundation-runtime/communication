@@ -63,7 +63,7 @@
         <logging-api-version>1.0.2-1</logging-api-version>
         <jetty-version>9.2.9.v20150224</jetty-version>
         <http-server-api-version>1.0.3-2-SNAPSHOT</http-server-api-version>
-        <configuration-lib-version>1.0.2-4</configuration-lib-version>
+        <configuration-lib-version>1.0.3-1</configuration-lib-version>
         <monitoring-api-version>1.0.2-2</monitoring-api-version>
         <monitoring-jmx-lib-version>1.0.2-2</monitoring-jmx-lib-version>
         <sd.version>1.1.0-6</sd.version>

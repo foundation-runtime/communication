@@ -60,7 +60,7 @@
         <http-client-common-version>1.0.2-6</http-client-common-version>
         <jetty-version>9.2.9.v20150224</jetty-version>
         <logging-log4j-version>1.0.2-1</logging-log4j-version>
-        <configuration-lib-version>1.0.2-4</configuration-lib-version>
+        <configuration-lib-version>1.0.3-1</configuration-lib-version>
         <monitoring-jmx-lib-version>1.0.2-2</monitoring-jmx-lib-version>
     </properties>
     <scm>
