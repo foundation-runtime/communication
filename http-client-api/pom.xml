@@ -19,7 +19,7 @@
     <parent>
 		<groupId>com.cisco.oss.foundation</groupId>
 		<artifactId>foundation-common-base</artifactId>
-        <version>1.0.0-3</version>
+        <version>1.0.1-5</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.cisco.oss.foundation</groupId>
@@ -57,6 +57,7 @@
         </developer>
     </developers>
     <properties>
+        <foundation-common-base-version>1.0.1-5</foundation-common-base-version>
         <commons-version>1.0.2-1</commons-version>
         <client-common-version>1.1.1-1</client-common-version>
         <!--<javaVersion>1.6</javaVersion>-->

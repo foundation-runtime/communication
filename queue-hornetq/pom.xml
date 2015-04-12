@@ -3,7 +3,7 @@
     <parent>
         <groupId>com.cisco.oss.foundation</groupId>
         <artifactId>foundation-common-base</artifactId>
-        <version>1.0.0-3</version>
+        <version>1.0.1-5</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.cisco.oss.foundation.queue</groupId>
@@ -31,6 +31,7 @@
         </developer>
     </developers>
     <properties>
+        <foundation-common-base-version>1.0.1-5</foundation-common-base-version>
         <hornetq-version>2.4.4.Final</hornetq-version>
         <logging-api-version>1.0.2-1</logging-api-version>
         <logging-log4j-version>1.0.2-1</logging-log4j-version>

@@ -3,7 +3,7 @@
     <parent>
         <groupId>com.cisco.oss.foundation</groupId>
         <artifactId>foundation-common-base</artifactId>
-        <version>1.0.0-3</version>
+        <version>1.0.1-5</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.cisco.oss.foundation.queue</groupId>
@@ -40,6 +40,9 @@
         <name>Cisco</name>
         <url>http://www.cisco.com</url>
     </organization>
+    <properties>
+        <foundation-common-base-version>1.0.1-5</foundation-common-base-version>
+    </properties>
     <build>
         <pluginManagement>
             <plugins>
