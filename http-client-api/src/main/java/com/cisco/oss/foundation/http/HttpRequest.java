@@ -44,6 +44,8 @@ public class HttpRequest implements ClientRequest{
     private String contentType = "application/json";
 
     protected boolean httpsEnabled = false;
+    protected boolean retryOnServerBusy = false;
+
 
     public String getContentType() {
         return contentType;
@@ -206,6 +208,11 @@ public class HttpRequest implements ClientRequest{
 
         public Builder https() {
             request.httpsEnabled = true;
+            return this;
+        }
+
+        public Builder retryOnServerBusy() {
+            request.retryOnServerBusy = true;
             return this;
         }
 

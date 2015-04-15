@@ -149,14 +149,22 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
                         CommunicationInfo.getCommunicationInfo().transactionFinished(connectionDetails, getMonioringApiName(request), true, responseStatus + "");
                     }
                 }
-//                if (lastKnownErrorThreadLocal.get() != null) {
-//                    lastCaugtException = handleException(serviceMethod, serverProxy, lastKnownErrorThreadLocal.get());
-//                } else {
-                serverProxy.setCurrentNumberOfAttempts(0);
-                serverProxy.setFailedAttemptTimeStamp(0);
-//                }
 
-                successfullyInvoked = true;
+                if(request.retryOnServerBusy){
+                    if(result.getStatus() == 503){
+                        lastCaugtException = loadBalancerStrategy.handleException(apiName, serverProxy, new ServerBusyException("server returned HTP 503 for client: " + apiName));
+                    }else{
+                        serverProxy.setCurrentNumberOfAttempts(0);
+                        serverProxy.setFailedAttemptTimeStamp(0);
+                        successfullyInvoked = true;
+                    }
+
+                }else{
+                    serverProxy.setCurrentNumberOfAttempts(0);
+                    serverProxy.setFailedAttemptTimeStamp(0);
+                    successfullyInvoked = true;
+                }
+
 
             } catch (Throwable e) {
                 lastCaugtException = loadBalancerStrategy.handleException(apiName, serverProxy, e);

@@ -176,7 +176,6 @@ public abstract class AbstractLoadBalancerStrategy<S extends ClientRequest> impl
         }
 
         if (LOGGER.isDebugEnabled()) {
-            // LOGGER.warn(errorMessage + ". Exception is: " + throwable);
             LOGGER.warn(warnMessage + "(attempt " + serverProxy.getCurrentNumberOfAttempts() + ", will retry in " + serverProxy.getRetryDelay() + " milliseconds)", throwable);
         } else {
             LOGGER.warn(warnMessage + "(attempt " + serverProxy.getCurrentNumberOfAttempts() + ", will retry in " + serverProxy.getRetryDelay() + " milliseconds)");
@@ -206,8 +205,6 @@ public abstract class AbstractLoadBalancerStrategy<S extends ClientRequest> impl
 
     public void handleNullserverProxy(final String apiName, final Throwable lastCaugtException) {
 
-//		final Serializable interfaceName = serviceMethod != null ? serviceMethod.getDeclaringClass() : "UNKNOWN";
-//		final String methodName = serviceMethod != null ? serviceMethod.getName() : "UNKNOWN";
         final String causedBy = lastCaugtException != null ? ("\"Caused by: " + lastCaugtException) : "\"";
         final NoActiveServersException noActiveServersException = new NoActiveServersException("No active servers were found in the server proxies list. API: \"" + apiName + "\"." + causedBy, lastCaugtException);
 
@@ -216,31 +213,7 @@ public abstract class AbstractLoadBalancerStrategy<S extends ClientRequest> impl
             failOverStrategy.lastActive = null;
         }
 
-//		// drill down to see if the applicative interface declares throwing an
-//		// IOException.
-//		// if so, we want to throw an IOException and not a RuntimeException.
-//		if (serviceMethod != null) {
-//
-//			final Class<?>[] exceptionTypes = serviceMethod.getExceptionTypes();
-//			for (Class<?> exceptionClass : exceptionTypes) {
-//				if (exceptionClass.isAssignableFrom(IOException.class)) {
-//					// if lastCaugtException == null, this message will be used
-//					// because it is most likely to be a configuration problem.
-//					final String message = "Can not find a responding server, OR your config prefix may be wrong.";
-//					final String errorMessage = noActiveServersException.getMessage() + "\nCaused by: " + (lastCaugtException == null ? message : lastCaugtException);
-//					final NoActiveServersIOException noActiveSrvIOException = new NoActiveServersIOException(errorMessage);
-//					throw noActiveSrvIOException;
-//				}
-//			}
-//		}
 
-        // if you are the first in chain and you don't have ana available server
-        // throw this new exception so the loop of trying to find an active
-        // server will end.
-//		final boolean firstInChain = ConfigurationFactory.getConfiguration().getBoolean(LoadBalancerConstants.DEFAULT_FIRST_IN_CHAIN);
-//		if (firstInChain) {
-//			throw new NoActiveServersDeadEndException(noActiveServersException.getMessage(), lastCaugtException);
-//		}
 
         throw noActiveServersException;
 
