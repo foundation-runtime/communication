@@ -25,6 +25,7 @@ import com.cisco.oss.foundation.directory.exception.ServiceException;
 import com.cisco.oss.foundation.directory.impl.DirectoryServiceClient;
 import com.cisco.oss.foundation.http.server.HttpServerFactory;
 import com.cisco.oss.foundation.http.server.ServerFailedToStartException;
+import com.cisco.oss.foundation.ip.utils.IpUtils;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import org.apache.commons.configuration.Configuration;
@@ -430,8 +431,9 @@ public enum JettyHttpServerFactory implements HttpServerFactory , JettyHttpServe
         final ProvidedServiceInstance instance = new ProvidedServiceInstance(serviceName, host, port);
 
 // Setting the service instance URI. URI is defined as tcp://address:port for the TCP end point
-        instance.setUri("http://" + host + ":" + port + "");
-        instance.setAddress(host);
+        String serverHost = "0.0.0.0".equals(host) ? IpUtils.getIpAddress() : host;
+        instance.setUri("http://" + serverHost + ":" + port + "");
+        instance.setAddress(serverHost);
         instance.setPort(port);
 
         instance.setStatus(OperationalStatus.UP);
