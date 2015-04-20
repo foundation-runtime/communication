@@ -95,22 +95,27 @@ class RabbitMQMessageProducer extends AbstractMessageProducer {
     @Override
     public void sendMessage(byte[] message, Map<String, Object> messageHeaders) {
 
-        messageHeaders.put(QueueConstants.FLOW_CONTEXT_HEADER, FlowContextFactory.serializeNativeFlowContext());
+        if (!RabbitMQMessagingFactory.IS_BLOCKED.get()) {
+            messageHeaders.put(QueueConstants.FLOW_CONTEXT_HEADER, FlowContextFactory.serializeNativeFlowContext());
 
-        if (isInitialized.get()) {
-            sendMessageInternal(message, messageHeaders);
-        }else{
-            try {
-                Channel channel = RabbitMQMessagingFactory.getChannel();
-                channel.exchangeDeclare(queueName, "topic", true, false, false, null);
-                isInitialized.set(true);
+            if (isInitialized.get()) {
                 sendMessageInternal(message, messageHeaders);
-            } catch (Exception e) {
-                String errorMsg = "can't init producer as it is underlying connection is not ready";
-                LOGGER.warn(errorMsg);
-                throw new QueueException(errorMsg, e);
+            }else{
+                try {
+                    Channel channel = RabbitMQMessagingFactory.getChannel();
+                    channel.exchangeDeclare(queueName, "topic", true, false, false, null);
+                    isInitialized.set(true);
+                    sendMessageInternal(message, messageHeaders);
+                } catch (Exception e) {
+                    String errorMsg = "can't init producer as it is underlying connection is not ready";
+                    LOGGER.warn(errorMsg);
+                    throw new QueueException(errorMsg, e);
+                }
             }
+        }else{
+            throw new QueueException("RabbitMQ connection is blocked");
         }
+
 
     }
 

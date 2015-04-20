@@ -49,6 +49,7 @@ public class RabbitMQMessagingFactory {
     private static AtomicBoolean IS_RECONNECT_THREAD_RUNNING = new AtomicBoolean(false);
     static AtomicBoolean IS_CONNETED = new AtomicBoolean(false);
     static CountDownLatch INIT_LATCH = new CountDownLatch(1);
+    static AtomicBoolean IS_BLOCKED =  new AtomicBoolean(false);
 
 
 
@@ -137,6 +138,17 @@ public class RabbitMQMessagingFactory {
             }
             Address[] addrs = new Address[0];
             connection = connectionFactory.newConnection(addresses.toArray(addrs));
+            connection.addBlockedListener(new BlockedListener() {
+                public void handleBlocked(String reason) throws IOException {
+                    LOGGER.error("RabbitMQ connection is now blocked. Port: {}, Reason: {}", connection.getPort(), reason);
+                    IS_BLOCKED.set(true);
+                }
+
+                public void handleUnblocked() throws IOException {
+                    LOGGER.info("RabbitMQ connection is now un-blocked. Port: {}", connection.getPort());
+                    IS_BLOCKED.set(false);
+                }
+            });
             IS_CONNETED.set(true);
             INIT_LATCH.countDown();
 
