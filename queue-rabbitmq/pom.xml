@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <parent>
         <groupId>com.cisco.oss.foundation</groupId>
         <artifactId>foundation-common-base</artifactId>
@@ -16,7 +17,7 @@
         <system>Github</system>
     </issueManagement>
     <mailingLists>
-        <mailingList />
+        <mailingList/>
     </mailingLists>
     <developers>
         <developer>
@@ -32,7 +33,7 @@
     </developers>
     <properties>
         <foundation-common-base-version>1.0.1-5</foundation-common-base-version>
-        <rabbitmq-version>3.4.4</rabbitmq-version>
+        <rabbitmq-version>3.5.1</rabbitmq-version>
         <logging-api-version>1.0.2-1</logging-api-version>
         <logging-log4j-version>1.0.2-1</logging-log4j-version>
         <configuration-lib-version>1.0.3-1</configuration-lib-version>
@@ -91,11 +92,11 @@
             <version>2.4.4.Final</version>
             <scope>test</scope>
         </dependency>
-		<dependency>
-  <groupId>com.rabbitmq</groupId>
-  <artifactId>amqp-client</artifactId>
-  <version>${rabbitmq-version}</version>
-</dependency>
+        <dependency>
+            <groupId>com.rabbitmq</groupId>
+            <artifactId>amqp-client</artifactId>
+            <version>${rabbitmq-version}</version>
+        </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
