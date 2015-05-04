@@ -54,6 +54,7 @@ public class MonitoringFilter extends AbstractInfraHttpFilter {
         if (!uniqueUriMonitoringEnabled) {
             populateBoyersList();
         }
+        MonitoringAgentFactory.getInstance().register();
     }
 
     private void populateBoyersList() {
@@ -95,9 +96,6 @@ public class MonitoringFilter extends AbstractInfraHttpFilter {
 //			methodName = httpServletRequest.getMethod() + ":" + httpServletRequest.getRequestURI().toString();
             methodName = updateMethodName(httpServletRequest, methodName);
             LOGGER.trace("transaction method name is: {}", methodName);
-
-            MonitoringAgentFactory.getInstance().register();
-
 
             reqServiceDetails = serviceDetails;
 
