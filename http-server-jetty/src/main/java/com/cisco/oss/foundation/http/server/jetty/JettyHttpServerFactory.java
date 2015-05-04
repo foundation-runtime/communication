@@ -362,25 +362,9 @@ public enum JettyHttpServerFactory implements HttpServerFactory, JettyHttpServer
 
         registrationManager.registerService(instance, null);
 
-
-// Update the OperationalStatus of the instance to DOWN, this instance will be removed from the ServiceInstance lookup.
-//        registrationManager.updateServiceOperationalStatus(serviceName, instance.getProviderId(), OperationalStatus.DOWN);
-
-
-// Update the instance: OperationalStatus to UP, and the "version" metadata to "2.5.1"
-//        instance.setStatus(OperationalStatus.UP);
-//        instance.getMetadata().put("version", "2.5.1");
-//        instance.getMetadata().put("datacenter", "dc01");
-//        registrationManager.updateService(instance);
-
         Runtime.getRuntime().addShutdownHook(new Thread() {
             public void run() {
-                // Unregister the instance.
-                try {
-                    registrationManager.unregisterService(serviceName, instance.getProviderId());
-                } catch (ServiceException e) {
-                    LOGGER.error("can't un-register the service in service directory server. error is: {}", e);
-                }
+                unRegisterInstance(serviceName, instance);
             }
         });
 
@@ -429,14 +413,17 @@ public enum JettyHttpServerFactory implements HttpServerFactory, JettyHttpServer
             }
             ProvidedServiceInstance instance = pair.getRight();
             if(instance != null){
-                try {
-                    final RegistrationManager registrationManager = ServiceDirectory.getRegistrationManager();
-//                    registrationManager.updateServiceOperationalStatus(instance.getServiceName(),instance.getProviderId(),OperationalStatus.DOWN);
-                    registrationManager.unregisterService(instance.getServiceName(),instance.getProviderId());
-                } catch (ServiceException e) {
-                    LOGGER.error("Problem stopping the http {} server. Error is {}.", serviceName, e);
-                }
+                unRegisterInstance(serviceName, instance);
             }
+        }
+    }
+
+    private void unRegisterInstance(String serviceName, ProvidedServiceInstance instance) {
+        try {
+            final RegistrationManager registrationManager = ServiceDirectory.getRegistrationManager();
+            registrationManager.unregisterService(instance.getServiceName(),instance.getProviderId());
+        } catch (ServiceException e) {
+            LOGGER.info("Problem stopping the http {} server. Probably already un-registered. Error is {}.", serviceName, e);
         }
     }
 
