@@ -25,7 +25,7 @@
     <groupId>com.cisco.oss.foundation</groupId>
     <artifactId>http-server-api</artifactId>
     <name>http-server-api</name>
-    <version>1.0.3-3-SNAPSHOT</version>
+    <version>1.0.3-3</version>
     <description>This project is the http server api library in the cisco vss foundation runtime</description>
     <url>https://github.com/foundation-runtime/communication/http-server-api</url>
     <packaging>jar</packaging>
@@ -69,7 +69,7 @@
         <connection>scm:git:git@github.com:foundation-runtime/communication.git</connection>
         <developerConnection>scm:git:git@github.com:foundation-runtime/communication.git</developerConnection>
         <url>https://github.com/foundation-runtime/communication.git</url>
-        <tag>HEAD</tag>
+        <tag>http-server-api-1.0.3-3</tag>
     </scm>
     <organization>
         <name>Cisco</name>
