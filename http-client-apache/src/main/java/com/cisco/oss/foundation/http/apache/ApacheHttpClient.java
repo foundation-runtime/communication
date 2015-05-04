@@ -380,6 +380,21 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
 
     }
 
+    @Override
+    public void close() {
+        try {
+            if (httpClient != null) {
+                httpClient.close();
+            }
+
+            if (httpAsyncClient != null) {
+                httpAsyncClient.close();
+            }
+        } catch (IOException e) {
+            LOGGER.warn("can't close http client: {}", e);
+        }
+    }
+
     private static class FoundationFutureCallBack implements FutureCallback<org.apache.http.HttpResponse> {
         private ResponseCallback responseCallback;
         private InternalServerProxy serverProxy;
@@ -432,4 +447,6 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
             responseCallback.cancelled();
         }
     }
+
+
 }
