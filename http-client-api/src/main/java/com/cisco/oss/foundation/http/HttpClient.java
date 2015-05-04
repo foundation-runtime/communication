@@ -63,5 +63,10 @@ public interface HttpClient<S extends HttpRequest, R extends HttpResponse> {
      */
     String getApiName();
 
+    /**
+     * close the client and cleanup resources
+     */
+    void close();
+
 
 }
