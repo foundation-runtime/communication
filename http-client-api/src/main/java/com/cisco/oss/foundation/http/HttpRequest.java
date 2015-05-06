@@ -47,6 +47,9 @@ public class HttpRequest implements ClientRequest{
     protected boolean retryOnServerBusy = false;
 
 
+    protected boolean silentLogging = false;
+
+
     public String getContentType() {
         return contentType;
     }
@@ -128,6 +131,10 @@ public class HttpRequest implements ClientRequest{
 
     public boolean isHttpsEnabled() {
         return httpsEnabled;
+    }
+
+    public boolean isSilentLogging() {
+        return silentLogging;
     }
 
     /**
@@ -213,6 +220,11 @@ public class HttpRequest implements ClientRequest{
 
         public Builder retryOnServerBusy() {
             request.retryOnServerBusy = true;
+            return this;
+        }
+
+        public Builder silentLogging() {
+            request.silentLogging = true;
             return this;
         }
 

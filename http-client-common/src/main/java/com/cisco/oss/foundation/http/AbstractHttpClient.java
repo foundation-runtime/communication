@@ -132,13 +132,23 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
 
                 request = updateRequestUri(request, serverProxy);
 
-                LOGGER.info("sending request: {}-{}", request.getHttpMethod(), request.getUri());
+                if (request.silentLogging) {
+                    LOGGER.trace("sending request: {}-{}", request.getHttpMethod(), request.getUri());
+                }else{
+                    LOGGER.info("sending request: {}-{}", request.getHttpMethod(), request.getUri());
+                }
+
                 ServerConnectionDetails connectionDetails = new ServerConnectionDetails(apiName, "HTTP:" + request.getHttpMethod(), request.getUri().getHost(), -1, request.getUri().getPort());
                 if (exposeStatisticsToMonitor) {
                     CommunicationInfo.getCommunicationInfo().transactionStarted(connectionDetails, getMonioringApiName(request));
                 }
                 result = executeDirect(request);
-                LOGGER.info("got response status: {} for request: {}", result.getStatus(), result.getRequestedURI());
+
+                if (request.silentLogging) {
+                    LOGGER.trace("got response status: {} for request: {}", result.getStatus(), result.getRequestedURI());
+                }else{
+                    LOGGER.info("got response status: {} for request: {}", result.getStatus(), result.getRequestedURI());
+                }
                 if (exposeStatisticsToMonitor) {
 
                     int responseStatus = result.getStatus();

@@ -348,7 +348,11 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
 
 //        final HttpRequest tempRequest = request;
 
-        LOGGER.info("sending request: {}-{}", request.getHttpMethod(),request.getUri());
+        if (request.isSilentLogging()) {
+            LOGGER.trace("sending request: {}-{}", request.getHttpMethod(), request.getUri());
+        }else{
+            LOGGER.info("sending request: {}-{}", request.getHttpMethod(), request.getUri());
+        }
 //        final FlowContext fc = FlowContextFactory.getFlowContext();
 //        Request httpRequest = prepareRequest(request).onRequestQueued(new Request.QueuedListener() {
 //            @Override
@@ -420,7 +424,11 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
             serverProxy.setFailedAttemptTimeStamp(0);
 
             ApacheHttpResponse apacheHttpResponse = new ApacheHttpResponse(response, request.getUri(), apacheHttpClient.isAutoCloseable());
-            LOGGER.info("got response status: {} for request: {}",apacheHttpResponse.getStatus(), apacheHttpResponse.getRequestedURI());
+            if (request.isSilentLogging()) {
+                LOGGER.trace("got response status: {} for request: {}", apacheHttpResponse.getStatus(), apacheHttpResponse.getRequestedURI());
+            }else{
+                LOGGER.info("got response status: {} for request: {}", apacheHttpResponse.getStatus(), apacheHttpResponse.getRequestedURI());
+            }
             responseCallback.completed(apacheHttpResponse);
         }
 
