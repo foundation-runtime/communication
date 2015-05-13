@@ -46,8 +46,8 @@ object RunTestServer {
     val server = new Server(port)
 
     val sslContextFactory: SslContextFactory = new SslContextFactory
-    sslContextFactory.setKeyStorePath("server.jks")
-    sslContextFactory.setKeyStorePassword("foundation-agent")
+    sslContextFactory.setKeyStorePath("foundation.jks")
+    sslContextFactory.setKeyStorePassword("foundation")
 //    sslContextFactory.setpas
 
     val sslSelectChannelConnector = new SslSelectChannelConnector(sslContextFactory)

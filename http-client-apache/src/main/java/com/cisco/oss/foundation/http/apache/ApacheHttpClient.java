@@ -42,6 +42,7 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.concurrent.FutureCallback;
 import org.apache.http.conn.ssl.SSLContexts;
+import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.conn.ssl.X509HostnameVerifier;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
@@ -55,12 +56,13 @@ import org.apache.http.message.BasicHttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.net.ssl.SSLContext;
+import javax.net.ssl.*;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.KeyStore;
+import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.Map;
 
@@ -111,6 +113,7 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
 
         autoCloseable = metadata.isAutoCloseable();
 
+        HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
 
         SSLContext sslContext = null;
 
@@ -132,13 +135,51 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
                         .build();
 
             } else if (addSslSupport) {
+
+                TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+
                 KeyStore keyStore = KeyStore.getInstance(keystoreType);
                 keyStore.load(new FileInputStream(metadata.getKeyStorePath()), metadata.getKeyStorePassword().toCharArray());
+
+                tmf.init(keyStore);
+
 
                 sslContext = SSLContexts.custom()
                         .useSSL()
                         .loadKeyMaterial(keyStore, metadata.getKeyStorePassword().toCharArray())
                         .build();
+
+                sslContext.init(null, tmf.getTrustManagers(),null);
+
+                SSLSocketFactory sf = new SSLSocketFactory(sslContext);
+
+                sf.setHostnameVerifier(new X509HostnameVerifier() {
+                    @Override
+                    public void verify(String host, SSLSocket ssl) throws IOException {
+
+                    }
+
+                    @Override
+                    public void verify(String host, X509Certificate cert) throws SSLException {
+
+                    }
+
+                    @Override
+                    public void verify(String host, String[] cns, String[] subjectAlts) throws SSLException {
+
+                    }
+
+                    @Override
+                    public boolean verify(String s, SSLSession sslSession) {
+                        return true;
+                    }
+                });
+
+                httpClientBuilder
+                        .setSSLSocketFactory(sf)
+                        .setSslcontext(sslContext);
+
+
 
             } else if (addTrustSupport) {
 
@@ -157,12 +198,12 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
             LOGGER.error("can't set TLS Support. Error is: {}", e, e);
         }
 
-        HttpClientBuilder httpClientBuilder = HttpClientBuilder.create()
-                .setMaxConnPerRoute(metadata.getMaxConnectionsPerAddress())
+
+        httpClientBuilder.setMaxConnPerRoute(metadata.getMaxConnectionsPerAddress())
                 .setMaxConnTotal(metadata.getMaxConnectionsTotal())
                 .setDefaultRequestConfig(requestConfig)
-                .setKeepAliveStrategy(new InfraConnectionKeepAliveStrategy(metadata.getIdleTimeout()))
-                .setSslcontext(sslContext);
+                .setKeepAliveStrategy(new InfraConnectionKeepAliveStrategy(metadata.getIdleTimeout()));
+
 
 
 
@@ -346,30 +387,12 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
 
         request = updateRequestUri((S)request, serverProxy);
 
-//        final HttpRequest tempRequest = request;
-
         if (request.isSilentLogging()) {
             LOGGER.trace("sending request: {}-{}", request.getHttpMethod(), request.getUri());
         }else{
             LOGGER.info("sending request: {}-{}", request.getHttpMethod(), request.getUri());
         }
-//        final FlowContext fc = FlowContextFactory.getFlowContext();
-//        Request httpRequest = prepareRequest(request).onRequestQueued(new Request.QueuedListener() {
-//            @Override
-//            public void onQueued(Request jettyRequest) {
-//                FlowContextFactory.addFlowContext(((S) tempRequest).getFlowContext());
-//            }
-//        }).onRequestBegin(new Request.BeginListener() {
-//            @Override
-//            public void onBegin(Request jettyRequest) {
-//                FlowContextFactory.addFlowContext(((S) tempRequest).getFlowContext());
-//            }
-//        }).onRequestFailure(new Request.FailureListener() {
-//            @Override
-//            public void onFailure(Request jettyRequest, Throwable failure) {
-//                FlowContextFactory.addFlowContext(((S) tempRequest).getFlowContext());
-//            }
-//        });
+
 
         org.apache.http.HttpRequest httpRequest = null;
 
