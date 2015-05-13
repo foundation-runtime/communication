@@ -21,7 +21,7 @@ import org.junit.Test
 import com.cisco.oss.foundation.http.HttpRequest
 import com.cisco.oss.foundation.http.apache.{ApacheHttpClientFactory, ApacheHttpResponse}
 import com.cisco.oss.foundation.loadbalancer.{LoadBalancerStrategy, RequestTimeoutException, NoActiveServersException}
-import com.cisco.oss.foundation.http.api.test.{MultithreadTestUtil, BasicHttpTestUtil}
+import com.cisco.oss.foundation.http.api.test.{BasicHttpsTestUtil, MultithreadTestUtil, BasicHttpTestUtil}
 import org.apache.commons.configuration.{Configuration, PropertiesConfiguration}
 
 /**
@@ -29,11 +29,12 @@ import org.apache.commons.configuration.{Configuration, PropertiesConfiguration}
  */
 class TestApacheClient {
   val httpTestUtil = new BasicHttpTestUtil[HttpRequest,ApacheHttpResponse]
+  val httpsTestUtil = new BasicHttpsTestUtil[HttpRequest,ApacheHttpResponse]
   val httpMultiThreadTestUtil = new MultithreadTestUtil[HttpRequest,ApacheHttpResponse]
   val propsConfiguration: Configuration = new PropertiesConfiguration(classOf[TestApacheClient].getResource("/config.properties"))
-  val clientTest = {
-    ApacheHttpClientFactory.createHttpClient("clientTest", propsConfiguration)
-  }
+  val clientTest = ApacheHttpClientFactory.createHttpClient("clientTest", propsConfiguration)
+  val clientHttpsTest = ApacheHttpClientFactory.createHttpClient("clientHttpsTest", propsConfiguration)
+
   val LOGGER = LoggerFactory.getLogger(classOf[TestApacheClient])
 
   @Test
@@ -50,6 +51,11 @@ class TestApacheClient {
   @Test
   def realServerInvokeGet() {
     httpTestUtil.realServerInvokeGet(clientTest)
+  }
+
+  @Test
+  def realHttpsServerInvokeGet() {
+    httpsTestUtil.realHttpsServerInvokeGet(clientHttpsTest)
   }
 
 

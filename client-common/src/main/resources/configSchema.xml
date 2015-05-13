@@ -31,6 +31,12 @@
                            </DefaultValue>
                        </StructureMemberDefinition>
                    </StructureDefinition>
+           <DefaultValue>
+               <StructureValue>
+                   <StructureMemberValue name="host" value="vcsdirsvc"/>
+                   <StructureMemberValue name="port" value="2013"/>
+               </StructureValue>
+           </DefaultValue>
         </Parameter>
 	</NamespaceDefinition>
 </NamespaceDefinitions>

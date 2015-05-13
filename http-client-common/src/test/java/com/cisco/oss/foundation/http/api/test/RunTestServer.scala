@@ -16,13 +16,15 @@
 
 package com.cisco.oss.foundation.http.api.test
 
-import org.slf4j.LoggerFactory
+import java.io.{BufferedReader, InputStreamReader}
+import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
+
 import com.cisco.oss.foundation.flowcontext.FlowContextFactory
-import java.io.{InputStreamReader, BufferedReader}
-import scala.Int
-import org.eclipse.jetty.server.Server
+import org.eclipse.jetty.server._
+import org.eclipse.jetty.server.ssl.SslSelectChannelConnector
 import org.eclipse.jetty.servlet.ServletHandler
-import javax.servlet.http.{HttpServletResponse, HttpServletRequest, HttpServlet}
+import org.eclipse.jetty.util.ssl.SslContextFactory
+import org.slf4j.LoggerFactory
 
 /**
  * Created by Yair Ogen on 1/20/14.
@@ -35,6 +37,28 @@ object RunTestServer {
     val handler = new ServletHandler();
     server.setHandler(handler);
     handler.addServletWithMapping(classOf[ServletTester], "/test");
+    server.start();
+
+    server
+  }
+
+  def runHTTPSServer(port:Int):Server = {
+    val server = new Server(port)
+
+    val sslContextFactory: SslContextFactory = new SslContextFactory
+    sslContextFactory.setKeyStorePath("server.jks")
+    sslContextFactory.setKeyStorePassword("foundation-agent")
+//    sslContextFactory.setpas
+
+    val sslSelectChannelConnector = new SslSelectChannelConnector(sslContextFactory)
+    sslSelectChannelConnector.setHost("localhost")
+    sslSelectChannelConnector.setPort(port)
+
+
+    val handler = new ServletHandler();
+    server.setHandler(handler);
+    handler.addServletWithMapping(classOf[ServletTester], "/test");
+    server.setConnectors(Array[Connector](sslSelectChannelConnector))
     server.start();
 
     server

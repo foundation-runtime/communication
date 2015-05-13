@@ -136,7 +136,7 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
                 keyStore.load(new FileInputStream(metadata.getKeyStorePath()), metadata.getKeyStorePassword().toCharArray());
 
                 sslContext = SSLContexts.custom()
-                        .useTLS()
+                        .useSSL()
                         .loadKeyMaterial(keyStore, metadata.getKeyStorePassword().toCharArray())
                         .build();
 
