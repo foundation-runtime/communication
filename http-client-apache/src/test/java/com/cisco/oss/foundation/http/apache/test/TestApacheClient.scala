@@ -16,6 +16,10 @@
 
 package com.cisco.oss.foundation.http.apache.test
 
+import java.security.cert.X509Certificate
+import javax.net.ssl.{SSLSocket, SSLSession}
+
+import org.apache.http.conn.ssl.X509HostnameVerifier
 import org.slf4j.LoggerFactory
 import org.junit.Test
 import com.cisco.oss.foundation.http.HttpRequest
@@ -33,7 +37,16 @@ class TestApacheClient {
   val httpMultiThreadTestUtil = new MultithreadTestUtil[HttpRequest,ApacheHttpResponse]
   val propsConfiguration: Configuration = new PropertiesConfiguration(classOf[TestApacheClient].getResource("/config.properties"))
   val clientTest = ApacheHttpClientFactory.createHttpClient("clientTest", propsConfiguration)
-  val clientHttpsTest = ApacheHttpClientFactory.createHttpClient("clientHttpsTest", propsConfiguration)
+  private val verifier: X509HostnameVerifier with Object {def verify(s: String, sslSession: SSLSession): Boolean; def verify(host: String, cert: X509Certificate): Unit; def verify(host: String, ssl: SSLSocket): Unit; def verify(host: String, cns: Array[String], subjectAlts: Array[String]): Unit} = new X509HostnameVerifier {
+    override def verify(host: String, ssl: SSLSocket): Unit = {}
+
+    override def verify(host: String, cert: X509Certificate): Unit = {}
+
+    override def verify(host: String, cns: Array[String], subjectAlts: Array[String]): Unit = {}
+
+    override def verify(s: String, sslSession: SSLSession): Boolean = true
+  }
+  val clientHttpsTest = ApacheHttpClientFactory.createHttpClient("clientHttpsTest", propsConfiguration, verifier)
 
   val LOGGER = LoggerFactory.getLogger(classOf[TestApacheClient])
 
