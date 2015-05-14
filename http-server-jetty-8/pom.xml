@@ -19,7 +19,7 @@
     <parent>
 		<groupId>com.cisco.oss.foundation</groupId>
 		<artifactId>foundation-common-base</artifactId>
-        <version>1.0.1-5</version>
+        <version>1.0.1-6</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.cisco.oss.foundation</groupId>
@@ -60,13 +60,14 @@
         <!--<javaVersion>1.6</javaVersion>-->
         <foundation-common-base-version>1.0.1-5</foundation-common-base-version>
         <logging-api-version>1.0.2-1</logging-api-version>
-        <http-server-api-version>1.0.3-3</http-server-api-version>
+        <http-server-api-version>1.0.3-4</http-server-api-version>
         <logging-log4j-version>1.0.2-1</logging-log4j-version>
-        <http-client-apache-version>1.0.2-5</http-client-apache-version>
+        <http-client-apache-version>1.1.1-1</http-client-apache-version>
         <configuration-lib-version>1.0.3-1</configuration-lib-version>
-        <monitoring-api-version>1.0.2-2</monitoring-api-version>
+        <monitoring-api-version>1.0.3-1</monitoring-api-version>
         <jetty-8-version>8.1.16.v20140903</jetty-8-version>
-        <sd.version>1.1.0-6</sd.version>
+        <sd-api-ersion>1.1.0-7</sd-api-ersion>
+        <sd-core-ersion>1.1.0-6</sd-core-ersion>
     </properties>
     <scm>
         <connection>scm:git:git@github.com:foundation-runtime/communication.git</connection>
@@ -137,7 +138,7 @@
         <dependency>
             <groupId>com.cisco.oss.foundation.directory</groupId>
             <artifactId>sd-api</artifactId>
-            <version>${sd.version}</version>
+            <version>${sd-api-version}</version>
             <exclusions>
                 <exclusion>
                     <artifactId>slf4j-api</artifactId>
@@ -148,7 +149,7 @@
         <dependency>
             <groupId>com.cisco.oss.foundation.directory</groupId>
             <artifactId>sd-core</artifactId>
-            <version>${sd.version}</version>
+            <version>${sd-core-version}</version>
             <exclusions>
                 <exclusion>
                     <artifactId>slf4j-api</artifactId>
