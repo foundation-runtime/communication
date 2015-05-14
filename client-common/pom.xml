@@ -24,7 +24,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.cisco.oss.foundation</groupId>
     <artifactId>client-common</artifactId>
-    <version>1.1.1-2-SNAPSHOT</version>
+    <version>1.1.1-2</version>
     <name>client-common</name>
     <description>This project is the common library for http client in the cisco oss foundation runtime</description>
     <url>https://github.com/foundation-runtime/communication/client-common</url>
@@ -69,7 +69,7 @@
         <connection>scm:git:git@github.com:foundation-runtime/communication.git</connection>
         <developerConnection>scm:git:git@github.com:foundation-runtime/communication.git</developerConnection>
         <url>https://github.com/foundation-runtime/communication.git</url>
-        <tag>HEAD</tag>
+        <tag>client-common-1.1.1-2</tag>
     </scm>
     <organization>
         <name>Cisco</name>
