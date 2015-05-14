@@ -62,7 +62,8 @@
         <logging-log4j-version>1.0.2-1</logging-log4j-version>
         <monitoring-api-version>1.0.2-2</monitoring-api-version>
         <!--<javaVersion>1.6</javaVersion>-->
-        <sd-version>1.1.0-6</sd-version>
+        <sd-api-version>1.1.0-7</sd-api-version>
+        <sd-core-version>1.1.0-6</sd-core-version>
     </properties>
     <scm>
         <connection>scm:git:git@github.com:foundation-runtime/communication.git</connection>
@@ -169,12 +170,12 @@
         <dependency>
             <groupId>com.cisco.oss.foundation.directory</groupId>
             <artifactId>sd-api</artifactId>
-            <version>${sd-version}</version>
+            <version>${sd-api-version}</version>
         </dependency>
         <dependency>
             <groupId>com.cisco.oss.foundation.directory</groupId>
             <artifactId>sd-core</artifactId>
-            <version>${sd-version}</version>
+            <version>${sd-core-version}</version>
         </dependency>
     </dependencies>
 </project>
