@@ -18,25 +18,5 @@
 <NamespaceDefinitions xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/foundation-runtime/configuration/master/ccp_schema/CCP_XML.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<NamespaceDefinition>
 		<NamespaceIdentifier version="TBD" name="TBD" />
-       <Parameter name="service.sd" type="STRUCTURE" description="Host and Port configuration for Service Directory server" advanced="true" instantiationLevel="GLOBAL">
-                   <StructureDefinition>
-                       <StructureMemberDefinition name="host" type="STRING">
-                           <DefaultValue>
-                               <PrimitiveValue value="vcsdirsvc"/>
-                           </DefaultValue>
-                       </StructureMemberDefinition>
-                       <StructureMemberDefinition name="port" type="INTEGER">
-                           <DefaultValue>
-                               <PrimitiveValue value="2013"/>
-                           </DefaultValue>
-                       </StructureMemberDefinition>
-                   </StructureDefinition>
-           <DefaultValue>
-               <StructureValue>
-                   <StructureMemberValue name="host" value="vcsdirsvc"/>
-                   <StructureMemberValue name="port" value="2013"/>
-               </StructureValue>
-           </DefaultValue>
-        </Parameter>
 	</NamespaceDefinition>
 </NamespaceDefinitions>
