@@ -66,8 +66,8 @@
         <configuration-lib-version>1.0.3-1</configuration-lib-version>
         <monitoring-api-version>1.0.3-1</monitoring-api-version>
         <jetty-8-version>8.1.16.v20140903</jetty-8-version>
-        <sd-api-ersion>1.1.0-7</sd-api-ersion>
-        <sd-core-ersion>1.1.0-6</sd-core-ersion>
+        <sd-api-version>1.1.0-7</sd-api-version>
+        <sd-core-version>1.1.0-6</sd-core-version>
     </properties>
     <scm>
         <connection>scm:git:git@github.com:foundation-runtime/communication.git</connection>
@@ -138,7 +138,7 @@
         <dependency>
             <groupId>com.cisco.oss.foundation.directory</groupId>
             <artifactId>sd-api</artifactId>
-            <version>${sd-api-version}</version>
+            <version>${sd.version}</version>
             <exclusions>
                 <exclusion>
                     <artifactId>slf4j-api</artifactId>
@@ -149,7 +149,7 @@
         <dependency>
             <groupId>com.cisco.oss.foundation.directory</groupId>
             <artifactId>sd-core</artifactId>
-            <version>${sd-core-version}</version>
+            <version>${sd.version}</version>
             <exclusions>
                 <exclusion>
                     <artifactId>slf4j-api</artifactId>
