@@ -113,7 +113,7 @@ public class TraceResponseWrapper extends HttpServletResponseWrapper {
 	}
 	
 	public void writeBody() throws IOException {
-		if (localStream != null && super.getOutputStream()!= null ) {
+		if (localStream != null && super.getOutputStream()!= null && TraceResponseWrapper.this.getResponse().getOutputStream() != super.getOutputStream()) {
             try {
                 super.getOutputStream().write(localStream.toByteArray());
             } catch (IOException e) {
