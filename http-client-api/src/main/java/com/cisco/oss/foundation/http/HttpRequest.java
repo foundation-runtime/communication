@@ -46,6 +46,8 @@ public class HttpRequest implements ClientRequest{
     protected boolean httpsEnabled = false;
     protected boolean retryOnServerBusy = false;
 
+    protected boolean queryParamsParseAsMultiValue = false;
+
 
     protected boolean silentLogging = false;
 
@@ -137,6 +139,10 @@ public class HttpRequest implements ClientRequest{
         return silentLogging;
     }
 
+    public boolean isQueryParamsParseAsMultiValue() {
+        return queryParamsParseAsMultiValue;
+    }
+
     /**
      * The builder for the HttpRequest
      */
@@ -220,6 +226,11 @@ public class HttpRequest implements ClientRequest{
 
         public Builder retryOnServerBusy() {
             request.retryOnServerBusy = true;
+            return this;
+        }
+
+        public Builder queryParamsParseAsMultiValue() {
+            request.queryParamsParseAsMultiValue = true;
             return this;
         }
 

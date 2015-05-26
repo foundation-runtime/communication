@@ -314,10 +314,17 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
             boolean hasQuery = !queryParams.isEmpty();
             for (Map.Entry<String, Collection<String>> stringCollectionEntry : queryParams.entrySet()) {
                 String key = stringCollectionEntry.getKey();
-                Collection<String> stringCollection = stringCollectionEntry.getValue();
-                String value = joiner.join(stringCollection);
-                uriBuilder.addParameter(key, value);
-                queryStringBuilder.append(key).append("=").append(value).append("&");
+                Collection<String> queryParamsValueList = stringCollectionEntry.getValue();
+                if (request.isQueryParamsParseAsMultiValue()) {
+                    for (String queryParamsValue : queryParamsValueList) {
+                        uriBuilder.addParameter(key, queryParamsValue);
+                        queryStringBuilder.append(key).append("=").append(queryParamsValue).append("&");
+                    }
+                }else{
+                    String value = joiner.join(queryParamsValueList);
+                    uriBuilder.addParameter(key, value);
+                    queryStringBuilder.append(key).append("=").append(value).append("&");
+                }
             }
             uriBuilder.setFragment(requestUri.getFragment());
             uriBuilder.setHost(requestUri.getHost());
