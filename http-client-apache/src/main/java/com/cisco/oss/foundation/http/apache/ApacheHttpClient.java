@@ -144,10 +144,7 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
 
                 SSLConnectionSocketFactory sf = new SSLConnectionSocketFactory(sslContext, hostnameVerifier);
 
-                httpClientBuilder
-                        .setSSLSocketFactory(sf)
-                        .setSslcontext(sslContext);
-
+                httpClientBuilder.setSSLSocketFactory(sf);
 
 
             } else if (addTrustSupport) {
@@ -160,6 +157,11 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
                         .loadTrustMaterial(trustStore, null)
                         .build();
 
+            }
+
+            if (addSslSupport | addTrustSupport) {
+//                sslContext.init();
+                httpClientBuilder.setSslcontext(sslContext);
             }
 
 
