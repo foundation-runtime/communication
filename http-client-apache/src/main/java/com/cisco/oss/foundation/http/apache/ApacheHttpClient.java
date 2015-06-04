@@ -29,21 +29,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpHost;
 import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpHead;
-import org.apache.http.client.methods.HttpOptions;
-import org.apache.http.client.methods.HttpPatch;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.methods.*;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.concurrent.FutureCallback;
-import org.apache.http.conn.ssl.SSLContexts;
-import org.apache.http.conn.ssl.SSLSocketFactory;
-import org.apache.http.conn.ssl.X509HostnameVerifier;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.ssl.SSLContexts;
+import javax.net.ssl.HostnameVerifier;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -62,9 +53,9 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.KeyStore;
-import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by Yair Ogen on 1/16/14.
@@ -74,7 +65,7 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
     private static final Logger LOGGER = LoggerFactory.getLogger(ApacheHttpClient.class);
     CloseableHttpAsyncClient httpAsyncClient = null;
     private CloseableHttpClient httpClient = null;
-    private X509HostnameVerifier hostnameVerifier;
+    private HostnameVerifier hostnameVerifier;
 
     public boolean isAutoCloseable() {
         return autoCloseable;
@@ -84,14 +75,14 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
 
 
 
-    ApacheHttpClient(String apiName, Configuration configuration, boolean enableLoadBalancing, X509HostnameVerifier hostnameVerifier) {
+    ApacheHttpClient(String apiName, Configuration configuration, boolean enableLoadBalancing, HostnameVerifier hostnameVerifier) {
         super(apiName, configuration, enableLoadBalancing);
         this.hostnameVerifier = hostnameVerifier;
         configureClient();
     }
 
 
-    ApacheHttpClient(String apiName, LoadBalancerStrategy.STRATEGY_TYPE strategyType, Configuration configuration, boolean enableLoadBalancing, X509HostnameVerifier hostnameVerifier) {
+    ApacheHttpClient(String apiName, LoadBalancerStrategy.STRATEGY_TYPE strategyType, Configuration configuration, boolean enableLoadBalancing, HostnameVerifier hostnameVerifier) {
         super(apiName, strategyType, configuration, enableLoadBalancing);
         this.hostnameVerifier = hostnameVerifier;
         configureClient();
@@ -129,9 +120,9 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
                 trustStore.load(new FileInputStream(metadata.getTrustStorePath()), metadata.getTrustStorePassword().toCharArray());
 
                 sslContext = SSLContexts.custom()
-                        .useTLS()
+                        .useProtocol("TLS")
                         .loadKeyMaterial(keyStore, metadata.getKeyStorePassword().toCharArray())
-                        .loadTrustMaterial(trustStore)
+                        .loadTrustMaterial(trustStore, null)
                         .build();
 
             } else if (addSslSupport) {
@@ -145,15 +136,13 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
 
 
                 sslContext = SSLContexts.custom()
-                        .useSSL()
+                        .useProtocol("SSL")
                         .loadKeyMaterial(keyStore, metadata.getKeyStorePassword().toCharArray())
                         .build();
 
                 sslContext.init(null, tmf.getTrustManagers(),null);
 
-                SSLSocketFactory sf = new SSLSocketFactory(sslContext);
-
-                sf.setHostnameVerifier(hostnameVerifier);
+                SSLConnectionSocketFactory sf = new SSLConnectionSocketFactory(sslContext, hostnameVerifier);
 
                 httpClientBuilder
                         .setSSLSocketFactory(sf)
@@ -167,8 +156,8 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
                 trustStore.load(new FileInputStream(metadata.getTrustStorePath()), metadata.getTrustStorePassword().toCharArray());
 
                 sslContext = SSLContexts.custom()
-                        .useTLS()
-                        .loadTrustMaterial(trustStore)
+                        .useProtocol("TLS")
+                        .loadTrustMaterial(trustStore, null)
                         .build();
 
             }
@@ -182,6 +171,8 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
         httpClientBuilder.setMaxConnPerRoute(metadata.getMaxConnectionsPerAddress())
                 .setMaxConnTotal(metadata.getMaxConnectionsTotal())
                 .setDefaultRequestConfig(requestConfig)
+                .evictExpiredConnections()
+                .evictIdleConnections(metadata.getIdleTimeout(), TimeUnit.MILLISECONDS)
                 .setKeepAliveStrategy(new InfraConnectionKeepAliveStrategy(metadata.getIdleTimeout()));
 
 
@@ -201,8 +192,8 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
         }
 
         if (hostnameVerifier != null) {
-            httpClientBuilder.setHostnameVerifier(hostnameVerifier);
-            httpAsyncClientBuilder.setHostnameVerifier(hostnameVerifier);
+            httpClientBuilder.setSSLHostnameVerifier(hostnameVerifier);
+            httpAsyncClientBuilder.setSSLHostnameVerifier(hostnameVerifier);
         }
 
         if (!followRedirects) {
