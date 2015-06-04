@@ -160,7 +160,7 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
             }
 
             if (addSslSupport | addTrustSupport) {
-//                sslContext.init();
+                SSLContext.setDefault(sslContext);
                 httpClientBuilder.setSslcontext(sslContext);
             }
 
