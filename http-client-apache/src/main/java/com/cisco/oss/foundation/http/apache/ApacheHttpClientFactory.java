@@ -22,7 +22,8 @@ import com.cisco.oss.foundation.http.HttpClient;
 import com.cisco.oss.foundation.http.HttpRequest;
 import com.cisco.oss.foundation.loadbalancer.LoadBalancerStrategy;
 import org.apache.commons.configuration.Configuration;
-import org.apache.http.conn.ssl.X509HostnameVerifier;
+
+import javax.net.ssl.HostnameVerifier;
 
 /**
  * Created by Yair Ogen on 1/19/14.
@@ -37,7 +38,7 @@ public class ApacheHttpClientFactory {
         return createHttpClient(apiName, ConfigurationFactory.getConfiguration());
     }
 
-    public static HttpClient<HttpRequest,ApacheHttpResponse> createHttpClient(String apiName, X509HostnameVerifier hostnameVerifier){
+    public static HttpClient<HttpRequest,ApacheHttpResponse> createHttpClient(String apiName, HostnameVerifier hostnameVerifier){
         return createHttpClient(apiName, ConfigurationFactory.getConfiguration(), hostnameVerifier);
     }
 
@@ -45,7 +46,7 @@ public class ApacheHttpClientFactory {
         return createHttpClient(apiName, LoadBalancerStrategy.STRATEGY_TYPE.ROUND_ROBIN, configuration, enableLoadBalancing, null);
     }
 
-    public static HttpClient<HttpRequest,ApacheHttpResponse> createHttpClient(String apiName, Configuration configuration, boolean enableLoadBalancing, X509HostnameVerifier hostnameVerifier){
+    public static HttpClient<HttpRequest,ApacheHttpResponse> createHttpClient(String apiName, Configuration configuration, boolean enableLoadBalancing, HostnameVerifier hostnameVerifier){
         return createHttpClient(apiName, LoadBalancerStrategy.STRATEGY_TYPE.ROUND_ROBIN, configuration, enableLoadBalancing, hostnameVerifier);
     }
 
@@ -53,7 +54,7 @@ public class ApacheHttpClientFactory {
         return createHttpClient(apiName, configuration, true);
     }
 
-    public static HttpClient<HttpRequest,ApacheHttpResponse> createHttpClient(String apiName, Configuration configuration, X509HostnameVerifier hostnameVerifier){
+    public static HttpClient<HttpRequest,ApacheHttpResponse> createHttpClient(String apiName, Configuration configuration, HostnameVerifier hostnameVerifier){
         return createHttpClient(apiName, configuration, true, hostnameVerifier);
     }
 
@@ -66,7 +67,7 @@ public class ApacheHttpClientFactory {
         return createHttpClient(apiName, highAvailabilityStrategyType, configuration, true, null);
     }
 
-    public static HttpClient<HttpRequest,ApacheHttpResponse> createHttpClient(String apiName, LoadBalancerStrategy.STRATEGY_TYPE highAvailabilityStrategyType, Configuration configuration, boolean enableLoadBalancing, X509HostnameVerifier hostnameVerifier){
+    public static HttpClient<HttpRequest,ApacheHttpResponse> createHttpClient(String apiName, LoadBalancerStrategy.STRATEGY_TYPE highAvailabilityStrategyType, Configuration configuration, boolean enableLoadBalancing, HostnameVerifier hostnameVerifier){
         try {
             HttpClient client = null;
             if(highAvailabilityStrategyType == null){
