@@ -214,12 +214,10 @@ public class RabbitMQMessagingFactory {
     }
 
     static void triggerReconnectThread (){
-        System.out.println("*********************************************");
       if (IS_RECONNECT_THREAD_RUNNING.compareAndSet(false,true)){
           Thread reconnectThread = new Thread(new Runnable() {
               @Override
               public void run() {
-                  System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
                   while(!IS_CONNETED.get()){
                       try {
                           connect();
