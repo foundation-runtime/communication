@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Cisco Systems, Inc.
+ * Copyright 2015 Cisco Systems, Inc.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import com.cisco.oss.foundation.configuration.FoundationConfigurationListenerReg
 import com.cisco.oss.foundation.configuration.ConfigurationFactory;
 import com.cisco.oss.foundation.loadbalancer.*;
 import com.cisco.oss.foundation.monitoring.CommunicationInfo;
-import com.cisco.oss.foundation.monitoring.RMIMonitoringAgent;
+import com.cisco.oss.foundation.monitoring.MonitoringAgentFactory;
 import com.cisco.oss.foundation.monitoring.serverconnection.ServerConnectionDetails;
 import com.cisco.oss.foundation.string.utils.BoyerMoore;
 import com.google.common.collect.Lists;
@@ -47,9 +47,10 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
 
     public static final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractHttpClient.class);
-    protected LoadBalancerStrategy loadBalancerStrategy = new RoundRobinStrategy();
+    protected LoadBalancerStrategy loadBalancerStrategy = null;
     protected String apiName = "HTTP";
     protected boolean exposeStatisticsToMonitor = false;
+    protected boolean autoEncodeUri = true;
     private static Map<String, List<BoyerMoore>> boyersMap = new ConcurrentHashMap<String, List<BoyerMoore>>();
 
     protected InternalServerProxyMetadata metadata;
@@ -60,37 +61,43 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
     public AbstractHttpClient(String apiName, Configuration configuration, boolean enableLoadBalancing) {
         this(apiName, LoadBalancerStrategy.STRATEGY_TYPE.ROUND_ROBIN, configuration, enableLoadBalancing);
         exposeStatisticsToMonitor = getExposeStatisticsToMonitor();
+        autoEncodeUri = metadata.isAutoEncodeUri();
         if(exposeStatisticsToMonitor){
-            RMIMonitoringAgent.getInstance().register();
+            MonitoringAgentFactory.getInstance().register();
         }
     }
 
     public AbstractHttpClient(String apiName, LoadBalancerStrategy.STRATEGY_TYPE strategyType, Configuration configuration, boolean enableLoadBalancing) {
         this.apiName = apiName;
         this.enableLoadBalancing = enableLoadBalancing;
-        if(configuration == null){
+        if (configuration == null) {
             this.configuration = ConfigurationFactory.getConfiguration();
-        }else{
+        } else {
             this.configuration = configuration;
         }
         exposeStatisticsToMonitor = getExposeStatisticsToMonitor();
-        if(exposeStatisticsToMonitor){
-            RMIMonitoringAgent.getInstance().register(this.configuration);
+        if (exposeStatisticsToMonitor) {
+            MonitoringAgentFactory.getInstance().register(this.configuration);
         }
+
+        metadata = loadServersMetadataConfiguration();
+
         loadBalancerStrategy = fromHighAvailabilityStrategyType(strategyType);
         createServerListFromConfig();
+        autoEncodeUri = metadata.isAutoEncodeUri();
         followRedirects = metadata.isFollowRedirects();
         FoundationConfigurationListenerRegistry.addFoundationConfigurationListener(new LoadBalancerConfigurationListener());
     }
 
-    private LoadBalancerStrategy fromHighAvailabilityStrategyType(LoadBalancerStrategy.STRATEGY_TYPE strategyType){
+    private LoadBalancerStrategy fromHighAvailabilityStrategyType(LoadBalancerStrategy.STRATEGY_TYPE strategyType) {
+
         switch (strategyType) {
             case FAIL_OVER:
-                return new FailOverStrategy();
+                return new FailOverStrategy(metadata.getServiceName(), metadata.isServiceDirectoryEnabled(), metadata.getWaitingTime(), apiName, metadata.getRetryDelay(), metadata.getNumberOfAttempts());
             case STICKY_ROUND_ROBIN:
-                return new StickyRoundRobinStrategy();
+                return new StickyRoundRobinStrategy(metadata.getServiceName(), metadata.isServiceDirectoryEnabled(), metadata.getWaitingTime(), apiName, metadata.getRetryDelay(), metadata.getNumberOfAttempts());
             default:
-                return new RoundRobinStrategy();
+                return new RoundRobinStrategy(metadata.getServiceName(), metadata.isServiceDirectoryEnabled(), metadata.getWaitingTime(), apiName, metadata.getRetryDelay(), metadata.getNumberOfAttempts());
         }
     }
 
@@ -125,13 +132,23 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
 
                 request = updateRequestUri(request, serverProxy);
 
-                LOGGER.info("sending request: {}", request.getUri());
+                if (request.silentLogging) {
+                    LOGGER.trace("sending request: {}-{}", request.getHttpMethod(), request.getUri());
+                }else{
+                    LOGGER.info("sending request: {}-{}", request.getHttpMethod(), request.getUri());
+                }
+
                 ServerConnectionDetails connectionDetails = new ServerConnectionDetails(apiName, "HTTP:" + request.getHttpMethod(), request.getUri().getHost(), -1, request.getUri().getPort());
                 if (exposeStatisticsToMonitor) {
                     CommunicationInfo.getCommunicationInfo().transactionStarted(connectionDetails, getMonioringApiName(request));
                 }
                 result = executeDirect(request);
-                LOGGER.info("got response: {}", result.getRequestedURI());
+
+                if (request.silentLogging) {
+                    LOGGER.trace("got response status: {} for request: {}", result.getStatus(), result.getRequestedURI());
+                }else{
+                    LOGGER.info("got response status: {} for request: {}", result.getStatus(), result.getRequestedURI());
+                }
                 if (exposeStatisticsToMonitor) {
 
                     int responseStatus = result.getStatus();
@@ -142,14 +159,22 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
                         CommunicationInfo.getCommunicationInfo().transactionFinished(connectionDetails, getMonioringApiName(request), true, responseStatus + "");
                     }
                 }
-//                if (lastKnownErrorThreadLocal.get() != null) {
-//                    lastCaugtException = handleException(serviceMethod, serverProxy, lastKnownErrorThreadLocal.get());
-//                } else {
-                serverProxy.setCurrentNumberOfRetries(0);
-                serverProxy.setFailedAttemptTimeStamp(0);
-//                }
 
-                successfullyInvoked = true;
+                if(request.retryOnServerBusy){
+                    if(result.getStatus() == 503){
+                        lastCaugtException = loadBalancerStrategy.handleException(apiName, serverProxy, new ServerBusyException("server returned HTP 503 for client: " + apiName));
+                    }else{
+                        serverProxy.setCurrentNumberOfAttempts(0);
+                        serverProxy.setFailedAttemptTimeStamp(0);
+                        successfullyInvoked = true;
+                    }
+
+                }else{
+                    serverProxy.setCurrentNumberOfAttempts(0);
+                    serverProxy.setFailedAttemptTimeStamp(0);
+                    successfullyInvoked = true;
+                }
+
 
             } catch (Throwable e) {
                 lastCaugtException = loadBalancerStrategy.handleException(apiName, serverProxy, e);
@@ -163,7 +188,8 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
 
         URI origUri = request.getUri();
         String host = serverProxy.getHost();
-        String scheme = origUri.getScheme() == null ? "http" : origUri.getScheme();
+        String scheme = origUri.getScheme() == null ? (request.isHttpsEnabled() ? "https" : "http") : origUri.getScheme();
+
         int port = serverProxy.getPort();
 
         String urlPath = "";
@@ -175,7 +201,18 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
 
         URI newURI = null;
         try {
-            newURI = new URI(scheme, origUri.getUserInfo(), host, port, urlPath, origUri.getQuery(), origUri.getFragment());
+            if(autoEncodeUri){
+                String query = origUri.getQuery();
+                newURI = new URI(scheme, origUri.getUserInfo(), host, port, urlPath, query, origUri.getFragment());
+            }else{
+                String query = origUri.getRawQuery();
+                if (query != null){
+                    newURI = new URI(scheme + "://" + host + ":" + port + urlPath + "?" + query);
+                }else{
+                    newURI = new URI(scheme + "://" + host + ":" + port + urlPath);
+                }
+
+            }
         } catch (URISyntaxException e) {
             throw new ClientException(e.toString());
         }
@@ -205,9 +242,9 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
 
     @Override
     public R execute(S request) {
-        if(enableLoadBalancing){
+        if (enableLoadBalancing) {
             return executeWithLoadBalancer(request);
-        }else{
+        } else {
             return executeDirect(request);
         }
     }
@@ -221,24 +258,26 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
 
     private void createServerListFromConfig() {
 
-        List<InternalServerProxy> serversList = Lists.newCopyOnWriteArrayList();
+        if (!metadata.isServiceDirectoryEnabled()) {
 
-        metadata = loadServersMetadataConfiguration();
+            List<InternalServerProxy> serversList = Lists.newCopyOnWriteArrayList();
 
-        // based on the data collected from the config file - updates the server
-        // list
-        AbstractLoadBalancerStrategy.readWriteLock.writeLock().lock();
-        try {
-            serversList = updateServerListBasedOnConfig(serversList, metadata);
-        } finally {
-            AbstractLoadBalancerStrategy.readWriteLock.writeLock().unlock();
+
+            // based on the data collected from the config file - updates the server
+            // list
+            AbstractLoadBalancerStrategy.readWriteLock.writeLock().lock();
+            try {
+                serversList = updateServerListBasedOnConfig(serversList, metadata);
+            } finally {
+                AbstractLoadBalancerStrategy.readWriteLock.writeLock().unlock();
+            }
+
+            if (serversList.isEmpty()) {
+                LOGGER.debug("No hosts defined for api: \"" + apiName + "\". Please check your config files!");
+            }
+
+            loadBalancerStrategy.setServerProxies(serversList);
         }
-
-        if (serversList.isEmpty()) {
-            LOGGER.debug("No hosts defined for api: \"" + apiName + "\". Please check your config files!");
-        }
-
-        loadBalancerStrategy.setServerProxies(serversList);
 
     }
 
@@ -260,6 +299,12 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
         int maxConnectionsTotal = subset.getInt("http." + LoadBalancerConstants.MAX_CONNECTIONS_TOTAL, LoadBalancerConstants.DEFAULT_MAX_CONNECTIONS_TOTAL);
         int maxQueueSizePerAddress = subset.getInt("http." + LoadBalancerConstants.MAX_QUEUE_PER_ADDRESS, LoadBalancerConstants.DEFAULT_MAX_QUEUE_PER_ADDRESS);
         boolean followRedirects = subset.getBoolean("http." + LoadBalancerConstants.FOLLOW_REDIRECTS, false);
+        boolean disableCookies = subset.getBoolean("http." + LoadBalancerConstants.DISABLE_COOKIES, false);
+        boolean autoCloseable = subset.getBoolean("http." + LoadBalancerConstants.AUTO_CLOSEABLE, true);
+        boolean autoEncodeUri = subset.getBoolean("http." + LoadBalancerConstants.AUTO_ENCODE_URI, true);
+        boolean staleConnectionCheckEnabled = subset.getBoolean("http." + LoadBalancerConstants.IS_STALE_CONN_CHECK_ENABLED, false);
+        boolean serviceDirectoryEnabled = subset.getBoolean("http." + LoadBalancerConstants.SERVICE_DIRECTORY_IS_ENABLED, false);
+        String serviceName = subset.getString("http." + LoadBalancerConstants.SERVICE_DIRECTORY_SERVICE_NAME, "UNKNOWN");
 
         String keyStorePath = subset.getString("http." + LoadBalancerConstants.KEYSTORE_PATH, "");
         String keyStorePassword = subset.getString("http." + LoadBalancerConstants.KEYSTORE_PASSWORD, "");
@@ -298,7 +343,7 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
 
         }
 
-        InternalServerProxyMetadata metadata = new InternalServerProxyMetadata(readTimeout, connectTimeout, idleTimeout, maxConnectionsPerAddress, maxConnectionsTotal, maxQueueSizePerAddress, waitingTime, numberOfAttempts, retryDelay, hostAndPortPairs, keyStorePath, keyStorePassword, trustStorePath, trustStorePassword, followRedirects);
+        InternalServerProxyMetadata metadata = new InternalServerProxyMetadata(readTimeout, connectTimeout, idleTimeout, maxConnectionsPerAddress, maxConnectionsTotal, maxQueueSizePerAddress, waitingTime, numberOfAttempts, retryDelay, hostAndPortPairs, keyStorePath, keyStorePassword, trustStorePath, trustStorePassword, followRedirects, autoCloseable, staleConnectionCheckEnabled, disableCookies, serviceDirectoryEnabled, serviceName, autoEncodeUri);
 //        metadata.getHostAndPortPairs().addAll(hostAndPortPairs);
 //        metadata.setReadTimeout(readTimeout);
 //        metadata.setConnectTimeout(connectTimeout);
@@ -313,7 +358,7 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
     private InternalServerProxy createInternalServerProxy(final InternalServerProxyMetadata metadata, final String hostEntry, final int portEntry) {
         final InternalServerProxy internalServerProxy = new InternalServerProxy(metadata.getWaitingTime(), apiName);
         internalServerProxy.setRetryDelay(metadata.getRetryDelay());
-        internalServerProxy.setMaxNumberOfRetries(metadata.getNumberOfRetries());
+        internalServerProxy.setMaxNumberOfAttempts(metadata.getNumberOfAttempts());
         internalServerProxy.setHost(hostEntry);
         internalServerProxy.setPort(portEntry);
         return internalServerProxy;
@@ -334,6 +379,60 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
         }
 
         return serversList;
+    }
+
+    private boolean getExposeStatisticsToMonitor() {
+        boolean monitor = configuration.getBoolean(apiName + ".http.exposeStatisticsToMonitor", true);
+        return monitor;
+    }
+
+    protected String getMonioringApiName(S request) {
+
+        if (apiName != null) {
+
+            if (!boyersMap.containsKey(apiName)) {
+
+                List<BoyerMoore> boyers = populateBoyersList();
+                if (boyers != null) {
+                    boyersMap.put(apiName, boyers);
+                }
+            }
+
+            List<BoyerMoore> boyers = boyersMap.get(apiName);
+            if (boyers != null && !boyers.isEmpty()) {
+                String uri = request.getUri().toString();
+                for (BoyerMoore boyerMoore : boyers) {
+                    int match = boyerMoore.search(uri);
+                    if (match >= 0) {
+                        return boyerMoore.getPattern();
+                    }
+                }
+
+            }
+
+        }
+
+        String path = request.getUri().getPath();
+        int secondsSlashIndex = path.indexOf('/', 1);
+        return secondsSlashIndex > 0 ? path.substring(0, secondsSlashIndex) : path;
+    }
+
+    private List<BoyerMoore> populateBoyersList() {
+        List<BoyerMoore> boyers = new ArrayList<BoyerMoore>();
+        Map<String, String> parseSimpleArrayAsMap = ConfigUtil.parseSimpleArrayAsMap(configuration, apiName + ".http.monitoringBaseUri");
+        List<String> keys = new ArrayList<String>(parseSimpleArrayAsMap.keySet());
+//		Collections.sort(keys);
+        Collections.sort(keys, new Comparator<String>() {
+            // Overriding the compare method to sort the age
+            public int compare(String str1, String str2) {
+                return Integer.parseInt(str1) - Integer.parseInt(str2);
+            }
+        });
+        for (String key : keys) {
+            String baseUri = parseSimpleArrayAsMap.get(key);
+            boyers.add(new BoyerMoore(baseUri));
+        }
+        return boyers;
     }
 
     /**
@@ -403,58 +502,6 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
 
         }
 
-    }
-
-    private boolean getExposeStatisticsToMonitor() {
-        boolean monitor = configuration.getBoolean(apiName + ".http.exposeStatisticsToMonitor", true);
-        return monitor;
-    }
-
-    protected String getMonioringApiName(S request) {
-
-        if (apiName != null) {
-
-            if (!boyersMap.containsKey(apiName)) {
-
-                List<BoyerMoore> boyers = populateBoyersList();
-                if (boyers != null) {
-                    boyersMap.put(apiName, boyers);
-                }
-            }
-
-            List<BoyerMoore> boyers = boyersMap.get(apiName);
-            if (boyers != null && !boyers.isEmpty()) {
-                String uri = request.getUri().toString();
-                for (BoyerMoore boyerMoore : boyers) {
-                    int match = boyerMoore.search(uri);
-                    if (match >= 0) {
-                        return boyerMoore.getPattern();
-                    }
-                }
-
-            }
-
-        }
-
-        return request.getUri().toString();
-    }
-
-    private List<BoyerMoore> populateBoyersList() {
-        List<BoyerMoore> boyers = new ArrayList<BoyerMoore>();
-        Map<String, String> parseSimpleArrayAsMap = ConfigUtil.parseSimpleArrayAsMap(configuration, apiName + ".http.monitoringBaseUri");
-        List<String> keys = new ArrayList<String>(parseSimpleArrayAsMap.keySet());
-//		Collections.sort(keys);
-        Collections.sort(keys,new Comparator<String>() {
-            // Overriding the compare method to sort the age
-            public int compare(String str1, String str2) {
-                return Integer.parseInt(str1) - Integer.parseInt(str2);
-            }
-        });
-        for (String key : keys) {
-            String baseUri = parseSimpleArrayAsMap.get(key);
-            boyers.add(new BoyerMoore(baseUri));
-        }
-        return boyers;
     }
 
 }

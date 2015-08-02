@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!--
-  ~ Copyright 2014 Cisco Systems, Inc.
+  ~ Copyright 2015 Cisco Systems, Inc.
   ~
   ~  Licensed under the Apache License, Version 2.0 (the "License");
   ~  you may not use this file except in compliance with the License.
@@ -19,13 +19,13 @@
     <parent>
         <groupId>com.cisco.oss.foundation</groupId>
         <artifactId>foundation-common-base</artifactId>
-        <version>0.0.0-5</version>
+        <version>1.0.1-7</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.cisco.oss.foundation</groupId>
     <artifactId>http-client-jetty</artifactId>
     <name>http-client-jetty</name>
-    <version>0.0.0-8-SNAPSHOT</version>
+    <version>1.0.0-1-SNAPSHOT</version>
     <description>This project is the jetty http client implementation library in the cisco vss foundation runtime</description>
     <url>https://github.com/foundation-runtime/communication/http-client-jetty</url>
     <packaging>jar</packaging>
@@ -57,8 +57,12 @@
         </developer>
     </developers>
     <properties>
-        <http-client-common-version>0.0.0-7</http-client-common-version>
-        <jetty-version>9.2.0.v20140526</jetty-version>
+        <foundation-common-base-version>1.0.1-5</foundation-common-base-version>
+        <http-client-common-version>1.0.2-6</http-client-common-version>
+        <jetty-version>9.3.1.v20150714</jetty-version>
+        <logging-log4j-version>1.0.2-1</logging-log4j-version>
+        <configuration-lib-version>1.0.3-1</configuration-lib-version>
+        <monitoring-jmx-lib-version>1.0.2-2</monitoring-jmx-lib-version>
     </properties>
     <scm>
         <connection>scm:git:git@github.com:foundation-runtime/communication.git</connection>
@@ -72,7 +76,22 @@
     </organization>
     <build>
         <pluginManagement>
-            <plugins />
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>2.5</version>
+                    <configuration>
+                        <archive>
+                            <index>true</index>
+                            <manifest>
+                                <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                                <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                            </manifest>
+                        </archive>
+                    </configuration>
+                </plugin>
+            </plugins>
         </pluginManagement>
         <plugins>
             <plugin>
@@ -127,13 +146,18 @@
         <dependency>
             <groupId>org.scala-lang</groupId>
             <artifactId>scala-library</artifactId>
-            <version>2.10.3</version>
+            <version>2.11.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-client</artifactId>
             <version>${jetty-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.cisco.oss.foundation</groupId>
+            <artifactId>monitoring-jmx-lib</artifactId>
+            <version>${monitoring-jmx-lib-version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
@@ -161,8 +185,8 @@
         </dependency>-->
         <dependency>
             <groupId>com.typesafe.akka</groupId>
-            <artifactId>akka-actor_2.10</artifactId>
-            <version>2.2.4</version>
+            <artifactId>akka-actor_2.11</artifactId>
+            <version>2.3.3</version>
             <scope>test</scope>
         </dependency>
     </dependencies>    

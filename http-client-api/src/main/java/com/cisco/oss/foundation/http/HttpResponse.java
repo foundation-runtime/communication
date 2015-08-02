@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Cisco Systems, Inc.
+ * Copyright 2015 Cisco Systems, Inc.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -56,6 +56,14 @@ public interface HttpResponse {
      * @return
      */
     String getResponseAsString();
+
+
+    /**
+     * get the HTTP response as a String
+     * @param charset use this charset is possible when creating the string response
+     * @return
+     */
+    String getResponseAsString(String charset);
 
     /**
      * get the HTTP response as an InputStream

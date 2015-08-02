@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Cisco Systems, Inc.
+ * Copyright 2015 Cisco Systems, Inc.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -62,6 +62,11 @@ public interface HttpClient<S extends HttpRequest, R extends HttpResponse> {
      * @return
      */
     String getApiName();
+
+    /**
+     * close the client and cleanup resources
+     */
+    void close();
 
 
 }

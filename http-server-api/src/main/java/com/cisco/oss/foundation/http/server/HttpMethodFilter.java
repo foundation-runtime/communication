@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Cisco Systems, Inc.
+ * Copyright 2015 Cisco Systems, Inc.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -64,7 +64,7 @@ public class HttpMethodFilter extends AbstractInfraHttpFilter {
 		HttpServletRequest httpServletRequest = (HttpServletRequest)request;
 		
 		String method = httpServletRequest.getMethod();
-		if(methods.contains(method.toUpperCase(Locale.getDefault()))){
+		if(methods.contains(method)){
 			LOGGER.error("method {} is not allowed", method);
 			((HttpServletResponse)response).sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		}else{			

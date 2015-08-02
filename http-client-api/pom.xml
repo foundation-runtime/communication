@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!--
-  ~ Copyright 2014 Cisco Systems, Inc.
+  ~ Copyright 2015 Cisco Systems, Inc.
   ~
   ~  Licensed under the Apache License, Version 2.0 (the "License");
   ~  you may not use this file except in compliance with the License.
@@ -19,13 +19,13 @@
     <parent>
 		<groupId>com.cisco.oss.foundation</groupId>
 		<artifactId>foundation-common-base</artifactId>
-		<version>0.0.0-5</version>
+        <version>1.0.1-7</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.cisco.oss.foundation</groupId>
     <artifactId>http-client-api</artifactId>
     <name>http-client-api</name>
-    <version>0.0.0-8-SNAPSHOT</version>
+    <version>1.1.1-3-SNAPSHOT</version>
     <description>This project is the api library for http client in the cisco vss foundation runtime</description>
     <url>https://github.com/foundation-runtime/communication/http-client-api</url>
     <packaging>jar</packaging>
@@ -37,9 +37,8 @@
         </license>
     </licenses>
     <issueManagement>
-        <system>Github
-        </system>
-        <url>{URL in JIRA or Product name in CQ}</url>
+        <system>Github</system>
+        <url>https://github.com/foundation-runtime/communication/issues</url>
     </issueManagement>
     <mailingLists>
         <mailingList />
@@ -56,6 +55,12 @@
             </roles>
         </developer>
     </developers>
+    <properties>
+        <foundation-common-base-version>1.0.1-5</foundation-common-base-version>
+        <commons-version>1.0.2-1</commons-version>
+        <client-common-version>1.1.1-2</client-common-version>
+        <!--<javaVersion>1.6</javaVersion>-->
+    </properties>
     <scm>
         <connection>scm:git:git@github.com:foundation-runtime/communication.git</connection>
         <developerConnection>scm:git:git@github.com:foundation-runtime/communication.git</developerConnection>
@@ -68,48 +73,32 @@
     </organization>
     <build>
         <pluginManagement>
-            <plugins />
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>2.5</version>
+                    <configuration>
+                        <archive>
+                            <index>true</index>
+                            <manifest>
+                                <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                                <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                            </manifest>
+                        </archive>
+                    </configuration>
+                </plugin>
+            </plugins>
         </pluginManagement>
         <plugins>
-<!--
-            <plugin>
-                <groupId>org.scala-tools</groupId>
-                <artifactId>maven-scala-plugin</artifactId>
-                <version>2.15.2</version>
-                <executions>
-                    <execution>
-                        <id>scala-compile-first</id>
-                        <phase>process-resources</phase>
-                        <goals>
-                            <goal>add-source</goal>
-                            <goal>compile</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>scala-test-compile</id>
-                        <phase>process-test-resources</phase>
-                        <goals>
-                            <goal>testCompile</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>2.4</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>test-jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
--->
         </plugins>
     </build>
     <dependencies>
+        <dependency>
+            <groupId>com.cisco.oss.foundation</groupId>
+            <artifactId>client-common</artifactId>
+            <version>${client-common-version}</version>
+        </dependency>
         <dependency>
             <groupId>com.cisco.oss.foundation</groupId>
             <artifactId>commons</artifactId>

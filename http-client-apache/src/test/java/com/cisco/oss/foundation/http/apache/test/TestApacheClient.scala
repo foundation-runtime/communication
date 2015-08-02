@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Cisco Systems, Inc.
+ * Copyright 2015 Cisco Systems, Inc.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -16,12 +16,16 @@
 
 package com.cisco.oss.foundation.http.apache.test
 
+import java.security.cert.X509Certificate
+import javax.net.ssl.{SSLSocket, SSLSession}
+
+import org.apache.http.conn.ssl.X509HostnameVerifier
 import org.slf4j.LoggerFactory
 import org.junit.Test
 import com.cisco.oss.foundation.http.HttpRequest
 import com.cisco.oss.foundation.http.apache.{ApacheHttpClientFactory, ApacheHttpResponse}
 import com.cisco.oss.foundation.loadbalancer.{LoadBalancerStrategy, RequestTimeoutException, NoActiveServersException}
-import com.cisco.oss.foundation.http.api.test.{MultithreadTestUtil, BasicHttpTestUtil}
+import com.cisco.oss.foundation.http.api.test.{BasicHttpsTestUtil, MultithreadTestUtil, BasicHttpTestUtil}
 import org.apache.commons.configuration.{Configuration, PropertiesConfiguration}
 
 /**
@@ -29,11 +33,21 @@ import org.apache.commons.configuration.{Configuration, PropertiesConfiguration}
  */
 class TestApacheClient {
   val httpTestUtil = new BasicHttpTestUtil[HttpRequest,ApacheHttpResponse]
+  val httpsTestUtil = new BasicHttpsTestUtil[HttpRequest,ApacheHttpResponse]
   val httpMultiThreadTestUtil = new MultithreadTestUtil[HttpRequest,ApacheHttpResponse]
   val propsConfiguration: Configuration = new PropertiesConfiguration(classOf[TestApacheClient].getResource("/config.properties"))
-  val clientTest = {
-    ApacheHttpClientFactory.createHttpClient("clientTest", propsConfiguration)
+  val clientTest = ApacheHttpClientFactory.createHttpClient("clientTest", propsConfiguration)
+  private val verifier: X509HostnameVerifier with Object {def verify(s: String, sslSession: SSLSession): Boolean; def verify(host: String, cert: X509Certificate): Unit; def verify(host: String, ssl: SSLSocket): Unit; def verify(host: String, cns: Array[String], subjectAlts: Array[String]): Unit} = new X509HostnameVerifier {
+    override def verify(host: String, ssl: SSLSocket): Unit = {}
+
+    override def verify(host: String, cert: X509Certificate): Unit = {}
+
+    override def verify(host: String, cns: Array[String], subjectAlts: Array[String]): Unit = {}
+
+    override def verify(s: String, sslSession: SSLSession): Boolean = true
   }
+  val clientHttpsTest = ApacheHttpClientFactory.createHttpClient("clientHttpsTest", propsConfiguration, verifier)
+
   val LOGGER = LoggerFactory.getLogger(classOf[TestApacheClient])
 
   @Test
@@ -50,6 +64,11 @@ class TestApacheClient {
   @Test
   def realServerInvokeGet() {
     httpTestUtil.realServerInvokeGet(clientTest)
+  }
+
+  @Test
+  def realHttpsServerInvokeGet() {
+    httpsTestUtil.realHttpsServerInvokeGet(clientHttpsTest)
   }
 
 

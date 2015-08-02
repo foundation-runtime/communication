@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Cisco Systems, Inc.
+ * Copyright 2015 Cisco Systems, Inc.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -35,12 +35,19 @@ public class TraceServletReader extends BufferedReader {
         try {
             tracer.logRequestContentClose();
             super.close();
-            tracer.log("Content: {}", builder.toString());
-            tracer.log("Closed: %s", delegate);
+            tracer.log("Request Content: {}", builder.toString());
+//            tracer.log("Closed: {}", delegate);
         } catch (IOException e) {
             tracer.log(e);
             throw e;
         }
+    }
+
+    @Override
+    public int read(char[] cbuf, int off, int len) throws IOException {
+        int read = super.read(cbuf, off, len);
+        builder.append(cbuf);
+        return read;
     }
 
     @Override
@@ -53,7 +60,7 @@ public class TraceServletReader extends BufferedReader {
 //                tracer.logRequestContentChar((char)ret);
             } else {
 //                tracer.log("Content: {}", builder.toString());
-//                tracer.log("EOF reached on %s",delegate);
+//                tracer.log("EOF reached on {}",delegate);
             }
 
             return ret;

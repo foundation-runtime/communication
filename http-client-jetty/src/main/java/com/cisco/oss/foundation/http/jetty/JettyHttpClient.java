@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Cisco Systems, Inc.
+ * Copyright 2015 Cisco Systems, Inc.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.api.ContentResponse;
 import org.eclipse.jetty.client.api.Request;
 import org.eclipse.jetty.client.util.BytesContentProvider;
+import org.eclipse.jetty.util.HttpCookieStore;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,6 +85,10 @@ public class JettyHttpClient<S extends HttpRequest, R extends HttpResponse> exte
         httpClient.setMaxConnectionsPerDestination(metadata.getMaxConnectionsPerAddress());
         httpClient.setMaxRequestsQueuedPerDestination(metadata.getMaxQueueSizePerAddress());
         httpClient.setFollowRedirects(followRedirects);
+
+        if(metadata.isDisableCookies()){
+            httpClient.setCookieStore(new HttpCookieStore.Empty());
+        }
 
         try {
             httpClient.start();

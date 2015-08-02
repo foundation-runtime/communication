@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Cisco Systems, Inc.
+ * Copyright 2015 Cisco Systems, Inc.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ public class EmbeddedCoreTest {
             @Override
             public void run() {
                 final MessageConsumer consumer = HornetQMessagingFactory.createConsumer("consumer1");
-                consumer.registerMessageHandler(new AbstractHornetQMessageHandler() {
+                consumer.registerMessageHandler(new AbstractHornetQMessageHandler("consumer1") {
                     @Override
                     public void onMessage(Message message) {
 //                        System.out.println("[1] " + message.getPayloadAsString());
@@ -66,7 +66,7 @@ public class EmbeddedCoreTest {
             @Override
             public void run() {
                 final MessageConsumer consumer = HornetQMessagingFactory.createConsumer("consumer2");
-                consumer.registerMessageHandler(new AbstractHornetQMessageHandler() {
+                consumer.registerMessageHandler(new AbstractHornetQMessageHandler("consumer2") {
                     @Override
                     public void onMessage(Message message) {
 //                        System.out.println("[2] " + message.getPayloadAsString());
@@ -288,7 +288,7 @@ public class EmbeddedCoreTest {
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        consumer.registerMessageHandler(new AbstractHornetQMessageHandler() {
+                        consumer.registerMessageHandler(new AbstractHornetQMessageHandler("directConsumer") {
                             @Override
                             public void onMessage(Message message) {
                                 countDownLatch.countDown();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Cisco Systems, Inc.
+ * Copyright 2015 Cisco Systems, Inc.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ package com.cisco.oss.foundation.http.server.jetty;
 import com.cisco.oss.foundation.configuration.ConfigurationFactory;
 import com.cisco.oss.foundation.http.server.TraceWrapper;
 import org.eclipse.jetty.http.HttpHeaders;
+import org.eclipse.jetty.server.HttpOutput;
 import org.eclipse.jetty.server.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -113,7 +114,7 @@ public class TraceResponseWrapper extends HttpServletResponseWrapper {
 	}
 	
 	public void writeBody() throws IOException {
-		if (localStream != null && super.getOutputStream()!= null ) {
+		if (localStream != null && super.getOutputStream()!= null && (super.getOutputStream() instanceof HttpOutput && !((HttpOutput)super.getOutputStream()).isWritten())) {
             try {
                 super.getOutputStream().write(localStream.toByteArray());
             } catch (IOException e) {

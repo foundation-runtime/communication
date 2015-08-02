@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+  ~ Copyright 2015 Cisco Systems, Inc.
+  ~
+  ~  Licensed under the Apache License, Version 2.0 (the "License");
+  ~  you may not use this file except in compliance with the License.
+  ~  You may obtain a copy of the License at
+  ~
+  ~  http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  -->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <parent>
+        <groupId>com.cisco.oss.foundation</groupId>
+        <artifactId>foundation-common-base</artifactId>
+        <version>1.0.1-7</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.cisco.oss.foundation</groupId>
+    <artifactId>http-common</artifactId>
+    <version>1.0.0-2-SNAPSHOT</version>
+    <name>client-common</name>
+    <description>This project is the common library for http client and server in the cisco oss foundation runtime</description>
+    <url>https://github.com/foundation-runtime/communication/http-common</url>
+    <packaging>jar</packaging>
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+    <issueManagement>
+        <system>Github
+        </system>
+        <url>{URL in JIRA or Product name in CQ}</url>
+    </issueManagement>
+    <mailingLists>
+        <mailingList />
+    </mailingLists>
+    <developers>
+        <developer>
+            <id>Yair Ogen</id>
+            <name>Yair Ogen</name>
+            <email>yaogen@cisco.com</email>
+            <organization>Cisco</organization>
+            <organizationUrl>http://www.cisco.com</organizationUrl>
+            <roles>
+                <role>Developer</role>
+            </roles>
+        </developer>
+    </developers>
+    <properties>
+        <foundation-common-base-version>1.0.1-5</foundation-common-base-version>        
+    </properties>
+    <scm>
+        <connection>scm:git:git@github.com:foundation-runtime/communication.git</connection>
+        <developerConnection>scm:git:git@github.com:foundation-runtime/communication.git</developerConnection>
+        <url>https://github.com/foundation-runtime/communication.git</url>
+        <tag>HEAD</tag>
+    </scm>
+    <organization>
+        <name>Cisco</name>
+        <url>http://www.cisco.com</url>
+    </organization>
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>2.5</version>
+                    <configuration>
+                        <archive>
+                            <index>true</index>
+                            <manifest>
+                                <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                                <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                            </manifest>
+                        </archive>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+        <plugins>
+        </plugins>
+    </build>
+    <dependencyManagement>
+        <dependencies>            
+        </dependencies>
+    </dependencyManagement>
+    <dependencies>       
+    </dependencies>
+</project>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Cisco Systems, Inc.
+ * Copyright 2015 Cisco Systems, Inc.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -16,15 +16,15 @@
 
 package com.cisco.oss.foundation.http.server.jetty.filters;
 
-import java.io.IOException;
-
 import javax.servlet.ReadListener;
 import javax.servlet.ServletInputStream;
+import java.io.IOException;
 
 public class TraceServletInputStream extends ServletInputStream {
     private final ServletInputStream delegate;
     private final TraceLogger tracer;
     private final StringBuilder builder = new StringBuilder();
+    private boolean isClosed = false;
 
     public TraceServletInputStream(ServletInputStream stream, TraceLogger tracer) {
         this.delegate = stream;
@@ -54,7 +54,7 @@ public class TraceServletInputStream extends ServletInputStream {
                 builder.append((char)ret);
 //                tracer.logRequestContentByte((byte) ret);
             } else {
-                tracer.log("Content: {}", builder.toString());
+//                tracer.log("Content: {}", builder.toString());
 //                tracer.log("EOF reached on {}", delegate);
             }
             return ret;
@@ -66,14 +66,17 @@ public class TraceServletInputStream extends ServletInputStream {
 
     @Override
     public void close() throws IOException {
-        tracer.logRequestContentClose();
-        try {
-            delegate.close();
-            tracer.log("Request Content: {}", builder.toString());
-            tracer.log("Closed: {}", delegate);
-        } catch (IOException e) {
-            tracer.log(e);
-            throw e;
+        if (!isClosed) {
+            tracer.logRequestContentClose();
+            try {
+                delegate.close();
+                tracer.log("Request Content: {}", builder.toString());
+                tracer.log("Closed: {}", delegate);
+                isClosed = true;
+            } catch (IOException e) {
+                tracer.log(e);
+                throw e;
+            }
         }
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Cisco Systems, Inc.
+ * Copyright 2015 Cisco Systems, Inc.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -45,9 +45,6 @@ class ApacheAsyncClientTest {
     val strategy: FoundationFileChangedReloadingStrategy = new FoundationFileChangedReloadingStrategy
     strategy.setRefreshDelay(propsConfiguration.getInt("configuration.dynamicConfigReload.refreshDelay"))
     propsConfiguration.setReloadingStrategy(strategy)
-
-
-
 
     val clientRoundRobinTest = ApacheHttpClientFactory.createHttpClient("clientRoundRobinSyncTest", propsConfiguration)
     httpTestUtil.realServerInvokePostRoudRobin(clientRoundRobinTest,propsConfiguration)

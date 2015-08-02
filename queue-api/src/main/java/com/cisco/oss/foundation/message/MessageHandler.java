@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Cisco Systems, Inc.
+ * Copyright 2015 Cisco Systems, Inc.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -22,9 +22,13 @@ package com.cisco.oss.foundation.message;
  */
 public interface MessageHandler {
 
+//    void preMessageProcessing(Message message);
+//
+//    void postMessageProcessing(Message message);
+
     /**
      * the call back method
-     * @param message the asynchronously arrived messaeg
+     * @param message the asynchronously arrived message
      */
     void onMessage(Message message);
 }

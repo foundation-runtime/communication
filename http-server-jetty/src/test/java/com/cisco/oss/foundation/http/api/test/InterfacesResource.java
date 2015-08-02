@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Cisco Systems, Inc.
+ * Copyright 2015 Cisco Systems, Inc.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -66,7 +66,8 @@ public class InterfacesResource {
     public String testPost(@Context UriInfo uriInfo,
                                 @HeaderParam("Session-ID") String sessionId,
                                 @HeaderParam("Source-ID") String sourceId,
-                                @HeaderParam("Source-Type") String sourceType) {
+                                @HeaderParam("Source-Type") String sourceType,
+                                String body) {
 
 //        FlowContextFactory.createFlowContext();
         AUDITOR.info("starting InterfacesResource.requestGetIfs...");

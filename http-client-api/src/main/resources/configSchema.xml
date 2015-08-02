@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!--
-  ~ Copyright 2014 Cisco Systems, Inc.
+  ~ Copyright 2015 Cisco Systems, Inc.
   ~
   ~  Licensed under the Apache License, Version 2.0 (the "License");
   ~  you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
   ~  limitations under the License.
   -->
 
-<NamespaceDefinitions xsi:noNamespaceSchemaLocation="http://ch-infra.il.nds.com/cabResources/CCP_XML.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<NamespaceDefinitions xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/foundation-runtime/configuration/master/ccp_schema/CCP_XML.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<NamespaceDefinition>
 		<NamespaceIdentifier version="TBD" name="TBD" />
         <ParameterType name="service.http.client.base" type="STRUCTURE" description="Base structure for http clients">
@@ -78,9 +78,40 @@
                     </DefaultValue>
                 </StructureMemberDefinition>
                 <StructureMemberDefinition name="http.monitoringBaseUri" type="STRING" isArray="true" advanced="true" description="A list of base Uri's . If the list is not empty the infrastructure will try and match the base uri with the actual uri. if found the base uri will be the monitoring service/api name." required="false" />
-                <StructureMemberDefinition name="http.exposeStatisticsToMonitor" type="BOOLEAN" advanced="true" description="Set to true if you wnt to monitor client connections." required="false">
+                <StructureMemberDefinition name="http.exposeStatisticsToMonitor" type="BOOLEAN" advanced="true" description="Set to true if you want to monitor client connections." required="false">
                     <DefaultValue>
                         <PrimitiveValue value="true"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
+                <StructureMemberDefinition name="http.autoCloseable" type="BOOLEAN" advanced="true" description="Set to true if you want to client to close automatically and release the connection even before consuming the content. Note: you may need to disable this and call close directly if you want to work with the inputstream using streaming style." required="false">
+                    <DefaultValue>
+                        <PrimitiveValue value="true"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
+                <StructureMemberDefinition name="http.autoEncodeUri" type="BOOLEAN" advanced="true" description="Set to true if you want the client to encode the uri." required="false">
+                    <DefaultValue>
+                        <PrimitiveValue value="true"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
+                <StructureMemberDefinition name="http.staleConnectionCheckEnabled" type="BOOLEAN" advanced="true" description="Set to true if you want Client connections to be tested before re-used from the pool. Currently supported only in Apache client.." required="false">
+                    <DefaultValue>
+                        <PrimitiveValue value="false"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
+                <StructureMemberDefinition name="http.serviceDirectory.isEnabled" type="BOOLEAN" advanced="true" description="Set to true if you want LB based on service directory and not based on static configuration" required="false">
+                    <DefaultValue>
+                        <PrimitiveValue value="false"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
+                <StructureMemberDefinition name="http.serviceDirectory.clientName" type="STRING" advanced="true" description="Sets the service name of the server this client wants to connect to. Relevant only if 'serviceDirectory.isEnabled' is true." required="false"/>
+                <StructureMemberDefinition name="http.followRedirects" type="BOOLEAN" advanced="true" description="Set to true if you client to redirected to a new location in response to an HTTP response received from the target." required="false">
+                    <DefaultValue>
+                        <PrimitiveValue value="false"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
+                <StructureMemberDefinition name="http.disableCookies" type="BOOLEAN" advanced="true" description="Set to true if you want to enable cookies support." required="false">
+                    <DefaultValue>
+                        <PrimitiveValue value="false"/>
                     </DefaultValue>
                 </StructureMemberDefinition>
                 <StructureMemberDefinition name="http.keyStorePath" type="STRING" advanced="true" description="the path to the keystore file." required="false" />

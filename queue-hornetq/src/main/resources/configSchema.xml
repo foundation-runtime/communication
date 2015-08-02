@@ -1,14 +1,37 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<NamespaceDefinitions xsi:noNamespaceSchemaLocation="http://ch-infra.il.nds.com/cabResources/CCP_XML.xsd"
-                      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<!--
+  ~ Copyright 2015 Cisco Systems, Inc.
+  ~
+  ~  Licensed under the Apache License, Version 2.0 (the "License");
+  ~  you may not use this file except in compliance with the License.
+  ~  You may obtain a copy of the License at
+  ~
+  ~  http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  -->
+
+<NamespaceDefinitions
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/foundation-runtime/configuration/master/ccp_schema/CCP_XML.xsd"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <NamespaceDefinition>
         <NamespaceIdentifier version="TBD" name="TBD"/>
 
 
-        <ParameterType name="queue.consumer.base" type="STRUCTURE" description="base struccture for queue consumers">
+        <ParameterType name="queue.consumer.base" type="STRUCTURE" description="base structure for queue consumers">
             <StructureDefinition>
                 <StructureMemberDefinition name="queue.name" type="STRING" advanced="true" required="false"/>
                 <StructureMemberDefinition name="queue.filter" type="STRING" advanced="true" required="false"/>
+                <StructureMemberDefinition name="queue.isMonitoringEnabled" type="BOOLEAN" advanced="true"
+                                           required="false">
+                    <DefaultValue>
+                        <PrimitiveValue value="false"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
                 <StructureMemberDefinition name="queue.isSubscription" type="BOOLEAN" advanced="true">
                     <DefaultValue>
                         <PrimitiveValue value="false"/>
@@ -20,50 +43,37 @@
                     </DefaultValue>
                 </StructureMemberDefinition>
                 <StructureMemberDefinition name="queue.subscribedTo" type="STRING" required="false" advanced="true"/>
-                <StructureMemberDefinition name="queue.server.connections" type="STRUCTURE" isArray="true" advanced="true">
-                    <StructureDefinition>
-                        <StructureMemberDefinition name="host" type="STRING"/>
-                        <StructureMemberDefinition name="port" type="INTEGER"/>
-                    </StructureDefinition>
-                </StructureMemberDefinition>
             </StructureDefinition>
         </ParameterType>
 
         <ParameterType name="queue.producer.base" type="STRUCTURE" description="base structure for queue producers">
             <StructureDefinition>
                 <StructureMemberDefinition name="queue.name" type="STRING" advanced="true"/>
+                <StructureMemberDefinition name="queue.groupId" type="STRING" advanced="true"/>
+                <StructureMemberDefinition name="queue.expiration" type="LONG" advanced="true" unit="milliseconds">
+                    <DefaultValue>
+                        <PrimitiveValue value="1800000"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
                 <StructureMemberDefinition name="queue.isDurable" type="BOOLEAN" advanced="true">
                     <DefaultValue>
                         <PrimitiveValue value="true"/>
                     </DefaultValue>
                 </StructureMemberDefinition>
+                <StructureMemberDefinition name="queue.isMonitoringEnabled" type="BOOLEAN" advanced="true"
+                                           required="false">
+                    <DefaultValue>
+                        <PrimitiveValue value="false"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
             </StructureDefinition>
         </ParameterType>
 
-        <Parameter name="service.queue.type" type="STRING" description="The type of Queue implementation">
-            <DefaultValue>
-                <PrimitiveValue value="HornetQ"/>
-            </DefaultValue>
-            <Range>
-                <StringEnum value="HornetQ"/>
-                <StringEnum value="ActiveMQ"/>
-            </Range>
-            <EnabledBy parameterName="service.queue.isEnabled" operator="E">
-                <Value>
-                    <PrimitiveValue value="true"/>
-                </Value>
-            </EnabledBy>
-        </Parameter>
 
         <Parameter name="service.queue.security.isEnabled" type="BOOLEAN" description="Enable security authentication">
             <DefaultValue>
                 <PrimitiveValue value="false"></PrimitiveValue>
             </DefaultValue>
-            <EnabledBy parameterName="service.queue.isEnabled" operator="E">
-                <Value>
-                    <PrimitiveValue value="true"/>
-                </Value>
-            </EnabledBy>
         </Parameter>
 
         <Parameter name="service.queue.security.userName" type="STRING"
@@ -71,11 +81,6 @@
             <DefaultValue>
                 <PrimitiveValue value="hquser"/>
             </DefaultValue>
-            <EnabledBy parameterName="service.queue.security.isEnabled" operator="E">
-                <Value>
-                    <PrimitiveValue value="true"/>
-                </Value>
-            </EnabledBy>
         </Parameter>
 
         <Parameter name="service.queue.security.password" type="STRING"
@@ -90,90 +95,67 @@
             </EnabledBy>
         </Parameter>
 
-        <Parameter name="service.queue.sessionCacheSize" type="INTEGER"
-                   description="The maximum limit for the number of cached Sessions for the JMS Session cache">
-            <DefaultValue>
-                <PrimitiveValue value="100"/>
-            </DefaultValue>
-            <EnabledBy parameterName="service.queue.type" operator="E">
-                <Value>
-                    <PrimitiveValue value="ActiveMQ"/>
-                </Value>
-            </EnabledBy>
-        </Parameter>
 
-        <Parameter name="service.queue.isEnabled" type="BOOLEAN" description="Enable queuing functionality"
-                >
-            <DefaultValue>
-                <PrimitiveValue value="true"/>
-            </DefaultValue>
+        <Parameter name="service.queue.connections" isArray="true" type="STRUCTURE"
+                   description="Connection identifier for queue server(s). For HornetQ this is the connection to HornetQ's jndi service.">
+            <StructureDefinition>
+                <StructureMemberDefinition name="host" type="STRING" required="false"/>
+                <StructureMemberDefinition name="port" type="INTEGER" required="false">
+                    <!--<DefaultValue>
+                        <PrimitiveValue value="5900"/>
+                    </DefaultValue>-->
+                </StructureMemberDefinition>
+                <StructureMemberDefinition name="jmxPort" type="INTEGER" required="false">
+                    <!--<DefaultValue>
+                        <PrimitiveValue value="3900"/>
+                    </DefaultValue>-->
+                </StructureMemberDefinition>
+                <StructureMemberDefinition name="instance1" type="STRUCTURE" required="false">
+                    <StructureDefinition>
+                        <StructureMemberDefinition name="host" type="STRING" required="false"/>
+                        <StructureMemberDefinition name="port" type="INTEGER" required="false">
+                            <DefaultValue>
+                                <PrimitiveValue value="5900"/>
+                            </DefaultValue>
+                        </StructureMemberDefinition>
+                        <StructureMemberDefinition name="jmxPort" type="INTEGER" required="false">
+                            <DefaultValue>
+                                <PrimitiveValue value="3900"/>
+                            </DefaultValue>
+                        </StructureMemberDefinition>
+                    </StructureDefinition>
+                </StructureMemberDefinition>
+                <StructureMemberDefinition name="instance2" type="STRUCTURE" required="false">
+                    <StructureDefinition>
+                        <StructureMemberDefinition name="host" type="STRING" required="false"/>
+                        <StructureMemberDefinition name="port" type="INTEGER" required="false">
+                            <DefaultValue>
+                                <PrimitiveValue value="5900"/>
+                            </DefaultValue>
+                        </StructureMemberDefinition>
+                        <StructureMemberDefinition name="jmxPort" type="INTEGER" required="false">
+                            <DefaultValue>
+                                <PrimitiveValue value="3900"/>
+                            </DefaultValue>
+                        </StructureMemberDefinition>
+                    </StructureDefinition>
+                </StructureMemberDefinition>
+            </StructureDefinition>
+            <!--<DefaultValue>
+                <StructureValue index="1">
+                    <StructureMemberValue name="host" value="vgc1a"/>
+                    <StructureMemberValue name="port" value="5902"/>
+                    <StructureMemberValue name="jmxPort" value="3900"/>
+                </StructureValue>
+            </DefaultValue>-->
         </Parameter>
 
         <Parameter name="service.queue.attachRetryDelay" type="INTEGER" unit="MILLISECONDS"
                    description="Delay between attempts to attach to the queue server(s)"
                    advanced="true">
             <DefaultValue>
-                <PrimitiveValue value="60000"/>
+                <PrimitiveValue value="10000"/>
             </DefaultValue>
-            <EnabledBy parameterName="service.queue.isEnabled" operator="E">
-                <Value>
-                    <PrimitiveValue value="true"/>
-                </Value>
-            </EnabledBy>
-        </Parameter>
-
-        <Parameter name="service.queue.messageExpirationTime" type="INTEGER" unit="MINUTES"
-                   description="Messages sent to the queue will expire after this time duration"
-                >
-            <DefaultValue>
-                <PrimitiveValue value="30"/>
-            </DefaultValue>
-            <EnabledBy parameterName="service.queue.isEnabled" operator="E">
-                <Value>
-                    <PrimitiveValue value="true"/>
-                </Value>
-            </EnabledBy>
-        </Parameter>
-
-        <Parameter name="service.queue.producerTimeout" type="INTEGER" unit="MILLISECOND"
-                   description="If a produce activity is not completed within this time, the activity will time out and an error will be returned. A timeout may occur when the queue topic fills up due to consumer inactivity.">
-            <DefaultValue>
-                <PrimitiveValue value="2000"/>
-            </DefaultValue>
-            <EnabledBy parameterName="service.queue.isEnabled" operator="E">
-                <Value>
-                    <PrimitiveValue value="true"/>
-                </Value>
-            </EnabledBy>
-        </Parameter>
-
-        <Parameter name="service.queue.connections" isArray="true" type="STRUCTURE"
-                   description="Connection identifier for queue server(s). For HornetQ this is the connection to HornetQ's jndi service.">
-            <StructureDefinition>
-                <StructureMemberDefinition name="host" type="STRING"/>
-                <StructureMemberDefinition name="port" type="INTEGER">
-                    <DefaultValue>
-                        <PrimitiveValue value="5902"/>
-                    </DefaultValue>
-                </StructureMemberDefinition>
-                <StructureMemberDefinition name="jmxPort" type="INTEGER">
-                    <DefaultValue>
-                        <PrimitiveValue value="3900"/>
-                    </DefaultValue>
-                </StructureMemberDefinition>
-            </StructureDefinition>
-            <DefaultValue>
-                <StructureValue index="1">
-                    <StructureMemberValue name="host" value="vgc1a"/>
-                    <StructureMemberValue name="port" value="5902"/>
-                    <StructureMemberValue name="jmxPort" value="3900"/>
-                </StructureValue>
-            </DefaultValue>
-            <EnabledBy parameterName="service.queue.isEnabled" operator="E">
-                <Value>
-                    <PrimitiveValue value="true"/>
-                </Value>
-            </EnabledBy>
         </Parameter>
 
         <Parameter name="messageHandling.threadpool.size" type="INTEGER"

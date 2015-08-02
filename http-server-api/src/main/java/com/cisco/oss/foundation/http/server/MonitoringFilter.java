@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Cisco Systems, Inc.
+ * Copyright 2015 Cisco Systems, Inc.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ package com.cisco.oss.foundation.http.server;
 import com.cisco.oss.foundation.configuration.ConfigUtil;
 import com.cisco.oss.foundation.configuration.ConfigurationFactory;
 import com.cisco.oss.foundation.monitoring.CommunicationInfo;
-import com.cisco.oss.foundation.monitoring.RMIMonitoringAgent;
+import com.cisco.oss.foundation.monitoring.MonitoringAgentFactory;
 import com.cisco.oss.foundation.monitoring.services.ServiceDetails;
 import com.cisco.oss.foundation.string.utils.BoyerMoore;
 import org.apache.commons.lang3.tuple.Pair;
@@ -54,6 +54,7 @@ public class MonitoringFilter extends AbstractInfraHttpFilter {
         if (!uniqueUriMonitoringEnabled) {
             populateBoyersList();
         }
+        MonitoringAgentFactory.getInstance().register();
     }
 
     private void populateBoyersList() {
@@ -95,9 +96,6 @@ public class MonitoringFilter extends AbstractInfraHttpFilter {
 //			methodName = httpServletRequest.getMethod() + ":" + httpServletRequest.getRequestURI().toString();
             methodName = updateMethodName(httpServletRequest, methodName);
             LOGGER.trace("transaction method name is: {}", methodName);
-
-            RMIMonitoringAgent.getInstance().register();
-
 
             reqServiceDetails = serviceDetails;
 

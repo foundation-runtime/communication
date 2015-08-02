@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Cisco Systems, Inc.
+ * Copyright 2015 Cisco Systems, Inc.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -16,27 +16,38 @@
 
 package com.cisco.oss.foundation.http.apache;
 
-import com.cisco.oss.foundation.http.*;
+import com.cisco.oss.foundation.http.AbstractHttpClient;
+import com.cisco.oss.foundation.http.ClientException;
+import com.cisco.oss.foundation.http.HttpRequest;
+import com.cisco.oss.foundation.http.HttpResponse;
+import com.cisco.oss.foundation.http.ResponseCallback;
 import com.cisco.oss.foundation.loadbalancer.InternalServerProxy;
 import com.cisco.oss.foundation.loadbalancer.LoadBalancerStrategy;
 import com.google.common.base.Joiner;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpEntityEnclosingRequest;
+import org.apache.http.HttpHost;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.*;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.concurrent.FutureCallback;
-import org.apache.http.conn.ssl.SSLContexts;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.ssl.SSLContexts;
+import javax.net.ssl.HostnameVerifier;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
+import org.apache.http.impl.nio.client.HttpAsyncClientBuilder;
 import org.apache.http.impl.nio.client.HttpAsyncClients;
+import org.apache.http.message.BasicHttpEntityEnclosingRequest;
+import org.apache.http.message.BasicHttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.net.ssl.SSLContext;
+import javax.net.ssl.*;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URI;
@@ -44,6 +55,7 @@ import java.net.URISyntaxException;
 import java.security.KeyStore;
 import java.util.Collection;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by Yair Ogen on 1/16/14.
@@ -53,16 +65,26 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
     private static final Logger LOGGER = LoggerFactory.getLogger(ApacheHttpClient.class);
     CloseableHttpAsyncClient httpAsyncClient = null;
     private CloseableHttpClient httpClient = null;
+    private HostnameVerifier hostnameVerifier;
+
+    public boolean isAutoCloseable() {
+        return autoCloseable;
+    }
+
+    private boolean autoCloseable = true;
 
 
-    ApacheHttpClient(String apiName, Configuration configuration, boolean enableLoadBalancing) {
+
+    ApacheHttpClient(String apiName, Configuration configuration, boolean enableLoadBalancing, HostnameVerifier hostnameVerifier) {
         super(apiName, configuration, enableLoadBalancing);
+        this.hostnameVerifier = hostnameVerifier;
         configureClient();
     }
 
 
-    ApacheHttpClient(String apiName, LoadBalancerStrategy.STRATEGY_TYPE strategyType, Configuration configuration, boolean enableLoadBalancing) {
+    ApacheHttpClient(String apiName, LoadBalancerStrategy.STRATEGY_TYPE strategyType, Configuration configuration, boolean enableLoadBalancing, HostnameVerifier hostnameVerifier) {
         super(apiName, strategyType, configuration, enableLoadBalancing);
+        this.hostnameVerifier = hostnameVerifier;
         configureClient();
     }
 
@@ -72,12 +94,17 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
         RequestConfig.Builder requestBuilder = RequestConfig.custom();
         requestBuilder = requestBuilder.setConnectTimeout(metadata.getConnectTimeout());
         requestBuilder = requestBuilder.setSocketTimeout(metadata.getReadTimeout());
+        requestBuilder = requestBuilder.setStaleConnectionCheckEnabled(metadata.isStaleConnectionCheckEnabled());
 
         RequestConfig requestConfig = requestBuilder.build();
 
         boolean addSslSupport = StringUtils.isNotEmpty(metadata.getKeyStorePath()) && StringUtils.isNotEmpty(metadata.getKeyStorePassword());
 
         boolean addTrustSupport = StringUtils.isNotEmpty(metadata.getTrustStorePath()) && StringUtils.isNotEmpty(metadata.getTrustStorePassword());
+
+        autoCloseable = metadata.isAutoCloseable();
+
+        HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
 
         SSLContext sslContext = null;
 
@@ -93,19 +120,32 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
                 trustStore.load(new FileInputStream(metadata.getTrustStorePath()), metadata.getTrustStorePassword().toCharArray());
 
                 sslContext = SSLContexts.custom()
-                        .useTLS()
+                        .useProtocol("TLS")
                         .loadKeyMaterial(keyStore, metadata.getKeyStorePassword().toCharArray())
-                        .loadTrustMaterial(trustStore)
+                        .loadTrustMaterial(trustStore, null)
                         .build();
 
             } else if (addSslSupport) {
+
+                TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+
                 KeyStore keyStore = KeyStore.getInstance(keystoreType);
                 keyStore.load(new FileInputStream(metadata.getKeyStorePath()), metadata.getKeyStorePassword().toCharArray());
 
+                tmf.init(keyStore);
+
+
                 sslContext = SSLContexts.custom()
-                        .useTLS()
+                        .useProtocol("SSL")
                         .loadKeyMaterial(keyStore, metadata.getKeyStorePassword().toCharArray())
                         .build();
+
+                sslContext.init(null, tmf.getTrustManagers(),null);
+
+                SSLConnectionSocketFactory sf = new SSLConnectionSocketFactory(sslContext, hostnameVerifier);
+
+                httpClientBuilder.setSSLSocketFactory(sf);
+
 
             } else if (addTrustSupport) {
 
@@ -113,10 +153,15 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
                 trustStore.load(new FileInputStream(metadata.getTrustStorePath()), metadata.getTrustStorePassword().toCharArray());
 
                 sslContext = SSLContexts.custom()
-                        .useTLS()
-                        .loadTrustMaterial(trustStore)
+                        .useProtocol("TLS")
+                        .loadTrustMaterial(trustStore, null)
                         .build();
 
+            }
+
+            if (addSslSupport | addTrustSupport) {
+                SSLContext.setDefault(sslContext);
+                httpClientBuilder.setSslcontext(sslContext);
             }
 
 
@@ -124,12 +169,34 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
             LOGGER.error("can't set TLS Support. Error is: {}", e, e);
         }
 
-        HttpClientBuilder httpClientBuilder = HttpClientBuilder.create()
-                .setMaxConnPerRoute(metadata.getMaxConnectionsPerAddress())
+
+        httpClientBuilder.setMaxConnPerRoute(metadata.getMaxConnectionsPerAddress())
                 .setMaxConnTotal(metadata.getMaxConnectionsTotal())
                 .setDefaultRequestConfig(requestConfig)
+                .evictExpiredConnections()
+                .evictIdleConnections(metadata.getIdleTimeout(), TimeUnit.MILLISECONDS)
+                .setKeepAliveStrategy(new InfraConnectionKeepAliveStrategy(metadata.getIdleTimeout()));
+
+
+
+
+        HttpAsyncClientBuilder httpAsyncClientBuilder = HttpAsyncClients.custom();
+
+        httpAsyncClientBuilder.setDefaultRequestConfig(requestConfig)
+                .setMaxConnPerRoute(metadata.getMaxConnectionsPerAddress())
+                .setMaxConnTotal(metadata.getMaxConnectionsTotal())
                 .setKeepAliveStrategy(new InfraConnectionKeepAliveStrategy(metadata.getIdleTimeout()))
-                .setSslcontext(sslContext);
+                .setSSLContext(sslContext);
+
+        if(metadata.isDisableCookies()){
+            httpClientBuilder.disableCookieManagement();
+            httpAsyncClientBuilder.disableCookieManagement();
+        }
+
+        if (hostnameVerifier != null) {
+            httpClientBuilder.setSSLHostnameVerifier(hostnameVerifier);
+            httpAsyncClientBuilder.setSSLHostnameVerifier(hostnameVerifier);
+        }
 
         if (!followRedirects) {
             httpClientBuilder.disableRedirectHandling();
@@ -137,13 +204,7 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
 
         httpClient = httpClientBuilder.build();
 
-        httpAsyncClient = HttpAsyncClients.custom()
-                .setDefaultRequestConfig(requestConfig)
-                .setMaxConnPerRoute(metadata.getMaxConnectionsPerAddress())
-                .setMaxConnTotal(metadata.getMaxConnectionsTotal())
-                .setKeepAliveStrategy(new InfraConnectionKeepAliveStrategy(metadata.getIdleTimeout()))
-                .setSSLContext(sslContext)
-                .build();
+        httpAsyncClient = httpAsyncClientBuilder.build();
 
         httpAsyncClient.start();
 
@@ -152,53 +213,73 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
     @Override
     public HttpResponse executeDirect(HttpRequest request) {
 
-        HttpUriRequest httpUriRequest = null;
+        org.apache.http.HttpRequest httpRequest = null;
 
         Joiner joiner = Joiner.on(",").skipNulls();
         URI requestUri = buildUri(request, joiner);
 
-        httpUriRequest = buildHttpUriRequest(request, joiner, requestUri);
+        httpRequest = buildHttpUriRequest(request, joiner, requestUri);
 
         try {
-            LOGGER.info("sending request: {}", request.getUri());
-            CloseableHttpResponse response = httpClient.execute(httpUriRequest);
-            ApacheHttpResponse apacheHttpResponse = new ApacheHttpResponse(response, requestUri);
-            LOGGER.info("got response status: {} for request: {}",apacheHttpResponse.getStatus(), apacheHttpResponse.getRequestedURI());
+//            LOGGER.info("sending request: {}", request.getUri());
+
+            HttpHost httpHost = new HttpHost(requestUri.getHost(),requestUri.getPort(),requestUri.getScheme());
+            CloseableHttpResponse response = httpClient.execute(httpHost, httpRequest);
+            ApacheHttpResponse apacheHttpResponse = new ApacheHttpResponse(response, requestUri, autoCloseable);
+//            LOGGER.info("got response status: {} for request: {}",apacheHttpResponse.getStatus(), apacheHttpResponse.getRequestedURI());
             return apacheHttpResponse;
         } catch (IOException e) {
             throw new ClientException(e.toString(), e);
         }
     }
 
-    private HttpUriRequest buildHttpUriRequest(HttpRequest request, Joiner joiner, URI requestUri) {
-        HttpUriRequest httpUriRequest;
-        switch (request.getHttpMethod()) {
-            case GET:
-                httpUriRequest = new HttpGet(requestUri);
-                break;
-            case POST:
-                httpUriRequest = new HttpPost(requestUri);
-                break;
-            case PUT:
-                httpUriRequest = new HttpPut(requestUri);
-                break;
-            case DELETE:
-                httpUriRequest = new HttpDelete(requestUri);
-                break;
-            case HEAD:
-                httpUriRequest = new HttpHead(requestUri);
-                break;
-            case OPTIONS:
-                httpUriRequest = new HttpOptions(requestUri);
-                break;
-            default:
-                throw new ClientException("You have to one of the REST verbs such as GET, POST etc.");
+    private org.apache.http.HttpRequest buildHttpUriRequest(HttpRequest request, Joiner joiner, URI requestUri) {
+        org.apache.http.HttpRequest httpRequest;
+        if(autoEncodeUri){
+            switch (request.getHttpMethod()) {
+                case GET:
+                    httpRequest = new HttpGet(requestUri);
+                    break;
+                case POST:
+                    httpRequest = new HttpPost(requestUri);
+                    break;
+                case PUT:
+                    httpRequest = new HttpPut(requestUri);
+                    break;
+                case DELETE:
+                    httpRequest = new HttpDelete(requestUri);
+                    break;
+                case HEAD:
+                    httpRequest = new HttpHead(requestUri);
+                    break;
+                case OPTIONS:
+                    httpRequest = new HttpOptions(requestUri);
+                    break;
+                case PATCH:
+                    httpRequest = new HttpPatch(requestUri);
+                    break;
+                default:
+                    throw new ClientException("You have to one of the REST verbs such as GET, POST etc.");
+            }
+        }else{
+            switch (request.getHttpMethod()) {
+                case POST:
+                case PUT:
+                case DELETE:
+                case PATCH:
+                    httpRequest = new BasicHttpEntityEnclosingRequest(request.getHttpMethod().method(), requestUri.toString());
+                    break;
+                default:
+                    httpRequest = new BasicHttpRequest(request.getHttpMethod().method(), requestUri.toString());
+            }
+
         }
+
 
         byte[] entity = request.getEntity();
         if (entity != null) {
-            if (httpUriRequest instanceof HttpEntityEnclosingRequestBase) {
-                HttpEntityEnclosingRequestBase httpEntityEnclosingRequestBase = (HttpEntityEnclosingRequestBase) httpUriRequest;
+            if (httpRequest instanceof HttpEntityEnclosingRequest) {
+                HttpEntityEnclosingRequest httpEntityEnclosingRequestBase = (HttpEntityEnclosingRequest) httpRequest;
                 httpEntityEnclosingRequestBase.setEntity(new ByteArrayEntity(entity, ContentType.create(request.getContentType())));
             } else {
                 throw new ClientException("sending content for request type " + request.getHttpMethod() + " is not supported!");
@@ -211,9 +292,9 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
             String key = stringCollectionEntry.getKey();
             Collection<String> stringCollection = stringCollectionEntry.getValue();
             String value = joiner.join(stringCollection);
-            httpUriRequest.setHeader(key, value);
+            httpRequest.setHeader(key, value);
         }
-        return httpUriRequest;
+        return httpRequest;
     }
 
     private URI buildUri(HttpRequest request, Joiner joiner) {
@@ -222,11 +303,21 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
         Map<String, Collection<String>> queryParams = request.getQueryParams();
         if (queryParams != null && !queryParams.isEmpty()) {
             URIBuilder uriBuilder = new URIBuilder();
+            StringBuilder queryStringBuilder = new StringBuilder();
+            boolean hasQuery = !queryParams.isEmpty();
             for (Map.Entry<String, Collection<String>> stringCollectionEntry : queryParams.entrySet()) {
                 String key = stringCollectionEntry.getKey();
-                Collection<String> stringCollection = stringCollectionEntry.getValue();
-                String value = joiner.join(stringCollection);
-                uriBuilder.addParameter(key, value);
+                Collection<String> queryParamsValueList = stringCollectionEntry.getValue();
+                if (request.isQueryParamsParseAsMultiValue()) {
+                    for (String queryParamsValue : queryParamsValueList) {
+                        uriBuilder.addParameter(key, queryParamsValue);
+                        queryStringBuilder.append(key).append("=").append(queryParamsValue).append("&");
+                    }
+                }else{
+                    String value = joiner.join(queryParamsValueList);
+                    uriBuilder.addParameter(key, value);
+                    queryStringBuilder.append(key).append("=").append(value).append("&");
+                }
             }
             uriBuilder.setFragment(requestUri.getFragment());
             uriBuilder.setHost(requestUri.getHost());
@@ -235,7 +326,24 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
             uriBuilder.setScheme(requestUri.getScheme());
             uriBuilder.setUserInfo(requestUri.getUserInfo());
             try {
-                requestUri = uriBuilder.build();
+
+                if(!autoEncodeUri){
+                    String urlPath = "";
+                    if (requestUri.getRawPath() != null && requestUri.getRawPath().startsWith("/")) {
+                        urlPath = requestUri.getRawPath();
+                    } else {
+                        urlPath = "/" + requestUri.getRawPath();
+                    }
+
+                    if (hasQuery){
+                        String query = queryStringBuilder.substring(0,queryStringBuilder.length()-1);
+                        requestUri = new URI(requestUri.getScheme() + "://" + requestUri.getHost() + ":" + requestUri.getPort() + urlPath + "?" + query);
+                    }else{
+                        requestUri = new URI(requestUri.getScheme() + "://" + requestUri.getHost() + ":" + requestUri.getPort() + urlPath);
+                    }
+                }else{
+                    requestUri = uriBuilder.build();
+                }
             } catch (URISyntaxException e) {
                 LOGGER.warn("could not update uri: {}", requestUri);
             }
@@ -259,37 +367,39 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
 
         request = updateRequestUri((S)request, serverProxy);
 
-//        final HttpRequest tempRequest = request;
+        if (request.isSilentLogging()) {
+            LOGGER.trace("sending request: {}-{}", request.getHttpMethod(), request.getUri());
+        }else{
+            LOGGER.info("sending request: {}-{}", request.getHttpMethod(), request.getUri());
+        }
 
-        LOGGER.info("sending request: {}", request.getUri());
-//        final FlowContext fc = FlowContextFactory.getFlowContext();
-//        Request httpRequest = prepareRequest(request).onRequestQueued(new Request.QueuedListener() {
-//            @Override
-//            public void onQueued(Request jettyRequest) {
-//                FlowContextFactory.addFlowContext(((S) tempRequest).getFlowContext());
-//            }
-//        }).onRequestBegin(new Request.BeginListener() {
-//            @Override
-//            public void onBegin(Request jettyRequest) {
-//                FlowContextFactory.addFlowContext(((S) tempRequest).getFlowContext());
-//            }
-//        }).onRequestFailure(new Request.FailureListener() {
-//            @Override
-//            public void onFailure(Request jettyRequest, Throwable failure) {
-//                FlowContextFactory.addFlowContext(((S) tempRequest).getFlowContext());
-//            }
-//        });
 
-        HttpUriRequest httpUriRequest = null;
+        org.apache.http.HttpRequest httpRequest = null;
 
         Joiner joiner = Joiner.on(",").skipNulls();
         URI requestUri = buildUri(request, joiner);
 
-        httpUriRequest = buildHttpUriRequest(request, joiner, requestUri);
+        httpRequest = buildHttpUriRequest(request, joiner, requestUri);
 
+        HttpHost httpHost = new HttpHost(requestUri.getHost(),requestUri.getPort(),requestUri.getScheme());
 
-        httpAsyncClient.execute(httpUriRequest, new FoundationFutureCallBack(this,request, responseCallback, serverProxy, loadBalancerStrategy, apiName));
+        httpAsyncClient.execute(httpHost, httpRequest, new FoundationFutureCallBack(this,request, responseCallback, serverProxy, loadBalancerStrategy, apiName));
 
+    }
+
+    @Override
+    public void close() {
+        try {
+            if (httpClient != null) {
+                httpClient.close();
+            }
+
+            if (httpAsyncClient != null) {
+                httpAsyncClient.close();
+            }
+        } catch (IOException e) {
+            LOGGER.warn("can't close http client: {}", e);
+        }
     }
 
     private static class FoundationFutureCallBack implements FutureCallback<org.apache.http.HttpResponse> {
@@ -313,12 +423,15 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
         @Override
         public void completed(org.apache.http.HttpResponse response) {
 
-            serverProxy.setCurrentNumberOfRetries(0);
+            serverProxy.setCurrentNumberOfAttempts(0);
             serverProxy.setFailedAttemptTimeStamp(0);
 
-            ApacheHttpResponse apacheHttpResponse = new ApacheHttpResponse(response, request.getUri());
-            LOGGER.info("got response status: {} for request: {}",apacheHttpResponse.getStatus(), apacheHttpResponse.getRequestedURI());
-
+            ApacheHttpResponse apacheHttpResponse = new ApacheHttpResponse(response, request.getUri(), apacheHttpClient.isAutoCloseable());
+            if (request.isSilentLogging()) {
+                LOGGER.trace("got response status: {} for request: {}", apacheHttpResponse.getStatus(), apacheHttpResponse.getRequestedURI());
+            }else{
+                LOGGER.info("got response status: {} for request: {}", apacheHttpResponse.getStatus(), apacheHttpResponse.getRequestedURI());
+            }
             responseCallback.completed(apacheHttpResponse);
         }
 
@@ -345,4 +458,6 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
             responseCallback.cancelled();
         }
     }
+
+
 }

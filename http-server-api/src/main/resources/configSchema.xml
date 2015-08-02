@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!--
-  ~ Copyright 2014 Cisco Systems, Inc.
+  ~ Copyright 2015 Cisco Systems, Inc.
   ~
   ~  Licensed under the Apache License, Version 2.0 (the "License");
   ~  you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
   ~  limitations under the License.
   -->
 
-<NamespaceDefinitions xsi:noNamespaceSchemaLocation="http://ch-infra.il.nds.com/cabResources/CCP_XML.xsd"
+<NamespaceDefinitions xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/foundation-runtime/configuration/master/ccp_schema/CCP_XML.xsd"
                       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <NamespaceDefinition>
         <NamespaceIdentifier version="TBD" name="TBD"/>
@@ -51,6 +51,12 @@
                                            description="set to true to enable ping filter logging">
                     <DefaultValue>
                         <PrimitiveValue value="false"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
+                <StructureMemberDefinition name="http.pingFilter.proxyPingFilterHeader" type="STRING" advanced="true"
+                                           description="optional custom header for the ping filter.">
+                    <DefaultValue>
+                        <PrimitiveValue value="x-Ping"/>
                     </DefaultValue>
                 </StructureMemberDefinition>
                 <StructureMemberDefinition name="http.requestValidityFilter.isEnabled" type="BOOLEAN" advanced="true"
@@ -211,8 +217,16 @@
                         <PrimitiveValue value="6144"/>
                     </DefaultValue>
                 </StructureMemberDefinition>
+                <StructureMemberDefinition name="http.serviceDirectory.isEnabled" type="BOOLEAN" advanced="true"
+                                           description="Determines whether the server should register against a service directory">
+                    <DefaultValue>
+                        <PrimitiveValue value="false"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
             </StructureDefinition>
 
         </ParameterType>
+
+
     </NamespaceDefinition>
 </NamespaceDefinitions>

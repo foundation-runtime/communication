@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Cisco Systems, Inc.
+ * Copyright 2015 Cisco Systems, Inc.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -43,20 +43,28 @@ public class FlowContextFilter extends AbstractInfraHttpFilter {
 	
 	@Override
 	public void doFilterImpl(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-		try {
-			HttpServletRequest httpServletRequest = (HttpServletRequest)request;
-			String flowCtxtStr = httpServletRequest.getHeader(HttpServerFactory.FLOW_CONTEXT_HEADER);
-			if(!Strings.isNullOrEmpty(flowCtxtStr)){
-				FlowContextFactory.deserializeNativeFlowContext(flowCtxtStr);
-			}else{
-				FlowContextFactory.createFlowContext();
-			}
-			
+
+        long startTime = System.currentTimeMillis();
+
+        try {
+            HttpServletRequest httpServletRequest = (HttpServletRequest)request;
+            String flowCtxtStr = httpServletRequest.getHeader(HttpServerFactory.FLOW_CONTEXT_HEADER);
+            if(!Strings.isNullOrEmpty(flowCtxtStr)){
+                FlowContextFactory.deserializeNativeFlowContext(flowCtxtStr);
+            }else{
+                FlowContextFactory.createFlowContext();
+            }
+
 		} catch (Exception e) {
 			LOGGER.warn("problem setting flow context filter: " + e, e);
 		}
+
         ((HttpServletResponse)response).setHeader(HttpServerFactory.FLOW_CONTEXT_HEADER, FlowContextFactory.serializeNativeFlowContext());
-        chain.doFilter(request, response);	
+        chain.doFilter(request, response);
+
+        long endTime = System.currentTimeMillis();
+        int processingTime = (int) (endTime - startTime);
+        LOGGER.debug("Processing time: {} milliseconds", processingTime);
 	}
 
 	

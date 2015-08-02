@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Cisco Systems, Inc.
+ * Copyright 2015 Cisco Systems, Inc.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package com.cisco.oss.foundation.http;
 
 import com.cisco.oss.foundation.flowcontext.FlowContext;
 import com.cisco.oss.foundation.flowcontext.FlowContextFactory;
+import com.cisco.oss.foundation.loadbalancer.ClientRequest;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 
@@ -31,7 +32,7 @@ import java.util.Map;
  * Representation of a Http Request. This class is immutable. you should build it using the builder.
  * Created by Yair Ogen on 12/30/13.
  */
-public class HttpRequest {
+public class HttpRequest implements ClientRequest{
 
     protected URI uri;
     private Multimap<String, String> headers = ArrayListMultimap.create();
@@ -41,6 +42,15 @@ public class HttpRequest {
     private String lbKey;
     private FlowContext flowContext;
     private String contentType = "application/json";
+
+    protected boolean httpsEnabled = false;
+    protected boolean retryOnServerBusy = false;
+
+    protected boolean queryParamsParseAsMultiValue = false;
+
+
+    protected boolean silentLogging = false;
+
 
     public String getContentType() {
         return contentType;
@@ -121,6 +131,18 @@ public class HttpRequest {
                 '}';
     }
 
+    public boolean isHttpsEnabled() {
+        return httpsEnabled;
+    }
+
+    public boolean isSilentLogging() {
+        return silentLogging;
+    }
+
+    public boolean isQueryParamsParseAsMultiValue() {
+        return queryParamsParseAsMultiValue;
+    }
+
     /**
      * The builder for the HttpRequest
      */
@@ -157,12 +179,12 @@ public class HttpRequest {
             return this;
         }
 
-        Builder headers(Multimap<String, String> headers) {
+        public Builder headers(Multimap<String, String> headers) {
             request.headers = headers;
             return this;
         }
 
-        Builder queryParams(Multimap<String, String> queryParams) {
+        public Builder queryParams(Multimap<String, String> queryParams) {
             request.queryParams = queryParams;
             return this;
         }
@@ -194,6 +216,26 @@ public class HttpRequest {
 
         public Builder httpMethod(HttpMethod HttpMethod) {
             request.httpMethod = HttpMethod;
+            return this;
+        }
+
+        public Builder https() {
+            request.httpsEnabled = true;
+            return this;
+        }
+
+        public Builder retryOnServerBusy() {
+            request.retryOnServerBusy = true;
+            return this;
+        }
+
+        public Builder queryParamsParseAsMultiValue() {
+            request.queryParamsParseAsMultiValue = true;
+            return this;
+        }
+
+        public Builder silentLogging() {
+            request.silentLogging = true;
             return this;
         }
 

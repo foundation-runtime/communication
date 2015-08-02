@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Cisco Systems, Inc.
+ * Copyright 2015 Cisco Systems, Inc.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -24,8 +24,22 @@ import com.cisco.oss.foundation.message.Message;
  */
 public class TestHornetQHandler extends AbstractHornetQMessageHandler {
 
+    public TestHornetQHandler(String consumerName){
+        super(consumerName);
+    }
+
     @Override
     public void onMessage(Message message) {
         System.out.println(message.getPayloadAsString());
+    }
+
+    @Override
+    public String getProtocol() {
+        return "TestHornetQHandler";
+    }
+
+    @Override
+    public String getServiceDescription() {
+        return "DUMMY";
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Cisco Systems, Inc.
+ * Copyright 2015 Cisco Systems, Inc.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ import java.io.IOException;
  */
 public class PingFilter extends AbstractInfraHttpFilter {
 
-	private static final String PING_HEADER = "NDS-Proxy-Ping";
+	private static final String PING_HEADER = "x-Ping";
 	private final static Logger LOGGER = LoggerFactory.getLogger(PingFilter.class);
 	
 	public PingFilter(String serviceName) {
@@ -46,12 +46,10 @@ public class PingFilter extends AbstractInfraHttpFilter {
 
 	@Override
 	public void doFilterImpl(final ServletRequest request, final ServletResponse response, final FilterChain chain) throws IOException, ServletException {
-//		LOGGER.trace("Starting ping filter");
-//        Configuration configuration = ConfigurationFactory.getConfiguration();
-//        boolean enableLogging = configuration.getBoolean(serviceName + "http.pingFilter.enableLogging",false);
         boolean enableLogging = Boolean.valueOf(getConfigValue(serviceName + "http.pingFilter.enableLogging","false"));
 		final HttpServletRequest httpRequest = (HttpServletRequest) request;
-		if (null == httpRequest.getHeader(PING_HEADER)) {
+		String pingHeader = getConfigValue(serviceName + "http.proxyPingFilterHeader", PING_HEADER);
+		if (null == httpRequest.getHeader(pingHeader)) {
 			// if not ping request - do nothing, just forward through the chain
 			chain.doFilter(request, response);
 		} else {

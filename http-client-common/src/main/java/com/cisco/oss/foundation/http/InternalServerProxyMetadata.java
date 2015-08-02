@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Cisco Systems, Inc.
+ * Copyright 2015 Cisco Systems, Inc.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -35,19 +35,43 @@ public class InternalServerProxyMetadata {
     private int maxConnectionsTotal = 3000;
     private int maxQueueSizePerAddress = 1000;
     private long waitingTime = 0;
-    private int numberOfRetries = 0;
+    private int numberOfAttempts = 0;
     private long retryDelay = 0;
     private String keyStorePath = "";
     private String keyStorePassword = "";
     private String trustStorePath = "";
     private String trustStorePassword = "";
+    private boolean staleConnectionCheckEnabled = false;
+    private boolean autoCloseable = true;
+
+    public boolean isAutoEncodeUri() {
+        return autoEncodeUri;
+    }
+
+    private boolean autoEncodeUri = true;
+    private boolean followRedirects = false;
+    private boolean disableCookies = false;
+
+
+    private boolean serviceDirectoryEnabled = false;
+
+
+
+    private String serviceName = "UNKNOWN";
+
     private List<Pair<String, Integer>> hostAndPortPairs = null;
+
+    public boolean isAutoCloseable() {
+        return autoCloseable;
+    }
+
+    public boolean isStaleConnectionCheckEnabled() {
+        return staleConnectionCheckEnabled;
+    }
 
     public boolean isFollowRedirects() {
         return followRedirects;
     }
-
-    private boolean followRedirects = false;
 
     public long getIdleTimeout() {
         return idleTimeout;
@@ -93,7 +117,19 @@ public class InternalServerProxyMetadata {
         return waitingTime;
     }
 
-    public InternalServerProxyMetadata(int readTimeout, int connectTimeout, long idleTimeout, int maxConnectionsPerAddress, int maxConnectionsTotal, int maxQueueSizePerAddress, long waitingTime, int numberOfRetries, long retryDelay, List<Pair<String, Integer>> hostAndPortPairs, String keyStorePath, String keyStorePassword,String trustStorePath,String trustStorePassword, boolean followRedirects) {
+    public boolean isDisableCookies() {
+        return disableCookies;
+    }
+
+    public boolean isServiceDirectoryEnabled() {
+        return serviceDirectoryEnabled;
+    }
+
+    public String getServiceName() {
+        return serviceName;
+    }
+
+    public InternalServerProxyMetadata(int readTimeout, int connectTimeout, long idleTimeout, int maxConnectionsPerAddress, int maxConnectionsTotal, int maxQueueSizePerAddress, long waitingTime, int numberOfAttempts, long retryDelay, List<Pair<String, Integer>> hostAndPortPairs, String keyStorePath, String keyStorePassword, String trustStorePath, String trustStorePassword, boolean followRedirects, boolean autoCloseable, boolean staleConnectionCheckEnabled, boolean disableCookies, boolean serviceDirectoryEnabled, String serviceName, boolean autoEncodeUri) {
         this.readTimeout = readTimeout;
         this.connectTimeout = connectTimeout;
         this.idleTimeout = idleTimeout;
@@ -101,14 +137,26 @@ public class InternalServerProxyMetadata {
         this.maxConnectionsTotal = maxConnectionsTotal;
         this.maxQueueSizePerAddress = maxQueueSizePerAddress;
         this.waitingTime = waitingTime;
-        this.numberOfRetries = numberOfRetries;
+        this.numberOfAttempts = numberOfAttempts;
         this.retryDelay = retryDelay;
         this.hostAndPortPairs = hostAndPortPairs;
         this.followRedirects = followRedirects;
+        this.autoCloseable = autoCloseable;
+        this.autoEncodeUri = autoEncodeUri;
+        this.staleConnectionCheckEnabled = staleConnectionCheckEnabled;
+        this.disableCookies = disableCookies;
+        this.serviceDirectoryEnabled = serviceDirectoryEnabled;
+        this.serviceName = serviceName;
+
+        
+        this.trustStorePassword = trustStorePassword;
+        this.trustStorePath = trustStorePath;
+        this.keyStorePassword = keyStorePassword;
+        this.keyStorePath = keyStorePath;
     }
 
-    public int getNumberOfRetries() {
-        return numberOfRetries;
+    public int getNumberOfAttempts() {
+        return numberOfAttempts;
     }
 
     public long getRetryDelay() {

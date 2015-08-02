@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!--
-  ~ Copyright 2014 Cisco Systems, Inc.
+  ~ Copyright 2015 Cisco Systems, Inc.
   ~
   ~  Licensed under the Apache License, Version 2.0 (the "License");
   ~  you may not use this file except in compliance with the License.
@@ -19,13 +19,13 @@
     <parent>
 		<groupId>com.cisco.oss.foundation</groupId>
 		<artifactId>foundation-common-base</artifactId>
-		<version>0.0.0-5</version>
+        <version>1.0.1-7</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.cisco.oss.foundation</groupId>
     <artifactId>http-server-jetty-8</artifactId>
     <name>http-server-jetty-8</name>
-    <version>0.0.0-6-SNAPSHOT</version>
+    <version>1.0.6-3-SNAPSHOT</version>
     <packaging>jar</packaging>
     <description>This project is the http jetty server (version 8.x) implementation library in the cisco vss foundation runtime</description>
     <url>https://github.com/foundation-runtime/communication/http-server-jetty</url>
@@ -56,6 +56,19 @@
             </roles>
         </developer>
     </developers>
+    <properties>
+        <!--<javaVersion>1.6</javaVersion>-->
+        <foundation-common-base-version>1.0.1-5</foundation-common-base-version>
+        <logging-api-version>1.0.2-1</logging-api-version>
+        <http-server-api-version>1.0.3-4</http-server-api-version>
+        <logging-log4j-version>1.0.2-1</logging-log4j-version>
+        <http-client-apache-version>1.1.1-1</http-client-apache-version>
+        <configuration-lib-version>1.0.3-1</configuration-lib-version>
+        <monitoring-api-version>1.0.3-1</monitoring-api-version>
+        <jetty-8-version>8.1.16.v20140903</jetty-8-version>
+        <sd-api-version>1.1.0-7</sd-api-version>
+        <sd-core-version>1.1.0-6</sd-core-version>
+    </properties>
     <scm>
         <connection>scm:git:git@github.com:foundation-runtime/communication.git</connection>
         <developerConnection>scm:git:git@github.com:foundation-runtime/communication.git</developerConnection>
@@ -68,7 +81,22 @@
     </organization>
     <build>
         <pluginManagement>
-            <plugins />
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>2.5</version>
+                    <configuration>
+                        <archive>
+                            <index>true</index>
+                            <manifest>
+                                <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                                <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                            </manifest>
+                        </archive>
+                    </configuration>
+                </plugin>
+            </plugins>
         </pluginManagement>
         <plugins>
            <plugin>
@@ -108,6 +136,28 @@
             </exclusions>
         </dependency>
         <dependency>
+            <groupId>com.cisco.oss.foundation.directory</groupId>
+            <artifactId>sd-api</artifactId>
+            <version>${sd-api-version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>slf4j-api</artifactId>
+                    <groupId>org.slf4j</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.cisco.oss.foundation.directory</groupId>
+            <artifactId>sd-core</artifactId>
+            <version>${sd-core-version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>slf4j-api</artifactId>
+                    <groupId>org.slf4j</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
             <groupId>com.cisco.oss.foundation</groupId>
             <artifactId>logging-api</artifactId>
             <version>${logging-api-version}</version>
@@ -133,22 +183,22 @@
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-server</artifactId>
-            <version>8.1.14.v20131031</version>
+            <version>${jetty-8-version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-servlet</artifactId>
-            <version>8.1.14.v20131031</version>
+            <version>${jetty-8-version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-servlets</artifactId>
-            <version>8.1.14.v20131031</version>
+            <version>${jetty-8-version}</version>
         </dependency>
         <dependency>
             <groupId>org.scala-lang</groupId>
             <artifactId>scala-library</artifactId>
-            <version>2.10.3</version>
+            <version>2.11.1</version>
             <scope>test</scope>
         </dependency>
     </dependencies>    

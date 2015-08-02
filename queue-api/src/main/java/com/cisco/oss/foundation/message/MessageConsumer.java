@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Cisco Systems, Inc.
+ * Copyright 2015 Cisco Systems, Inc.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ public interface MessageConsumer {
 
     /**
      * register a handler that will receive messages asynchronously. This method will no block.
-     * Note: in many cases you should not use this interface directly. Instead extend a abstract class from the vendor specifc API implementation
+     * Note: in many cases you should not use this interface directly. Instead extend a abstract class from the vendor specific API implementation
      * @param messageHandler - the message handler instance that will be called-back when new messages arrive.
      */
     void registerMessageHandler(MessageHandler messageHandler);

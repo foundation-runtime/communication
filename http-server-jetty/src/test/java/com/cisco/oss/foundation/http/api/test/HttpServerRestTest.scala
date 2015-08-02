@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Cisco Systems, Inc.
+ * Copyright 2015 Cisco Systems, Inc.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -19,9 +19,6 @@ package com.cisco.oss.foundation.http.api.test
 import org.junit.runner.RunWith
 import javax.servlet.Servlet
 import com.google.common.collect.ArrayListMultimap
-import org.eclipse.jetty.servlet.ServletHolder
-import org.eclipse.jetty.servlet.ServletContextHandler
-import org.springframework.context.support.ClassPathXmlApplicationContext
 import org.eclipse.jetty.util.ssl.SslContextFactory
 import com.cisco.oss.foundation.configuration.ConfigurationFactory
 import org.scalatest._
@@ -33,11 +30,6 @@ import com.cisco.oss.foundation.http.server.jetty.JettyHttpServerFactory
 import com.cisco.oss.foundation.flowcontext.FlowContextFactory
 import com.cisco.oss.foundation.http.apache.ApacheHttpClientFactory
 import com.cisco.oss.foundation.http.{HttpMethod, HttpRequest}
-import java.util.logging._
-import java.util.Date
-import java.text.MessageFormat
-import org.joda.time.{DateTimeZone, DateTime}
-import org.joda.time.format.{DateTimeFormatterBuilder, DateTimeFormatter, DateTimeFormat}
 
 //class MyLogFormatter extends Formatter {
 //
@@ -101,15 +93,18 @@ class HttpServerRestTest extends FeatureSpec with GivenWhenThen with BeforeAndAf
     config setProperty("serverTest1.http.flowContextFilter.isEnabled", "true")
     config setProperty("serverTest1.http.traceFilter.isEnabled", "true")
     config setProperty("serverTest1.http.traceFilter.textContentTypes.1", "text/plain")
-    config setProperty("serverTest1.http.monitoringFilter.isEnabled", "false");
+    config setProperty("serverTest1.http.monitoringFilter.isEnabled", "true");
+    config setProperty("serverTest1.http.serviceDirectory.isEnabled", "false");
 
 
+    config setProperty("service.serverTest1-client.http.serviceDirectory.isEnabled", "false");
     config setProperty("service.serverTest1-client.http.readTimeout", "30000")
-    config setProperty("service.serverTest1-client.1.port", port)
+    config setProperty("service.serverTest1-client.http.serviceDirectory.serviceName", "serverTest1");
+        config setProperty("service.serverTest1-client.1.port", port)
     config setProperty("service.serverTest1-client.1.host", IpUtils.getIpAddress)
 
     val map: ArrayListMultimap[String, Servlet] = ArrayListMultimap.create()
-    //    val sh = new ServletContextHandler
+    //    val scripts.sh = new ServletContextHandler
     val resourceConfig = new ResourceConfig()
     resourceConfig packages ("com.cisco")
 
@@ -141,7 +136,8 @@ class HttpServerRestTest extends FeatureSpec with GivenWhenThen with BeforeAndAf
       val client = ApacheHttpClientFactory.createHttpClient("service.serverTest1-client")
       val request = HttpRequest.newBuilder()
         .uri("/ps/ifs")
-        .httpMethod(HttpMethod.GET)
+        .httpMethod(HttpMethod.POST)
+        .entity("hello *************")
         .build()
 
       val result = client.execute(request)
@@ -155,6 +151,48 @@ class HttpServerRestTest extends FeatureSpec with GivenWhenThen with BeforeAndAf
 
     }
 
+
+  }
+
+  feature("test InterfacesResource with SD support") {
+
+    info("starting serverTest1 server")
+    info("using MyServlet servlet")
+  ignore ("not usable when running in jenkins") {
+    scenario("calling get return resource result") {
+
+      given("server is running")
+
+      when("client sends a request")
+
+      FlowContextFactory.createFlowContext()
+
+      val client = ApacheHttpClientFactory.createHttpClient("service.serverTest1-client")
+      val request = HttpRequest.newBuilder()
+        .uri("/ps/ifs")
+        .httpMethod(HttpMethod.POST)
+        .entity("hello *************")
+        .build()
+
+      println("first invoke")
+      val result = client.execute(request)
+      println("post first invoke")
+
+      then("the server should return a message")
+
+
+      assert(result != null)
+      assert(result.getResponseAsString.contains("psSms"))
+
+      JettyHttpServerFactory.INSTANCE.stopHttpServer("serverTest1")
+
+      Thread.sleep(12500)
+
+      println("second invoke")
+      client.execute(request)
+      println("post second invoke")
+    }
+  }
 
   }
 }
