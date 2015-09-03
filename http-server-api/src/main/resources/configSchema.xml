@@ -223,6 +223,12 @@
                         <PrimitiveValue value="false"/>
                     </DefaultValue>
                 </StructureMemberDefinition>
+                <StructureMemberDefinition name="http.sessionManagerEnabled" type="BOOLEAN" advanced="true"
+                                           description="Determines whether the server should enable a session manager">
+                    <DefaultValue>
+                        <PrimitiveValue value="false"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
             </StructureDefinition>
 
         </ParameterType>

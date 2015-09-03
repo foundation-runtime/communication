@@ -238,12 +238,19 @@ public enum JettyHttpServerFactory implements HttpServerFactory , JettyHttpServe
             throw new UnsupportedOperationException("you must first stop stop server: " + serviceName + " before you want to start it again!");
         }
 
+        Configuration configuration = ConfigurationFactory.getConfiguration();
+        boolean sessionManagerEnabled = configuration.getBoolean(serviceName + ".http.sessionManagerEnabled", false);
+
         ContextHandlerCollection handler = new ContextHandlerCollection();
 
         JettyHttpThreadPool jettyHttpThreadPool = new JettyHttpThreadPool(serviceName);
 
         for (Map.Entry<String, Servlet> entry : servlets.entries()) {
             ServletContextHandler context = new ServletContextHandler();
+
+            if(sessionManagerEnabled){
+                context = new ServletContextHandler(ServletContextHandler.SESSIONS);
+            }
 
             if (eventListeners != null && !eventListeners.isEmpty()) {
                 context.setEventListeners(eventListeners.toArray(new EventListener[0]));
@@ -269,7 +276,6 @@ public enum JettyHttpServerFactory implements HttpServerFactory , JettyHttpServe
         server.setSendServerVersion(false);
 
         try {
-            Configuration configuration = ConfigurationFactory.getConfiguration();
 
             // set connectors
             String host = configuration.getString(serviceName + ".http.host", "0.0.0.0");
