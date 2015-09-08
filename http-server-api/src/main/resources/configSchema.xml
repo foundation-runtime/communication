@@ -224,9 +224,15 @@
                     </DefaultValue>
                 </StructureMemberDefinition>
                 <StructureMemberDefinition name="http.sessionManagerEnabled" type="BOOLEAN" advanced="true"
-                                           description="Determines whether the server should enable a session manager">
+                                           description="Determines whether the server should enable a session manager" required="false">
                     <DefaultValue>
                         <PrimitiveValue value="false"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
+                <StructureMemberDefinition name="http.servletContextPath" type="STRING" advanced="true"
+                                           description="sets the servlet context path" required="false">
+                    <DefaultValue>
+                        <PrimitiveValue value="/"/>
                     </DefaultValue>
                 </StructureMemberDefinition>
             </StructureDefinition>
