@@ -231,11 +231,12 @@ public enum JettyHttpServerFactory implements HttpServerFactory, JettyHttpServer
 //        ContextHandlerCollection handler = new ContextHandlerCollection();
 
         ServletContextHandler context = new ServletContextHandler();
-        context.setContextPath(configuration.getString(serviceName + ".http.servletContextPath", "/"));
 
         if(sessionManagerEnabled){
             context = new ServletContextHandler(ServletContextHandler.SESSIONS);
         }
+
+        context.setContextPath(configuration.getString(serviceName + ".http.servletContextPath", "/"));
 
         JettyHttpThreadPool jettyHttpThreadPool = new JettyHttpThreadPool(serviceName).init();
 
