@@ -247,6 +247,7 @@ public enum JettyHttpServerFactory implements HttpServerFactory , JettyHttpServe
 
         for (Map.Entry<String, Servlet> entry : servlets.entries()) {
             ServletContextHandler context = new ServletContextHandler();
+            context.setContextPath(configuration.getString(serviceName + ".http.servletContextPath", "/"));
 
             if(sessionManagerEnabled){
                 context = new ServletContextHandler(ServletContextHandler.SESSIONS);
