@@ -79,13 +79,12 @@ public class MonitoringFilter extends AbstractInfraHttpFilter {
     @Override
     public void doFilterImpl(final ServletRequest request, final ServletResponse response, final FilterChain chain) throws IOException, ServletException {
 
-        long startTime = System.currentTimeMillis();
-        ServiceDetails reqServiceDetails = null;
+        final long startTime = System.currentTimeMillis();
         HttpServletRequest httpServletRequest = (HttpServletRequest) request;
         HttpServletResponse httpServletResponse = (HttpServletResponse) response;
-        String methodName = httpServletRequest.getMethod();
+        String tempMethodName = httpServletRequest.getMethod();
         if (uniqueUriMonitoringEnabled) {
-            methodName += ":" + httpServletRequest.getRequestURI();
+            tempMethodName += ":" + httpServletRequest.getRequestURI();
         }
 
         boolean reportToMonitoring = true;
@@ -94,38 +93,63 @@ public class MonitoringFilter extends AbstractInfraHttpFilter {
             LOGGER.trace("Monitoring filter: Request processing started at: {}", startTime);
 
 //			methodName = httpServletRequest.getMethod() + ":" + httpServletRequest.getRequestURI().toString();
-            methodName = updateMethodName(httpServletRequest, methodName);
-            LOGGER.trace("transaction method name is: {}", methodName);
+            tempMethodName = updateMethodName(httpServletRequest, tempMethodName);
 
-            reqServiceDetails = serviceDetails;
-
-
-            reqServiceDetails = new ServiceDetails(description, serviceName, "HTTP", port);
+            LOGGER.trace("transaction method name is: {}", tempMethodName);
 
 
-            CommunicationInfo.getCommunicationInfo().transactionStarted(reqServiceDetails, methodName, threadPool.getThreads());
+            CommunicationInfo.getCommunicationInfo().transactionStarted(serviceDetails, tempMethodName, threadPool.getThreads());
 
         } catch (Exception e) {
             LOGGER.error("can't report monitoring data as it has failed on:" + e);
             reportToMonitoring = false;
         }
+        final String methodName = tempMethodName;
 
         try {
             chain.doFilter(httpServletRequest, httpServletResponse);
-        } catch (IOException e) {
-            CommunicationInfo.getCommunicationInfo().transactionFinished(reqServiceDetails, methodName, true, e.toString());
-            throw e;
-        } catch (ServletException e) {
-            CommunicationInfo.getCommunicationInfo().transactionFinished(reqServiceDetails, methodName, true, e.toString());
-            throw e;
-        } catch (RuntimeException e) {
-            CommunicationInfo.getCommunicationInfo().transactionFinished(reqServiceDetails, methodName, true, e.toString());
-            throw e;
-        } finally {
-            final long endTime = System.currentTimeMillis();
-            final int processingTime = (int) (endTime - startTime);
 
-            LOGGER.debug("Processing time: {} milliseconds", processingTime);
+            if (request.isAsyncStarted()) {
+
+                AsyncContext async = request.getAsyncContext();
+                async.addListener(new AsyncListener() {
+                    @Override
+                    public void onComplete(AsyncEvent event) throws IOException {
+                        final long endTime = System.currentTimeMillis();
+                        final int processingTime = (int) (endTime - startTime);
+                        LOGGER.debug("Processing time: {} milliseconds", processingTime);
+                    }
+
+                    @Override
+                    public void onTimeout(AsyncEvent event) throws IOException {
+
+                    }
+
+                    @Override
+                    public void onError(AsyncEvent event) throws IOException {
+                        Throwable throwable = event.getThrowable();
+                        if (throwable != null) {
+                            CommunicationInfo.getCommunicationInfo().transactionFinished(serviceDetails, methodName, true, throwable.toString());
+                        }
+                    }
+
+                    @Override
+                    public void onStartAsync(AsyncEvent event) throws IOException {
+
+                    }
+                });
+
+
+            } else {
+                final long endTime = System.currentTimeMillis();
+                final int processingTime = (int) (endTime - startTime);
+                LOGGER.debug("Processing time: {} milliseconds", processingTime);
+            }
+
+
+        } catch (Exception e) {
+            CommunicationInfo.getCommunicationInfo().transactionFinished(serviceDetails, methodName, true, e.toString());
+            throw e;
         }
 
         if (reportToMonitoring) {
@@ -134,11 +158,11 @@ public class MonitoringFilter extends AbstractInfraHttpFilter {
                 int status = httpServletResponse.getStatus();
 
                 if (status >= 400) {
-                    CommunicationInfo.getCommunicationInfo().transactionFinished(reqServiceDetails, methodName, true, httpServletResponse.getStatus() + "");
+                    CommunicationInfo.getCommunicationInfo().transactionFinished(serviceDetails, methodName, true, httpServletResponse.getStatus() + "");
 
                 } else {
 
-                    CommunicationInfo.getCommunicationInfo().transactionFinished(reqServiceDetails, methodName, false, "");
+                    CommunicationInfo.getCommunicationInfo().transactionFinished(serviceDetails, methodName, false, "");
                 }
             } catch (Exception e) {
                 LOGGER.error("can't report monitoring data as it has failed on:" + e);

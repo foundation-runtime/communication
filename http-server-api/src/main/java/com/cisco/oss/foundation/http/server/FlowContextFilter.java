@@ -21,10 +21,7 @@ import com.google.common.base.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -44,7 +41,7 @@ public class FlowContextFilter extends AbstractInfraHttpFilter {
 	@Override
 	public void doFilterImpl(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
 
-        long startTime = System.currentTimeMillis();
+        final long startTime = System.currentTimeMillis();
 
         try {
             HttpServletRequest httpServletRequest = (HttpServletRequest)request;
@@ -62,9 +59,40 @@ public class FlowContextFilter extends AbstractInfraHttpFilter {
         ((HttpServletResponse)response).setHeader(HttpServerFactory.FLOW_CONTEXT_HEADER, FlowContextFactory.serializeNativeFlowContext());
         chain.doFilter(request, response);
 
-        long endTime = System.currentTimeMillis();
-        int processingTime = (int) (endTime - startTime);
-        LOGGER.debug("Processing time: {} milliseconds", processingTime);
+		if (request.isAsyncStarted()) {
+
+            AsyncContext async = request.getAsyncContext();
+            async.addListener(new AsyncListener() {
+                @Override
+                public void onComplete(AsyncEvent event) throws IOException {
+                    long endTime = System.currentTimeMillis();
+                    int processingTime = (int) (endTime - startTime);
+                    LOGGER.debug("Processing time: {} milliseconds", processingTime);
+                }
+
+                @Override
+                public void onTimeout(AsyncEvent event) throws IOException {
+
+                }
+
+                @Override
+                public void onError(AsyncEvent event) throws IOException {
+
+                }
+
+                @Override
+                public void onStartAsync(AsyncEvent event) throws IOException {
+
+                }
+            });
+
+
+		}else{
+			long endTime = System.currentTimeMillis();
+			int processingTime = (int) (endTime - startTime);
+			LOGGER.debug("Processing time: {} milliseconds", processingTime);
+		}
+
 	}
 
 	

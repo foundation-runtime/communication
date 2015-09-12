@@ -16,12 +16,15 @@
 
 package com.cisco.oss.foundation.http.server.jetty.filters;
 
+import com.cisco.oss.foundation.flowcontext.FlowContext;
+import com.cisco.oss.foundation.flowcontext.FlowContextFactory;
 import com.google.common.base.Joiner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.AsyncEvent;
 import javax.servlet.AsyncListener;
+import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.Closeable;
@@ -32,12 +35,17 @@ import java.util.Enumeration;
 import java.util.Map;
 
 public class TraceLogger implements Closeable, AsyncListener {
-    private static final Logger LOGGER = LoggerFactory.getLogger(TraceLogger.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TraceFilter.class);
     private HttpServletResponse response;
     private CharContentLogFormatter requestContentCharFormatter;
     private ByteContentLogFormatter requestContentByteFormatter;
     private CharContentLogFormatter responseContentCharFormatter;
     private ByteContentLogFormatter responseContentByteFormatter;
+    private FlowContext flowContext;
+
+    public TraceLogger(FlowContext flowContext) {
+        this.flowContext = flowContext;
+    }
 
     @Override
     public void close() {
@@ -190,6 +198,12 @@ public class TraceLogger implements Closeable, AsyncListener {
 
     @Override
     public void onComplete(AsyncEvent event) throws IOException {
+
+        if(FlowContextFactory.getFlowContext() == null && flowContext != null){
+            FlowContextFactory.addFlowContext(flowContext);
+        }
+        HttpServletRequest request = (HttpServletRequest)event.getAsyncContext().getRequest();
+        LOGGER.info("Sending HTTP response to " + TraceFilter.getOriginalClient(request) + ":" + request.getRemotePort());
         this.close();
     }
 
@@ -199,6 +213,9 @@ public class TraceLogger implements Closeable, AsyncListener {
 
     @Override
     public void onStartAsync(AsyncEvent event) throws IOException {
+        if (flowContext != null) {
+            FlowContextFactory.addFlowContext(flowContext);
+        }
     }
 
     @Override
