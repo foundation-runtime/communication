@@ -60,7 +60,7 @@
         <!--<javaVersion>1.6</javaVersion>-->
         <foundation-common-base-version>1.0.1-5</foundation-common-base-version>
         <logging-api-version>1.0.2-1</logging-api-version>
-        <http-server-api-version>1.0.4-2</http-server-api-version>
+        <http-server-api-version>1.0.4-3</http-server-api-version>
         <logging-log4j-version>1.0.2-1</logging-log4j-version>
         <http-client-apache-version>1.1.1-1</http-client-apache-version>
         <configuration-lib-version>1.0.3-1</configuration-lib-version>
