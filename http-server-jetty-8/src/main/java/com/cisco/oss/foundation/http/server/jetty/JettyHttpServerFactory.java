@@ -314,9 +314,10 @@ public enum JettyHttpServerFactory implements HttpServerFactory , JettyHttpServe
                     int portForConnector = Integer.parseInt(servletToConnctor.get("port"));
 
                     ServletContextHandler servletContextHandler = contextMap.get(uriMapping);
-                    servletContextHandler.setVirtualHosts(new String[] {logicalName});
+                    servletContextHandler.setVirtualHosts(new String[] {"@" + logicalName});
                     boolean isSSL = Boolean.valueOf(servletToConnctor.get("isSSL"));
                     getConnectors(startupLogs, connectors, isSSL, logicalName, serviceName, keyStorePath, keyStorePassword, trustStorePath, trustStorePassword, configuration, hostForConnector, portForConnector, connectionIdleTime, isBlockingChannelConnector, numberOfAcceptors, acceptQueueSize);
+                    servletContextHandler.setConnectorNames(new String[]{logicalName});
                 }
 
 
@@ -325,11 +326,6 @@ public enum JettyHttpServerFactory implements HttpServerFactory , JettyHttpServe
                 boolean useHttpsOnly = configuration.getBoolean(serviceName + ".https.useHttpsOnly", false);
                 getConnectors(startupLogs, connectors, useHttpsOnly, null, serviceName, keyStorePath, keyStorePassword, trustStorePath, trustStorePassword, configuration, host, port, connectionIdleTime, isBlockingChannelConnector, numberOfAcceptors, acceptQueueSize);
 
-            }
-
-
-            for (Map.Entry<String, ServletContextHandler> contextMapping : contextMap.entrySet()) {
-                contextMapping.getValue().setConnectorNames(new String[]{contextMapping.getKey()});
             }
 
             server.setConnectors(connectors.toArray(new Connector[0]));
