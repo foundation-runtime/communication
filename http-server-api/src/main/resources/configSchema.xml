@@ -235,6 +235,15 @@
                         <PrimitiveValue value="/"/>
                     </DefaultValue>
                 </StructureMemberDefinition>
+                <StructureMemberDefinition name="http.servletsMapping" type="STRUCTURE" advanced="true" required="false" isArray="true" description="Enables defininf servlets to uri mapping based on different ports and hosts">
+                    <StructureDefinition>
+                        <StructureMemberDefinition name="logicalName" type="STRING"/>
+                        <StructureMemberDefinition name="uriMapping" type="STRING"/>
+                        <StructureMemberDefinition name="host" type="STRING"/>
+                        <StructureMemberDefinition name="port" type="INTEGER"/>
+                        <StructureMemberDefinition name="isSSL" type="BOOLEAN"/>
+                    </StructureDefinition>
+                </StructureMemberDefinition>
             </StructureDefinition>
 
         </ParameterType>
