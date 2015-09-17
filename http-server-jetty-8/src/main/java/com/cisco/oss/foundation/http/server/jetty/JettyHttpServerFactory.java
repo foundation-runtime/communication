@@ -249,7 +249,9 @@ public enum JettyHttpServerFactory implements HttpServerFactory , JettyHttpServe
         Map<String, Map<String, String>> servletMapping = ConfigUtil.parseComplexArrayStructure(serviceName + ".http.servletsMapping");
         Map<String,ServletContextHandler> contextMap = new HashMap<>();
 
+        int servletNum = -1;
         for (Map.Entry<String, Servlet> entry : servlets.entries()) {
+            servletNum++;
             ServletContextHandler context = new ServletContextHandler();
 
             if(sessionManagerEnabled){
@@ -265,7 +267,11 @@ public enum JettyHttpServerFactory implements HttpServerFactory , JettyHttpServe
             context.setContextPath(configuration.getString(serviceName + ".http.servletContextPath", "/"));
 
             if (eventListeners != null && !eventListeners.isEmpty()) {
-                context.setEventListeners(eventListeners.toArray(new EventListener[0]));
+                if(servletMapping != null && !servletMapping.isEmpty() && eventListeners.size() == servlets.size()){
+                    context.setEventListeners(new EventListener[]{eventListeners.get(servletNum)});
+                }else{
+                    context.setEventListeners(eventListeners.toArray(new EventListener[0]));
+                }
             }
 
             context.addServlet(new ServletHolder(entry.getValue()), uri);
