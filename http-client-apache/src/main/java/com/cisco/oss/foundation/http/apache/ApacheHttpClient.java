@@ -33,6 +33,7 @@ import org.apache.http.client.methods.*;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.concurrent.FutureCallback;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.protocol.HttpContext;
 import org.apache.http.ssl.SSLContexts;
 import javax.net.ssl.HostnameVerifier;
 import org.apache.http.entity.ByteArrayEntity;
@@ -66,6 +67,7 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
     CloseableHttpAsyncClient httpAsyncClient = null;
     private CloseableHttpClient httpClient = null;
     private HostnameVerifier hostnameVerifier;
+    public static ThreadLocal<HttpContext> HTTP_CONTEXT_THREAD_LOCAL = new ThreadLocal<>();
 
     public boolean isAutoCloseable() {
         return autoCloseable;
@@ -224,7 +226,8 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
 //            LOGGER.info("sending request: {}", request.getUri());
 
             HttpHost httpHost = new HttpHost(requestUri.getHost(),requestUri.getPort(),requestUri.getScheme());
-            CloseableHttpResponse response = httpClient.execute(httpHost, httpRequest);
+            HttpContext httpContext = HTTP_CONTEXT_THREAD_LOCAL.get();
+            CloseableHttpResponse response = httpContext == null ? httpClient.execute(httpHost, httpRequest): httpClient.execute(httpHost, httpRequest, httpContext);
             ApacheHttpResponse apacheHttpResponse = new ApacheHttpResponse(response, requestUri, autoCloseable);
 //            LOGGER.info("got response status: {} for request: {}",apacheHttpResponse.getStatus(), apacheHttpResponse.getRequestedURI());
             return apacheHttpResponse;
