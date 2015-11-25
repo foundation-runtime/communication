@@ -223,9 +223,20 @@ public enum JettyHttpServerFactory implements HttpServerFactory, JettyHttpServer
             throw new UnsupportedOperationException("you must first stop stop server: " + serviceName + " before you want to start it again!");
         }
 
+        Configuration configuration = ConfigurationFactory.getConfiguration();
+        boolean sessionManagerEnabled = configuration.getBoolean(serviceName + ".http.sessionManagerEnabled", false);
+
+
+
 //        ContextHandlerCollection handler = new ContextHandlerCollection();
 
         ServletContextHandler context = new ServletContextHandler();
+
+        if(sessionManagerEnabled){
+            context = new ServletContextHandler(ServletContextHandler.SESSIONS);
+        }
+
+        context.setContextPath(configuration.getString(serviceName + ".http.servletContextPath", "/"));
 
         JettyHttpThreadPool jettyHttpThreadPool = new JettyHttpThreadPool(serviceName).init();
 
@@ -254,7 +265,6 @@ public enum JettyHttpServerFactory implements HttpServerFactory, JettyHttpServer
 
 
         try {
-            Configuration configuration = ConfigurationFactory.getConfiguration();
 
             // set connectors
             String host = configuration.getString(serviceName + ".http.host", "0.0.0.0");

@@ -16,6 +16,7 @@
 
 package com.cisco.oss.foundation.http.server.jetty.filters;
 
+import com.cisco.oss.foundation.flowcontext.FlowContextFactory;
 import com.cisco.oss.foundation.http.server.AbstractInfraHttpFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,10 +66,11 @@ public class TraceFilter extends AbstractInfraHttpFilter {
                     async.addListener(tracer);
                 } else {
                     tracer.close();
+                    LOGGER.info("Sending HTTP response to " + originalClient + ":" + request.getRemotePort());
                 }
             }
 
-            LOGGER.info("Sending HTTP response to " + originalClient + ":" + request.getRemotePort());
+
 
         } else {
             // pass request through unchanged
@@ -83,7 +85,7 @@ public class TraceFilter extends AbstractInfraHttpFilter {
     }
 
     private TraceLogger newTracer() throws IOException {
-        return new TraceLogger();
+        return new TraceLogger(FlowContextFactory.getFlowContext());
     }
 
     @Override

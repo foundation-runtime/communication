@@ -159,12 +159,6 @@
         </dependency>
         <dependency>
             <groupId>com.cisco.oss.foundation</groupId>
-            <artifactId>http-server-jetty</artifactId>
-            <version>1.0.1-1</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.cisco.oss.foundation</groupId>
             <artifactId>configuration-lib</artifactId>
             <version>${configuration-lib-version}</version>
             <classifier>tests</classifier>

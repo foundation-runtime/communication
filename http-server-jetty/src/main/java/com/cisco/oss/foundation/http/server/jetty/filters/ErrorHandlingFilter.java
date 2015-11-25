@@ -21,10 +21,7 @@ import org.eclipse.jetty.io.EofException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import javax.servlet.*;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
@@ -44,6 +41,38 @@ public class ErrorHandlingFilter extends AbstractInfraHttpFilter {
 
 		try {
 			chain.doFilter(request, response);
+			if (request.isAsyncStarted())
+			{
+				request.getAsyncContext().addListener(new AsyncListener()
+				{
+					@Override
+					public void onStartAsync(AsyncEvent event) throws IOException
+					{
+					}
+
+					@Override
+					public void onComplete(AsyncEvent event) throws IOException
+					{
+					}
+
+					@Override
+					public void onTimeout(AsyncEvent event) throws IOException
+					{
+					}
+
+					@Override
+					public void onError(AsyncEvent event) throws IOException
+					{
+						Throwable throwable = event.getThrowable();
+						if(throwable instanceof EofException){
+							LOGGER.error("EOF Exception caught. Probably client closed connection before the response was sent.");
+						}else{
+							LOGGER.error("error serving request: " + throwable, throwable);
+							((HttpServletResponse)response).sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal Server Error");
+						}
+					}
+				});
+			}
 		} catch (EofException e) {
 			LOGGER.error("EOF Exception caught. Probably client closed connection before the response was sent.");
 			// don't send response. no one is waiting for it on the other side

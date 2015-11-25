@@ -296,5 +296,46 @@ public class RabbitMQMessagingFactory {
         }
     }
 
+    public static boolean deleteQueue(String queueName){
+        try {
+            getChannel().queueDelete(queueName);
+            return true;
+        } catch (IOException e) {
+            LOGGER.warn("can't delete queue: {}", e);
+            return false;
+        }
+    }
+
+    public static boolean deleteQueue(String queueName, boolean deleteOnlyIfNotUsed, boolean deeltenlyIfNotEmpty){
+        try {
+            getChannel().queueDelete(queueName, deleteOnlyIfNotUsed, deeltenlyIfNotEmpty);
+            return true;
+        } catch (IOException e) {
+            LOGGER.warn("can't delete queue: {}", e);
+            return false;
+        }
+    }
+
+    public static boolean deleteExchange(String exchangeName){
+        try {
+            getChannel().exchangeDelete(exchangeName);
+            return true;
+        } catch (IOException e) {
+            LOGGER.warn("can't delete exchange: {}", e);
+            return false;
+        }
+    }
+
+
+    public static boolean deleteExchange(String exchangeName, boolean deleteOnlyIfNotUsed){
+        try {
+            getChannel().exchangeDelete(exchangeName, deleteOnlyIfNotUsed);
+            return true;
+        } catch (IOException e) {
+            LOGGER.warn("can't delete exchange: {}", e);
+            return false;
+        }
+    }
+
 
 }

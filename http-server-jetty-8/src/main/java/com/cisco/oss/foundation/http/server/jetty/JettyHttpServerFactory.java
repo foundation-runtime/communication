@@ -16,6 +16,7 @@
 
 package com.cisco.oss.foundation.http.server.jetty;
 
+import com.cisco.oss.foundation.configuration.ConfigUtil;
 import com.cisco.oss.foundation.configuration.ConfigurationFactory;
 import com.cisco.oss.foundation.directory.RegistrationManager;
 import com.cisco.oss.foundation.directory.ServiceDirectory;
@@ -57,31 +58,33 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @author Yair Ogen
  */
-public enum JettyHttpServerFactory implements HttpServerFactory , JettyHttpServerFactoryExtensions {
+public enum JettyHttpServerFactory implements HttpServerFactory, JettyHttpServerFactoryExtensions {
 
     INSTANCE;
 
+    private static List<EventListener> eventListeners = new ArrayList<>(3);
+
     private final static Logger LOGGER = LoggerFactory.getLogger(JettyHttpServerFactory.class);
 
-    static{
+    static {
         try {
             Configuration configuration = ConfigurationFactory.getConfiguration();
             String sdHost = configuration.getString("service.sd.host", "");
             int sdPort = configuration.getInt("service.sd.port", -1);
 
-            if(StringUtils.isNotBlank(sdHost)){
-                ServiceDirectory.getServiceDirectoryConfig().setProperty( DirectoryServiceClient.SD_API_SD_SERVER_FQDN_PROPERTY, sdHost);
+            if (StringUtils.isNotBlank(sdHost)) {
+                ServiceDirectory.getServiceDirectoryConfig().setProperty(DirectoryServiceClient.SD_API_SD_SERVER_FQDN_PROPERTY, sdHost);
             }
 
-            if(sdPort > 0){
-                ServiceDirectory.getServiceDirectoryConfig().setProperty( DirectoryServiceClient.SD_API_SD_SERVER_PORT_PROPERTY, sdPort);
+            if (sdPort > 0) {
+                ServiceDirectory.getServiceDirectoryConfig().setProperty(DirectoryServiceClient.SD_API_SD_SERVER_PORT_PROPERTY, sdPort);
             }
         } catch (Exception e) {
-            LOGGER.error("Can't assign service Directory host and port properties: {}",e ,e);
+            LOGGER.error("Can't assign service Directory host and port properties: {}", e, e);
         }
     }
 
-    private static final Map<String, Pair<Server,ProvidedServiceInstance>> servers = new ConcurrentHashMap<String, Pair<Server,ProvidedServiceInstance>>();
+    private static final Map<String, Pair<Server, ProvidedServiceInstance>> servers = new ConcurrentHashMap<String, Pair<Server, ProvidedServiceInstance>>();
 
     private JettyHttpServerFactory() {
     }
@@ -238,18 +241,45 @@ public enum JettyHttpServerFactory implements HttpServerFactory , JettyHttpServe
             throw new UnsupportedOperationException("you must first stop stop server: " + serviceName + " before you want to start it again!");
         }
 
+        Configuration configuration = ConfigurationFactory.getConfiguration();
+        boolean sessionManagerEnabled = configuration.getBoolean(serviceName + ".http.sessionManagerEnabled", false);
+
         ContextHandlerCollection handler = new ContextHandlerCollection();
 
         JettyHttpThreadPool jettyHttpThreadPool = new JettyHttpThreadPool(serviceName);
 
+        Map<String, Map<String, String>> servletMapping = ConfigUtil.parseComplexArrayStructure(serviceName + ".http.servletsMapping");
+        Map<String, ServletContextHandler> contextMap = new HashMap<>();
+
+        int servletNum = -1;
         for (Map.Entry<String, Servlet> entry : servlets.entries()) {
+            servletNum++;
             ServletContextHandler context = new ServletContextHandler();
 
-            if (eventListeners != null && !eventListeners.isEmpty()) {
-                context.setEventListeners(eventListeners.toArray(new EventListener[0]));
+            if (sessionManagerEnabled) {
+                context = new ServletContextHandler(ServletContextHandler.SESSIONS);
             }
 
-            context.addServlet(new ServletHolder(entry.getValue()), entry.getKey());
+            String uri = entry.getKey();
+
+            if (servletMapping != null && !servletMapping.isEmpty()) {
+                contextMap.put(uri, context);
+            }
+
+            context.setContextPath(configuration.getString(serviceName + ".http.servletContextPath", "/"));
+
+            if (eventListeners != null && !eventListeners.isEmpty()) {
+                if(servletMapping != null && !servletMapping.isEmpty() && eventListeners.size() == servlets.size()){
+                    context.setEventListeners(new EventListener[]{eventListeners.get(servletNum)});
+                }else{
+                    context.setEventListeners(eventListeners.toArray(new EventListener[0]));
+                }
+                for (EventListener eventListener : JettyHttpServerFactory.eventListeners) {
+                    context.addEventListener(eventListener);
+                }
+            }
+
+            context.addServlet(new ServletHolder(entry.getValue()), uri);
 
             for (Map.Entry<String, String> initParam : initParams.entrySet()) {
                 context.setInitParameter(initParam.getKey(), initParam.getValue());
@@ -269,7 +299,11 @@ public enum JettyHttpServerFactory implements HttpServerFactory , JettyHttpServe
         server.setSendServerVersion(false);
 
         try {
-            Configuration configuration = ConfigurationFactory.getConfiguration();
+
+
+            List<Connector> connectors = new ArrayList<>(3);
+            List<String> startupLogs = new ArrayList<>(3);
+
 
             // set connectors
             String host = configuration.getString(serviceName + ".http.host", "0.0.0.0");
@@ -280,60 +314,30 @@ public enum JettyHttpServerFactory implements HttpServerFactory , JettyHttpServe
             int acceptQueueSize = configuration.getInt(serviceName + ".http.acceptQueueSize", 0);
             boolean serviceDirectoryEnabled = configuration.getBoolean(serviceName + ".http.serviceDirectory.isEnabled", false);
 
-            AbstractConnector connector = null;
-            if (isBlockingChannelConnector) {
-                connector = new BlockingChannelConnector();
-            } else {
-                connector = new SelectChannelConnector();
-            }
-
-            connector.setAcceptQueueSize(acceptQueueSize);
-            connector.setAcceptors(numberOfAcceptors);
-            connector.setPort(port);
-            connector.setHost(host);
-            connector.setMaxIdleTime(connectionIdleTime);
-            connector.setRequestHeaderSize(configuration.getInt(serviceName + ".http.requestHeaderSize", connector.getRequestHeaderSize()));
+            if (servletMapping != null && !servletMapping.isEmpty()) {
 
 
-            Connector[] connectors = null;
+                for (Map<String, String> servletToConnctor : servletMapping.values()) {
+                    String logicalName = servletToConnctor.get("logicalName");
+                    String uriMapping = servletToConnctor.get("uriMapping");
+                    String hostForConnector = servletToConnctor.get("host");
+                    int portForConnector = Integer.parseInt(servletToConnctor.get("port"));
 
-            boolean useHttpsOnly = configuration.getBoolean(serviceName + ".https.useHttpsOnly", false);
-
-            boolean isSSL = StringUtils.isNotBlank(keyStorePath) && StringUtils.isNotBlank(keyStorePassword);
-            int sslPort = -1;
-
-            SslSelectChannelConnector sslSelectChannelConnector = null;
-
-            if (isSSL) {
-                String sslHost = configuration.getString(serviceName + ".https.host", "0.0.0.0");
-                sslPort = configuration.getInt(serviceName + ".https.port", 8090);
-
-                SslContextFactory sslContextFactory = new SslContextFactory();
-                sslContextFactory.setKeyStorePath(keyStorePath);
-                sslContextFactory.setKeyStorePassword(keyStorePassword);
-
-                boolean addTrustStoreSupport = StringUtils.isNotEmpty(trustStorePath) && StringUtils.isNotEmpty(trustStorePassword);
-                if (addTrustStoreSupport) {
-                    sslContextFactory.setTrustStore(trustStorePath);
-                    sslContextFactory.setTrustStorePassword(trustStorePassword);
-                    sslContextFactory.setNeedClientAuth(true);
+                    ServletContextHandler servletContextHandler = contextMap.get(uriMapping);
+                    servletContextHandler.setVirtualHosts(new String[]{"@" + logicalName});
+                    boolean isSSL = Boolean.valueOf(servletToConnctor.get("isSSL"));
+                    getConnectors(startupLogs, connectors, isSSL, logicalName, serviceName, keyStorePath, keyStorePassword, trustStorePath, trustStorePassword, configuration, hostForConnector, portForConnector, connectionIdleTime, isBlockingChannelConnector, numberOfAcceptors, acceptQueueSize);
+                    servletContextHandler.setConnectorNames(new String[]{logicalName});
                 }
 
-                sslSelectChannelConnector = new SslSelectChannelConnector(sslContextFactory);
-                sslSelectChannelConnector.setHost(sslHost);
-                sslSelectChannelConnector.setPort(sslPort);
 
-                if (useHttpsOnly) {
-                    connectors = new Connector[]{sslSelectChannelConnector};
-                } else {
-                    connectors = new Connector[]{connector, sslSelectChannelConnector};
-                }
             } else {
-                connectors = new Connector[]{connector};
+                boolean useHttpsOnly = configuration.getBoolean(serviceName + ".https.useHttpsOnly", false);
+                getConnectors(startupLogs, connectors, useHttpsOnly, null, serviceName, keyStorePath, keyStorePassword, trustStorePath, trustStorePassword, configuration, host, port, connectionIdleTime, isBlockingChannelConnector, numberOfAcceptors, acceptQueueSize);
 
             }
 
-            server.setConnectors(connectors);
+            server.setConnectors(connectors.toArray(new Connector[0]));
 
             // set thread pool
             server.setThreadPool(jettyHttpThreadPool.threadPool);
@@ -341,26 +345,92 @@ public enum JettyHttpServerFactory implements HttpServerFactory , JettyHttpServe
             // set servlets/context handlers
             server.setHandler(handler);
 
+
+
             server.start();
             ProvidedServiceInstance instance = null;
             if (serviceDirectoryEnabled) {
                 instance = registerWithSDServer(serviceName, host, port);
             }
 
-            servers.put(serviceName, Pair.of(server,instance));
+            servers.put(serviceName, Pair.of(server, instance));
 
-            if (sslPort != -1 && sslSelectChannelConnector != null) {
-                LOGGER.info("Https server: {} started on {}", serviceName, sslPort);
-            }
-
-            if(!useHttpsOnly){
-                LOGGER.info("Http server: {} started on {}", serviceName, port);
+            for (String startupLog : startupLogs) {
+                LOGGER.info(startupLog);
             }
 
             // server.join();
         } catch (Exception e) {
             LOGGER.error("Problem starting the http {} server. Error is {}.", new Object[]{serviceName, e, e});
             throw new ServerFailedToStartException(e);
+        }
+    }
+
+    private void getConnectors(List<String> startupLogs, List<Connector> connectors, boolean useHttpsOnly, String logicalName, String serviceName, String keyStorePath, String keyStorePassword, String trustStorePath, String trustStorePassword, Configuration configuration, String host, int port, int connectionIdleTime, boolean isBlockingChannelConnector, int numberOfAcceptors, int acceptQueueSize) {
+
+        AbstractConnector connector = null;
+        if (isBlockingChannelConnector) {
+            connector = new BlockingChannelConnector();
+        } else {
+            connector = new SelectChannelConnector();
+        }
+
+        connector.setAcceptQueueSize(acceptQueueSize);
+        connector.setAcceptors(numberOfAcceptors);
+        connector.setPort(port);
+        connector.setHost(host);
+        connector.setMaxIdleTime(connectionIdleTime);
+        connector.setRequestHeaderSize(configuration.getInt(serviceName + ".http.requestHeaderSize", connector.getRequestHeaderSize()));
+
+        if (logicalName != null) {
+            connector.setName(logicalName);
+        }
+
+
+        boolean isSSL = StringUtils.isNotBlank(keyStorePath) && StringUtils.isNotBlank(keyStorePassword);
+        int sslPort = -1;
+
+        SslSelectChannelConnector sslSelectChannelConnector = null;
+
+        if (isSSL) {
+            String sslHost = configuration.getString(serviceName + ".https.host", "0.0.0.0");
+            sslPort = configuration.getInt(serviceName + ".https.port", 8090);
+
+            SslContextFactory sslContextFactory = new SslContextFactory();
+            sslContextFactory.setKeyStorePath(keyStorePath);
+            sslContextFactory.setKeyStorePassword(keyStorePassword);
+
+            boolean addTrustStoreSupport = StringUtils.isNotEmpty(trustStorePath) && StringUtils.isNotEmpty(trustStorePassword);
+            if (addTrustStoreSupport) {
+                sslContextFactory.setTrustStore(trustStorePath);
+                sslContextFactory.setTrustStorePassword(trustStorePassword);
+                sslContextFactory.setNeedClientAuth(true);
+            }
+
+            sslSelectChannelConnector = new SslSelectChannelConnector(sslContextFactory);
+            sslSelectChannelConnector.setHost(sslHost);
+            sslSelectChannelConnector.setPort(sslPort);
+            if (logicalName != null) {
+                sslSelectChannelConnector.setName(logicalName);
+            }
+
+            if (useHttpsOnly) {
+                sslSelectChannelConnector.setAcceptQueueSize(acceptQueueSize);
+                sslSelectChannelConnector.setAcceptors(numberOfAcceptors);
+                sslSelectChannelConnector.setMaxIdleTime(connectionIdleTime);
+                sslSelectChannelConnector.setRequestHeaderSize(configuration.getInt(serviceName + ".http.requestHeaderSize", sslSelectChannelConnector.getRequestHeaderSize()));
+                connectors.add(sslSelectChannelConnector);
+                startupLogs.add("Https server: " + serviceName + " started on " + sslPort);
+            } else {
+                startupLogs.add("Https server: " + serviceName + " started on " + sslPort);
+                startupLogs.add("Http server: " + serviceName + " started on " + port);
+                connectors.add(connector);
+                connectors.add(sslSelectChannelConnector);
+            }
+        } else {
+            startupLogs.add("Http server: " + serviceName + " started on " + port);
+            connectors.add(connector);
+
         }
     }
 
@@ -401,7 +471,7 @@ public enum JettyHttpServerFactory implements HttpServerFactory , JettyHttpServe
                 }
             }
             ProvidedServiceInstance instance = pair.getRight();
-            if(instance != null){
+            if (instance != null) {
                 unRegisterInstance(serviceName, instance);
             }
         }
@@ -413,6 +483,11 @@ public enum JettyHttpServerFactory implements HttpServerFactory , JettyHttpServe
         if (server != null) {
             server.addBean(errorHandler);
         }
+    }
+
+//    @Override
+    public void setAdditionalListeners(List<EventListener> eventListeners) {
+        this.eventListeners = eventListeners;
     }
 
     private ProvidedServiceInstance registerWithSDServer(final String serviceName, String host, int port) throws Exception {
@@ -448,7 +523,7 @@ public enum JettyHttpServerFactory implements HttpServerFactory , JettyHttpServe
     private void unRegisterInstance(String serviceName, ProvidedServiceInstance instance) {
         try {
             final RegistrationManager registrationManager = ServiceDirectory.getRegistrationManager();
-            registrationManager.unregisterService(instance.getServiceName(),instance.getProviderId());
+            registrationManager.unregisterService(instance.getServiceName(), instance.getProviderId());
         } catch (ServiceException e) {
             LOGGER.info("Problem stopping the http {} server. Probably already un-registered. Error is {}.", serviceName, e);
         }
