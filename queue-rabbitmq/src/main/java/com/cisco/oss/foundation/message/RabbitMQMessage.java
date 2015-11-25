@@ -50,4 +50,8 @@ public class RabbitMQMessage implements Message {
 
         return getResponse.getProps().getHeaders();
     }
+
+    public Long getDeliveryTag() {
+        return getResponse.getEnvelope().getDeliveryTag();
+    }
 }

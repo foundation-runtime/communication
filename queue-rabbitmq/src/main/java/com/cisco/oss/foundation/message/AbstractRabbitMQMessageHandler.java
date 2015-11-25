@@ -37,6 +37,16 @@ public abstract class AbstractRabbitMQMessageHandler extends AbstractMessageHand
      */
     private volatile String _consumerTag;
 
+    private int channelNumber = -1;
+
+    public void setChannelNumber(int channelNumber) {
+        this.channelNumber = channelNumber;
+    }
+
+    protected int getChannelNumber() {
+        return channelNumber;
+    }
+
     /**
      * Constructs a new instance and records its association to the passed-in channel.
      *

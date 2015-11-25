@@ -38,7 +38,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * so this class can be used in a multi-threaded environment.
  * Created by Yair Ogen on 24/04/2014.
  */
-class RabbitMQMessageConsumer implements MessageConsumer {
+public class RabbitMQMessageConsumer implements MessageConsumer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RabbitMQMessageConsumer.class);
     public static final String DLQ = "DLQ";
@@ -141,13 +141,39 @@ class RabbitMQMessageConsumer implements MessageConsumer {
         }
     }
 
+    public void registerMessageHandler(MessageHandler messageHandler, boolean autoAck) {
+        try {
+            if (messageHandler instanceof AbstractRabbitMQMessageHandler) {
+                String consumerTag = FlowContextFactory.getFlowContext() != null ? FlowContextFactory.getFlowContext().getUniqueId() : "N/A";
+                Channel channel = RabbitMQMessagingFactory.getChannel();
+                ((AbstractRabbitMQMessageHandler)messageHandler).setChannelNumber(channel.getChannelNumber());
+                channel.basicConsume(queueName, autoAck, consumerTag, (Consumer) messageHandler);
+            } else {
+                throw new IllegalArgumentException("Using RabbitMQ consumerThreadLocal you must provide a valid RabbitMQ massage handler");
+            }
+
+        } catch (IOException e) {
+//            LOGGER.error("can't register a MessageHandler: {}", e);
+            throw new QueueException("can't register a MessageHandler: " + e, e);
+        }
+    }
+
+    public void ackMessage(Integer channelNumber, Long deliveryTag) {
+        RabbitMQMessagingFactory.ackMessage(channelNumber, deliveryTag);
+    }
+
+    public void nackMessage(Integer channelNumber, Long deliveryTag) {
+        RabbitMQMessagingFactory.nackMessage(channelNumber, deliveryTag);
+    }
+
     @Override
     public void registerMessageHandler(MessageHandler messageHandler) {
 
         try {
             if (messageHandler instanceof Consumer) {
                 String consumerTag = FlowContextFactory.getFlowContext() != null ? FlowContextFactory.getFlowContext().getUniqueId() : "N/A";
-                RabbitMQMessagingFactory.getChannel().basicConsume(queueName, true, consumerTag, (Consumer) messageHandler);
+                Channel channel = RabbitMQMessagingFactory.getChannel();
+                channel.basicConsume(queueName, true, consumerTag, (Consumer) messageHandler);
 //                org.RabbitMQ.api.core.client.MessageHandler handler = (org.RabbitMQ.api.core.client.MessageHandler) messageHandler;
 //                consumerInfo.put(consumerName,messageHandler);
 //                List<ClientConsumer> consumer = getConsumer(true);
