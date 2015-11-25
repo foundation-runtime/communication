@@ -29,7 +29,6 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -46,7 +45,7 @@ public class RabbitMQMessagingFactory {
     private static Map<String, MessageProducer> producers = new ConcurrentHashMap<String, MessageProducer>();
     public static ThreadLocal<Channel> channelThreadLocal = new ThreadLocal<>();
     //    private static List<Channel> channels = new CopyOnWriteArrayList<>();
-    private static PriorityBlockingQueue<AckNckMessage> messageAckQueue = new PriorityBlockingQueue<AckNckMessage>(10000);
+    private static PriorityBlockingQueue<AckNackMessage> messageAckQueue = new PriorityBlockingQueue<AckNackMessage>(10000);
     private static Map<Integer, Channel> channels = new ConcurrentHashMap<Integer, Channel>();
     private static Connection connection = null;
     private static AtomicBoolean IS_RECONNECT_THREAD_RUNNING = new AtomicBoolean(false);
@@ -92,7 +91,7 @@ public class RabbitMQMessagingFactory {
                 while (true) {
                     try {
 
-                        AckNckMessage message = messageAckQueue.take();
+                        AckNackMessage message = messageAckQueue.take();
 
                         Channel channel = channels.get(message.channelNumber);
                         if (channel != null && channel.isOpen()) {
@@ -103,7 +102,7 @@ public class RabbitMQMessagingFactory {
                         }
 
                     } catch (Exception e) {
-                        LOGGER.debug(e.toString(), e);
+                        LOGGER.error(e.toString(), e);
                     }
                 }
             }
@@ -205,26 +204,26 @@ public class RabbitMQMessagingFactory {
     }
 
     static void ackMessage(Integer channelNumber, Long deliveryTag) {
-        messageAckQueue.add(new AckNckMessage(channelNumber, deliveryTag, true));
+        messageAckQueue.add(new AckNackMessage(channelNumber, deliveryTag, true));
     }
 
     static void nackMessage(Integer channelNumber, Long deliveryTag) {
-        messageAckQueue.add(new AckNckMessage(channelNumber, deliveryTag, false));
+        messageAckQueue.add(new AckNackMessage(channelNumber, deliveryTag, false));
     }
 
-    static class AckNckMessage implements Comparable<AckNckMessage> {
+    static class AckNackMessage implements Comparable<AckNackMessage> {
         private final Integer channelNumber;
         private final Long deliveryTag;
         private final boolean ack;
 
-        public AckNckMessage(Integer channelNumber, Long deliveryTag, boolean ack) {
+        public AckNackMessage(Integer channelNumber, Long deliveryTag, boolean ack) {
             this.channelNumber = channelNumber;
             this.deliveryTag = deliveryTag;
             this.ack = ack;
         }
 
         @Override
-        public int compareTo(AckNckMessage o) {
+        public int compareTo(AckNackMessage o) {
             if (o == null)
                 return 1;
 

@@ -48,7 +48,6 @@ public class RabbitMQMessageConsumer implements MessageConsumer {
     private String queueName = "";
     private QueueingConsumer consumer = null;
 
-
     private AtomicInteger nextIndex = new AtomicInteger(0);
 
     RabbitMQMessageConsumer(String consumerName) {
@@ -60,8 +59,8 @@ public class RabbitMQMessageConsumer implements MessageConsumer {
             String filter = subset.getString("queue.filter", "");
             boolean isDurable = subset.getBoolean("queue.isDurable", true);
             boolean isSubscription = subset.getBoolean("queue.isSubscription", false);
-            long expiration = subset.getLong("queue.expiration",1800000);
-            long maxLength = subset.getLong("queue.maxLength",-1);
+            long expiration = subset.getLong("queue.expiration", 1800000);
+            long maxLength = subset.getLong("queue.maxLength", -1);
             boolean deadLetterIsEnabled = subset.getBoolean("queue.deadLetterIsEnabled", true);
             String subscribedTo = isSubscription ? subset.getString("queue.subscribedTo", "") : queueName;
             String exchangeType = isSubscription ? "topic" : "direct";
@@ -79,24 +78,24 @@ public class RabbitMQMessageConsumer implements MessageConsumer {
                 args.put("x-max-length", maxLength);
             }
 
-            if(expiration > 0){
+            if (expiration > 0) {
                 args.put("x-message-ttl", expiration);
             }
 
 
-            if(deadLetterIsEnabled){
+            if (deadLetterIsEnabled) {
                 channel.exchangeDeclare(DLQ, exchangeType, true, false, false, null);
-                args.put("x-dead-letter-exchange",DLQ);
+                args.put("x-dead-letter-exchange", DLQ);
             }
 
             String queue = channel.queueDeclare(queueName, true, false, false, args).getQueue();
 
             Map<String, String> filters = ConfigUtil.parseSimpleArrayAsMap(consumerName + ".queue.filters");
-            if(filters != null && !filters.isEmpty()){
+            if (filters != null && !filters.isEmpty()) {
                 for (String routingKey : filters.values()) {
                     channel.queueBind(queue, subscribedTo, routingKey);
                 }
-            }else{
+            } else {
                 channel.queueBind(queue, subscribedTo, "#");
             }
 
@@ -109,19 +108,13 @@ public class RabbitMQMessageConsumer implements MessageConsumer {
 
     }
 
-
-
-
-
-
-
     @Override
     public Message receive() {
 
         try {
             QueueingConsumer.Delivery delivery = consumer.nextDelivery();
             GetResponse getResponse = new GetResponse(delivery.getEnvelope(), delivery.getProperties(), delivery.getBody(), 0);
-            RabbitMQMessage rabbitMQMessage = new RabbitMQMessage(getResponse,"");
+            RabbitMQMessage rabbitMQMessage = new RabbitMQMessage(getResponse, "");
             return rabbitMQMessage;
         } catch (InterruptedException e) {
             throw new QueueException("can't get new message: " + e, e);
@@ -134,7 +127,7 @@ public class RabbitMQMessageConsumer implements MessageConsumer {
         try {
             QueueingConsumer.Delivery delivery = consumer.nextDelivery(timeout);
             GetResponse getResponse = new GetResponse(delivery.getEnvelope(), delivery.getProperties(), delivery.getBody(), 0);
-            RabbitMQMessage rabbitMQMessage = new RabbitMQMessage(getResponse,"");
+            RabbitMQMessage rabbitMQMessage = new RabbitMQMessage(getResponse, "");
             return rabbitMQMessage;
         } catch (InterruptedException e) {
             throw new QueueException("can't get new message: " + e, e);
@@ -146,7 +139,7 @@ public class RabbitMQMessageConsumer implements MessageConsumer {
             if (messageHandler instanceof AbstractRabbitMQMessageHandler) {
                 String consumerTag = FlowContextFactory.getFlowContext() != null ? FlowContextFactory.getFlowContext().getUniqueId() : "N/A";
                 Channel channel = RabbitMQMessagingFactory.getChannel();
-                ((AbstractRabbitMQMessageHandler)messageHandler).setChannelNumber(channel.getChannelNumber());
+                ((AbstractRabbitMQMessageHandler) messageHandler).setChannelNumber(channel.getChannelNumber());
                 channel.basicConsume(queueName, autoAck, consumerTag, (Consumer) messageHandler);
             } else {
                 throw new IllegalArgumentException("Using RabbitMQ consumerThreadLocal you must provide a valid RabbitMQ massage handler");
@@ -168,26 +161,7 @@ public class RabbitMQMessageConsumer implements MessageConsumer {
 
     @Override
     public void registerMessageHandler(MessageHandler messageHandler) {
-
-        try {
-            if (messageHandler instanceof Consumer) {
-                String consumerTag = FlowContextFactory.getFlowContext() != null ? FlowContextFactory.getFlowContext().getUniqueId() : "N/A";
-                Channel channel = RabbitMQMessagingFactory.getChannel();
-                channel.basicConsume(queueName, true, consumerTag, (Consumer) messageHandler);
-//                org.RabbitMQ.api.core.client.MessageHandler handler = (org.RabbitMQ.api.core.client.MessageHandler) messageHandler;
-//                consumerInfo.put(consumerName,messageHandler);
-//                List<ClientConsumer> consumer = getConsumer(true);
-//                for (ClientConsumer clientConsumer : consumer) {
-//                    clientConsumer.setMessageHandler(handler);
-//                }
-            } else {
-                throw new IllegalArgumentException("Using RabbitMQ consumerThreadLocal you must provide a valid RabbitMQ massage handler");
-            }
-
-        } catch (IOException e) {
-//            LOGGER.error("can't register a MessageHandler: {}", e);
-            throw new QueueException("can't register a MessageHandler: " + e, e);
-        }
+        registerMessageHandler(messageHandler, true);
     }
 
     @Override
