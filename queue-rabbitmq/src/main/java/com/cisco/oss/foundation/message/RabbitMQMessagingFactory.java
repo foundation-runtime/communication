@@ -29,8 +29,8 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -44,13 +44,14 @@ public class RabbitMQMessagingFactory {
     private static Map<String, MessageConsumer> consumers = new ConcurrentHashMap<String, MessageConsumer>();
     private static Map<String, MessageProducer> producers = new ConcurrentHashMap<String, MessageProducer>();
     public static ThreadLocal<Channel> channelThreadLocal = new ThreadLocal<>();
-    private static List<Channel> channels = new CopyOnWriteArrayList<>();
+    //    private static List<Channel> channels = new CopyOnWriteArrayList<>();
+    private static PriorityBlockingQueue<AckNackMessage> messageAckQueue = new PriorityBlockingQueue<AckNackMessage>(10000);
+    private static Map<Integer, Channel> channels = new ConcurrentHashMap<Integer, Channel>();
     private static Connection connection = null;
     private static AtomicBoolean IS_RECONNECT_THREAD_RUNNING = new AtomicBoolean(false);
-    static AtomicBoolean IS_CONNETED = new AtomicBoolean(false);
+    static AtomicBoolean IS_CONNECTED = new AtomicBoolean(false);
     static CountDownLatch INIT_LATCH = new CountDownLatch(1);
-    static AtomicBoolean IS_BLOCKED =  new AtomicBoolean(false);
-
+    static AtomicBoolean IS_BLOCKED = new AtomicBoolean(false);
 
 
     static {
@@ -71,7 +72,7 @@ public class RabbitMQMessagingFactory {
                     //allow possible background work to finish
                     Thread.sleep(1000);
 
-                    for (Channel channel : channels) {
+                    for (Channel channel : channels.values()) {
                         channel.close();
                     }
 
@@ -82,9 +83,33 @@ public class RabbitMQMessagingFactory {
                 }
             }
         });
+
+        Thread rabbitAckThread = new Thread("rabbitAckThread") {
+            @Override
+            public void run() {
+
+                while (true) {
+                    try {
+
+                        AckNackMessage message = messageAckQueue.take();
+
+                        Channel channel = channels.get(message.channelNumber);
+                        if (channel != null && channel.isOpen()) {
+                            if (message.ack)
+                                channel.basicAck(message.deliveryTag, false);
+                            else
+                                channel.basicNack(message.deliveryTag, false, true);
+                        }
+
+                    } catch (Exception e) {
+                        LOGGER.error(e.toString(), e);
+                    }
+                }
+            }
+        };
+        rabbitAckThread.setDaemon(true);
+        rabbitAckThread.start();
     }
-
-
 
 
     /**
@@ -118,7 +143,7 @@ public class RabbitMQMessagingFactory {
             final ArrayList<String> serverConnectionKeys = Lists.newArrayList(serverConnections.keySet());
             Collections.sort(serverConnectionKeys);
 
-            if(isEnabled){
+            if (isEnabled) {
                 connectionFactory.setUsername(userName);
                 connectionFactory.setPassword(password);
 
@@ -132,7 +157,7 @@ public class RabbitMQMessagingFactory {
 
                 String host = serverConnection.get("host");
                 int port = Integer.parseInt(serverConnection.get("port"));
-                addresses.add(new Address(host,port));
+                addresses.add(new Address(host, port));
 //              connectionFactory.setHost(host);
 //              connectionFactory.setPort(Integer.parseInt(port));
             }
@@ -149,7 +174,7 @@ public class RabbitMQMessagingFactory {
                     IS_BLOCKED.set(false);
                 }
             });
-            IS_CONNETED.set(true);
+            IS_CONNECTED.set(true);
             INIT_LATCH.countDown();
 
         } catch (Exception e) {
@@ -159,14 +184,14 @@ public class RabbitMQMessagingFactory {
         }
     }
 
-    static Channel getChannel(){
+    static Channel getChannel() {
         try {
-            if(channelThreadLocal.get() == null){
+            if (channelThreadLocal.get() == null) {
                 if (connection != null) {
                     Channel channel = connection.createChannel();
                     channelThreadLocal.set(channel);
-                    channels.add(channel);
-                }else{
+                    channels.put(channel.getChannelNumber(), channel);
+                } else {
                     throw new QueueException("RabbitMQ appears to be down. Please try again later.");
                 }
             }
@@ -176,6 +201,35 @@ public class RabbitMQMessagingFactory {
             throw new QueueException("can't create channel: " + e.toString(), e);
         }
 
+    }
+
+    static void ackMessage(Integer channelNumber, Long deliveryTag) {
+        messageAckQueue.add(new AckNackMessage(channelNumber, deliveryTag, true));
+    }
+
+    static void nackMessage(Integer channelNumber, Long deliveryTag) {
+        messageAckQueue.add(new AckNackMessage(channelNumber, deliveryTag, false));
+    }
+
+    static class AckNackMessage implements Comparable<AckNackMessage> {
+        private final Integer channelNumber;
+        private final Long deliveryTag;
+        private final boolean ack;
+
+        public AckNackMessage(Integer channelNumber, Long deliveryTag, boolean ack) {
+            this.channelNumber = channelNumber;
+            this.deliveryTag = deliveryTag;
+            this.ack = ack;
+        }
+
+        @Override
+        public int compareTo(AckNackMessage o) {
+            if (o == null)
+                return 1;
+
+            return this.channelNumber.compareTo(o.channelNumber);
+
+        }
     }
 
 
@@ -213,32 +267,32 @@ public class RabbitMQMessagingFactory {
         return producers.get(producerName);
     }
 
-    static void triggerReconnectThread (){
-      if (IS_RECONNECT_THREAD_RUNNING.compareAndSet(false,true)){
-          Thread reconnectThread = new Thread(new Runnable() {
-              @Override
-              public void run() {
-                  while(!IS_CONNETED.get()){
-                      try {
-                          connect();
-                      } catch (Exception e) {
-                          LOGGER.trace("reconnect failed: " + e);
-                          try {
-                              Thread.sleep(ConfigurationFactory.getConfiguration().getInt("service.queue.attachRetryDelay", 10000));
-                          } catch (InterruptedException e1) {
-                              LOGGER.trace("thread interrupted!!!", e1);
-                          }
-                      }
-                  }
-                  IS_RECONNECT_THREAD_RUNNING.set(false);
+    static void triggerReconnectThread() {
+        if (IS_RECONNECT_THREAD_RUNNING.compareAndSet(false, true)) {
+            Thread reconnectThread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    while (!IS_CONNECTED.get()) {
+                        try {
+                            connect();
+                        } catch (Exception e) {
+                            LOGGER.trace("reconnect failed: " + e);
+                            try {
+                                Thread.sleep(ConfigurationFactory.getConfiguration().getInt("service.queue.attachRetryDelay", 10000));
+                            } catch (InterruptedException e1) {
+                                LOGGER.trace("thread interrupted!!!", e1);
+                            }
+                        }
+                    }
+                    IS_RECONNECT_THREAD_RUNNING.set(false);
 
-              }
-          }, "RabbitMQ-Reconnect");
+                }
+            }, "RabbitMQ-Reconnect");
 
-          reconnectThread.setDaemon(false);
-          reconnectThread.start();
+            reconnectThread.setDaemon(false);
+            reconnectThread.start();
 
-      }
+        }
     }
 
     public static boolean deleteQueue(String queueName){

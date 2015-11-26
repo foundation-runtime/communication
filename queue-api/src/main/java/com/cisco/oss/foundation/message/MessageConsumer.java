@@ -43,6 +43,8 @@ public interface MessageConsumer {
      */
     void registerMessageHandler(MessageHandler messageHandler);
 
+    void registerMessageHandler(MessageHandler messageHandler, boolean autoAck);
+
     /**
      * close this consumer. This is useful for resource cleanup.
      * usually you don't need to run this API directly as implementation registers a shutdown hook for that.

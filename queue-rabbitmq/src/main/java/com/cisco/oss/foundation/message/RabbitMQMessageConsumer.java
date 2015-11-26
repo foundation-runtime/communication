@@ -38,7 +38,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * so this class can be used in a multi-threaded environment.
  * Created by Yair Ogen on 24/04/2014.
  */
-class RabbitMQMessageConsumer implements MessageConsumer {
+public class RabbitMQMessageConsumer implements MessageConsumer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RabbitMQMessageConsumer.class);
     public static final String DLQ = "DLQ";
@@ -47,7 +47,6 @@ class RabbitMQMessageConsumer implements MessageConsumer {
 
     private String queueName = "";
     private QueueingConsumer consumer = null;
-
 
     private AtomicInteger nextIndex = new AtomicInteger(0);
 
@@ -60,8 +59,8 @@ class RabbitMQMessageConsumer implements MessageConsumer {
             String filter = subset.getString("queue.filter", "");
             boolean isDurable = subset.getBoolean("queue.isDurable", true);
             boolean isSubscription = subset.getBoolean("queue.isSubscription", false);
-            long expiration = subset.getLong("queue.expiration",1800000);
-            long maxLength = subset.getLong("queue.maxLength",-1);
+            long expiration = subset.getLong("queue.expiration", 1800000);
+            long maxLength = subset.getLong("queue.maxLength", -1);
             boolean deadLetterIsEnabled = subset.getBoolean("queue.deadLetterIsEnabled", true);
             String subscribedTo = isSubscription ? subset.getString("queue.subscribedTo", "") : queueName;
             String exchangeType = isSubscription ? "topic" : "direct";
@@ -79,24 +78,24 @@ class RabbitMQMessageConsumer implements MessageConsumer {
                 args.put("x-max-length", maxLength);
             }
 
-            if(expiration > 0){
+            if (expiration > 0) {
                 args.put("x-message-ttl", expiration);
             }
 
 
-            if(deadLetterIsEnabled){
+            if (deadLetterIsEnabled) {
                 channel.exchangeDeclare(DLQ, exchangeType, true, false, false, null);
-                args.put("x-dead-letter-exchange",DLQ);
+                args.put("x-dead-letter-exchange", DLQ);
             }
 
             String queue = channel.queueDeclare(queueName, true, false, false, args).getQueue();
 
             Map<String, String> filters = ConfigUtil.parseSimpleArrayAsMap(consumerName + ".queue.filters");
-            if(filters != null && !filters.isEmpty()){
+            if (filters != null && !filters.isEmpty()) {
                 for (String routingKey : filters.values()) {
                     channel.queueBind(queue, subscribedTo, routingKey);
                 }
-            }else{
+            } else {
                 channel.queueBind(queue, subscribedTo, "#");
             }
 
@@ -109,19 +108,13 @@ class RabbitMQMessageConsumer implements MessageConsumer {
 
     }
 
-
-
-
-
-
-
     @Override
     public Message receive() {
 
         try {
             QueueingConsumer.Delivery delivery = consumer.nextDelivery();
             GetResponse getResponse = new GetResponse(delivery.getEnvelope(), delivery.getProperties(), delivery.getBody(), 0);
-            RabbitMQMessage rabbitMQMessage = new RabbitMQMessage(getResponse,"");
+            RabbitMQMessage rabbitMQMessage = new RabbitMQMessage(getResponse, "");
             return rabbitMQMessage;
         } catch (InterruptedException e) {
             throw new QueueException("can't get new message: " + e, e);
@@ -134,26 +127,20 @@ class RabbitMQMessageConsumer implements MessageConsumer {
         try {
             QueueingConsumer.Delivery delivery = consumer.nextDelivery(timeout);
             GetResponse getResponse = new GetResponse(delivery.getEnvelope(), delivery.getProperties(), delivery.getBody(), 0);
-            RabbitMQMessage rabbitMQMessage = new RabbitMQMessage(getResponse,"");
+            RabbitMQMessage rabbitMQMessage = new RabbitMQMessage(getResponse, "");
             return rabbitMQMessage;
         } catch (InterruptedException e) {
             throw new QueueException("can't get new message: " + e, e);
         }
     }
 
-    @Override
-    public void registerMessageHandler(MessageHandler messageHandler) {
-
+    public void registerMessageHandler(MessageHandler messageHandler, boolean autoAck) {
         try {
-            if (messageHandler instanceof Consumer) {
+            if (messageHandler instanceof AbstractRabbitMQMessageHandler) {
                 String consumerTag = FlowContextFactory.getFlowContext() != null ? FlowContextFactory.getFlowContext().getUniqueId() : "N/A";
-                RabbitMQMessagingFactory.getChannel().basicConsume(queueName, true, consumerTag, (Consumer) messageHandler);
-//                org.RabbitMQ.api.core.client.MessageHandler handler = (org.RabbitMQ.api.core.client.MessageHandler) messageHandler;
-//                consumerInfo.put(consumerName,messageHandler);
-//                List<ClientConsumer> consumer = getConsumer(true);
-//                for (ClientConsumer clientConsumer : consumer) {
-//                    clientConsumer.setMessageHandler(handler);
-//                }
+                Channel channel = RabbitMQMessagingFactory.getChannel();
+                ((AbstractRabbitMQMessageHandler) messageHandler).setChannelNumber(channel.getChannelNumber());
+                channel.basicConsume(queueName, autoAck, consumerTag, (Consumer) messageHandler);
             } else {
                 throw new IllegalArgumentException("Using RabbitMQ consumerThreadLocal you must provide a valid RabbitMQ massage handler");
             }
@@ -162,6 +149,19 @@ class RabbitMQMessageConsumer implements MessageConsumer {
 //            LOGGER.error("can't register a MessageHandler: {}", e);
             throw new QueueException("can't register a MessageHandler: " + e, e);
         }
+    }
+
+    public void ackMessage(Integer channelNumber, Long deliveryTag) {
+        RabbitMQMessagingFactory.ackMessage(channelNumber, deliveryTag);
+    }
+
+    public void nackMessage(Integer channelNumber, Long deliveryTag) {
+        RabbitMQMessagingFactory.nackMessage(channelNumber, deliveryTag);
+    }
+
+    @Override
+    public void registerMessageHandler(MessageHandler messageHandler) {
+        registerMessageHandler(messageHandler, true);
     }
 
     @Override
