@@ -25,6 +25,8 @@ import com.cisco.oss.foundation.string.utils.BoyerMoore;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
@@ -32,6 +34,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.util.*;
 
+@Component
+@Order(40)
 public class MonitoringFilter extends AbstractInfraHttpFilter {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(MonitoringFilter.class);
@@ -44,12 +48,24 @@ public class MonitoringFilter extends AbstractInfraHttpFilter {
     private boolean uniqueUriMonitoringEnabled = false;
     private List<BoyerMoore> boyers = new ArrayList<BoyerMoore>();
 
-    public MonitoringFilter(String serviceName, HttpThreadPool threadPool) {
-        super(serviceName);
+    public MonitoringFilter() {
+        super();
         description = ConfigurationFactory.getConfiguration().getString(serviceName + ".http.serviceDescription", "DEFAULT_DESCRIPTION");
         port = ConfigurationFactory.getConfiguration().getInt(serviceName + ".http.port", 8080);
         serviceDetails = new ServiceDetails(description, serviceName, "HTTP", port);
+        uniqueUriMonitoringEnabled = ConfigurationFactory.getConfiguration().getBoolean(serviceName + ".http.monitoringFilter.uniqueUriMonitoringEnabled", false);
+        if (!uniqueUriMonitoringEnabled) {
+            populateBoyersList();
+        }
+        MonitoringAgentFactory.getInstance().register();
+    }
+
+    public MonitoringFilter(String serviceName, HttpThreadPool threadPool) {
+        super(serviceName);
         this.threadPool = threadPool;
+        description = ConfigurationFactory.getConfiguration().getString(serviceName + ".http.serviceDescription", "DEFAULT_DESCRIPTION");
+        port = ConfigurationFactory.getConfiguration().getInt(serviceName + ".http.port", 8080);
+        serviceDetails = new ServiceDetails(description, serviceName, "HTTP", port);
         uniqueUriMonitoringEnabled = ConfigurationFactory.getConfiguration().getBoolean(serviceName + ".http.monitoringFilter.uniqueUriMonitoringEnabled", false);
         if (!uniqueUriMonitoringEnabled) {
             populateBoyersList();
@@ -98,7 +114,7 @@ public class MonitoringFilter extends AbstractInfraHttpFilter {
             LOGGER.trace("transaction method name is: {}", tempMethodName);
 
 
-            CommunicationInfo.getCommunicationInfo().transactionStarted(serviceDetails, tempMethodName, threadPool.getThreads());
+            CommunicationInfo.getCommunicationInfo().transactionStarted(serviceDetails, tempMethodName, threadPool != null ? threadPool.getThreads() : -1);
 
         } catch (Exception e) {
             LOGGER.error("can't report monitoring data as it has failed on:" + e);

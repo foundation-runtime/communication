@@ -20,6 +20,8 @@ import com.cisco.oss.foundation.flowcontext.FlowContextFactory;
 import com.google.common.base.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -32,13 +34,19 @@ import java.io.IOException;
 /**
  * Thia filter will extract the flow context from a known header and create it if ti doesn't exist.
  */
+@Component
+@Order(10)
 public class AsyncHandlerSupportFilter extends AbstractInfraHttpFilter {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(AsyncHandlerSupportFilter.class);
 
-	public AsyncHandlerSupportFilter(String serviceName){
-		super(serviceName);
+	public AsyncHandlerSupportFilter(){
+		super();
 	}
+
+    public AsyncHandlerSupportFilter(String serviceName){
+        super(serviceName);
+    }
 
 	
 	@Override

@@ -20,6 +20,8 @@ import com.cisco.oss.foundation.http.server.AbstractInfraHttpFilter;
 import org.eclipse.jetty.io.EofException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletResponse;
@@ -28,11 +30,17 @@ import java.io.IOException;
 /**
  * filter that catches all errors and prevents stack trace or other sensitive data from leaking to the client
  */
+@Component
+@Order(30)
 public class ErrorHandlingFilter extends AbstractInfraHttpFilter {
 
 	private final static Logger LOGGER = LoggerFactory.getLogger(ErrorHandlingFilter.class);
 
-	public ErrorHandlingFilter(String serviceName) {
+	public ErrorHandlingFilter() {
+		super();
+	}
+
+    public ErrorHandlingFilter(String serviceName) {
 		super(serviceName);
 	}
 

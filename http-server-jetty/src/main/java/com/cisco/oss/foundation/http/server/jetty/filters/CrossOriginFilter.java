@@ -24,6 +24,7 @@ import com.google.common.collect.Lists;
 import org.apache.commons.configuration.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import javax.servlet.*;
 import java.io.IOException;
@@ -34,6 +35,7 @@ import java.util.List;
 /**
  * implementation of CORS - http://en.wikipedia.org/wiki/Cross-origin_resource_sharing
  */
+@Component
 public class CrossOriginFilter extends AbstractInfraHttpFilter {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(CrossOriginFilter.class);
@@ -42,7 +44,16 @@ public class CrossOriginFilter extends AbstractInfraHttpFilter {
 	
 	private String serviceName;
 	
-	public CrossOriginFilter(String serviceName){
+	public CrossOriginFilter(){
+		super();
+		try {
+			crossOriginFilter.init(new CrossOriginFilterConfig(serviceName));
+		} catch (ServletException e) {
+			LOGGER.error("can't init crosee origin filter", e);
+		}
+	}
+
+    public CrossOriginFilter(String serviceName){
 		super(serviceName);
 		try {
 			crossOriginFilter.init(new CrossOriginFilterConfig(serviceName));

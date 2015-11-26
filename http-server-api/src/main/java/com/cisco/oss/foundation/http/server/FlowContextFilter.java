@@ -20,6 +20,8 @@ import com.cisco.oss.foundation.flowcontext.FlowContextFactory;
 import com.google.common.base.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
@@ -29,15 +31,21 @@ import java.io.IOException;
 /**
  * Thia filter will extract the flow context from a known header and create it if ti doesn't exist.
  */
+@Component
+@Order(20)
 public class FlowContextFilter extends AbstractInfraHttpFilter {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(FlowContextFilter.class);
 	
+	public FlowContextFilter(){
+		super();
+	}
+
 	public FlowContextFilter(String serviceName){
 		super(serviceName);
 	}
 
-	
+
 	@Override
 	public void doFilterImpl(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
 

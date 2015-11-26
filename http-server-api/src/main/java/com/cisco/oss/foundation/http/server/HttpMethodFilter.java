@@ -20,6 +20,8 @@ import com.cisco.oss.foundation.configuration.ConfigurationFactory;
 import org.apache.commons.configuration.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -33,12 +35,20 @@ import java.util.Iterator;
 import java.util.Locale;
 import java.util.Set;
 
+@Component
+@Order(50)
 public class HttpMethodFilter extends AbstractInfraHttpFilter {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(HttpMethodFilter.class);
 	private final Set<String> methods = new HashSet<String>(5);
 	
-	public HttpMethodFilter(String serviceName){
+	public HttpMethodFilter(){
+		super();
+		methods.add("TRACE");
+		updateAllowedMethodsFromConfig(serviceName);
+	}
+
+    public HttpMethodFilter(String serviceName){
 		super(serviceName);
 		methods.add("TRACE");
 		updateAllowedMethodsFromConfig(serviceName);

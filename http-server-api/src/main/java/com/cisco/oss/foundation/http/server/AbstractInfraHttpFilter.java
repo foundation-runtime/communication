@@ -18,6 +18,8 @@ package com.cisco.oss.foundation.http.server;
 
 import com.cisco.oss.foundation.configuration.ConfigurationFactory;
 import org.apache.commons.configuration.Configuration;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
@@ -32,26 +34,27 @@ import java.util.Map;
  * @author Yair Ogen
  * 
  */
+@Component
 public abstract class AbstractInfraHttpFilter implements Filter {
 
 
 
-	protected String serviceName = null;
+	@Value("${spring.application.name}")
+	protected String serviceName = null;//ConfigurationFactory.getConfiguration().getString("spring.application.name");
 	private String enabledKey = null;
 	private static boolean filterConfigurationDynamicRefreshEnabled = ConfigurationFactory.getConfiguration().getBoolean("http.filterConfigurationDynamicRefreshEnabled", false);
 	protected Map<String, String> filterConfigCache = new HashMap<String, String>();
 	private Configuration configuration = ConfigurationFactory.getConfiguration();
 
-	public AbstractInfraHttpFilter(String serviceName) {
-		this.serviceName = serviceName;
-		this.enabledKey = serviceName + "." + getKillSwitchFlag();
-        String defaultValue = isEnabledByDefault() + "";
-        boolean enabled = getConfigValue(enabledKey, Boolean.valueOf(defaultValue));
-
+	public AbstractInfraHttpFilter() {
+    }
+    public AbstractInfraHttpFilter(String serviceName) {
+        this.serviceName = serviceName;
     }
 
 	@Override
 	public void init(FilterConfig filterConfig) throws ServletException {
+        this.enabledKey = serviceName + "." + getKillSwitchFlag();
 	}
 
 	@Override

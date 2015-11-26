@@ -18,6 +18,7 @@ package com.cisco.oss.foundation.http.server;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -30,45 +31,50 @@ import java.io.IOException;
 /**
  * This filter replies to PING request if request contains
  * <code>NDS-Proxy-Ping</code> header.
- * 
+ *
  * @author Dima Mirkin
  * @author Yair Ogen
  */
+@Component
 public class PingFilter extends AbstractInfraHttpFilter {
 
-	private static final String PING_HEADER = "x-Ping";
-	private final static Logger LOGGER = LoggerFactory.getLogger(PingFilter.class);
-	
-	public PingFilter(String serviceName) {
-		super(serviceName);
-	}
+    private static final String PING_HEADER = "x-Ping";
+    private final static Logger LOGGER = LoggerFactory.getLogger(PingFilter.class);
+
+    public PingFilter() {
+        super();
+    }
+
+    public PingFilter(String serviceName) {
+        super(serviceName);
+    }
 
 
-	@Override
-	public void doFilterImpl(final ServletRequest request, final ServletResponse response, final FilterChain chain) throws IOException, ServletException {
-        boolean enableLogging = Boolean.valueOf(getConfigValue(serviceName + "http.pingFilter.enableLogging","false"));
-		final HttpServletRequest httpRequest = (HttpServletRequest) request;
-		String pingHeader = getConfigValue(serviceName + "http.proxyPingFilterHeader", PING_HEADER);
-		if (null == httpRequest.getHeader(pingHeader)) {
-			// if not ping request - do nothing, just forward through the chain
-			chain.doFilter(request, response);
-		} else {
+    @Override
+    public void doFilterImpl(final ServletRequest request, final ServletResponse response, final FilterChain chain) throws IOException, ServletException {
+        boolean enableLogging = Boolean.valueOf(getConfigValue(serviceName + "http.pingFilter.enableLogging", "false"));
+        final HttpServletRequest httpRequest = (HttpServletRequest) request;
+        String pingHeader = getConfigValue(serviceName + "http.proxyPingFilterHeader", PING_HEADER);
+        if (null == httpRequest.getHeader(pingHeader)) {
+            // if not ping request - do nothing, just forward through the chain
+            chain.doFilter(request, response);
+        } else {
             if (enableLogging) {
                 LOGGER.debug("HTTP Ping received from " + getOriginalClient(httpRequest));
             }
             ((HttpServletResponse) response).setDateHeader("Date", System.currentTimeMillis());
             ((HttpServletResponse) response).setStatus(HttpServletResponse.SC_OK);
-		}
-	}
-	
-	@Override
-	protected String getKillSwitchFlag() {
-		return "http.pingFilter.isEnabled";
-	}
-	
-	@Override
-	protected boolean isEnabledByDefault() {
-		return true;
-	}
+        }
+    }
+
+    @Override
+    protected String getKillSwitchFlag() {
+        return "http.pingFilter.isEnabled";
+    }
+
+    @Override
+    protected boolean isEnabledByDefault() {
+        return true;
+    }
 
 }

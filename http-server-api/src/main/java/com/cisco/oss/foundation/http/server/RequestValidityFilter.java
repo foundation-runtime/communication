@@ -18,6 +18,8 @@ package com.cisco.oss.foundation.http.server;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -34,9 +36,15 @@ import java.io.IOException;
  * @author Yair Ogen
  * 
  */
+@Component
+@Order(60)
 public class RequestValidityFilter extends AbstractInfraHttpFilter {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(RequestValidityFilter.class);
+
+	public RequestValidityFilter() {
+		super();
+	}
 
 	public RequestValidityFilter(String serviceName) {
 		super(serviceName);

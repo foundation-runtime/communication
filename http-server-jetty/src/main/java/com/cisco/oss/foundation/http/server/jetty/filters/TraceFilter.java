@@ -20,6 +20,8 @@ import com.cisco.oss.foundation.flowcontext.FlowContextFactory;
 import com.cisco.oss.foundation.http.server.AbstractInfraHttpFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
@@ -31,9 +33,15 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+@Component
+@Order(80)
 public class TraceFilter extends AbstractInfraHttpFilter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TraceFilter.class);
+
+    public TraceFilter() {
+        super();
+    }
 
     public TraceFilter(String serviceName) {
         super(serviceName);
