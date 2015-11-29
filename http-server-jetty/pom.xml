@@ -63,7 +63,7 @@
         <logging-log4j-version>1.0.2-1</logging-log4j-version>
         <logging-api-version>1.0.2-1</logging-api-version>
         <jetty-version>9.3.6.v20151106</jetty-version>
-        <http-server-api-version>1.1.0-1-SNAPSHOT</http-server-api-version>
+        <http-server-api-version>1.1.0-1</http-server-api-version>
         <configuration-lib-version>1.0.3-1</configuration-lib-version>
         <monitoring-api-version>1.0.3-1</monitoring-api-version>
         <monitoring-jmx-lib-version>1.0.3-1</monitoring-jmx-lib-version>
