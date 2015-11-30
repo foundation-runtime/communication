@@ -203,11 +203,11 @@ public class RabbitMQMessagingFactory {
 
     }
 
-    static void ackMessage(Integer channelNumber, Long deliveryTag) {
+    public static void ackMessage(Integer channelNumber, Long deliveryTag) {
         messageAckQueue.add(new AckNackMessage(channelNumber, deliveryTag, true));
     }
 
-    static void nackMessage(Integer channelNumber, Long deliveryTag) {
+    public static void nackMessage(Integer channelNumber, Long deliveryTag) {
         messageAckQueue.add(new AckNackMessage(channelNumber, deliveryTag, false));
     }
 
