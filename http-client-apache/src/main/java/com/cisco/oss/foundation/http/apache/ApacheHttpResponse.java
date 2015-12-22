@@ -39,10 +39,12 @@ public class ApacheHttpResponse implements HttpResponse {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ApacheHttpResponse.class);
 
-    private org.apache.http.HttpResponse httpResponse = null;
+    protected org.apache.http.HttpResponse httpResponse = null;
     private URI requestUri = null;
     private byte[] responseBody;
     private boolean isClosed = false;
+
+    public ApacheHttpResponse(){}
 
     public ApacheHttpResponse(org.apache.http.HttpResponse httpResponse, URI requestUri, boolean autoCloseable) {
         this.httpResponse = httpResponse;
