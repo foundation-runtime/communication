@@ -30,20 +30,12 @@ import com.netflix.client.AbstractLoadBalancerAwareClient;
 import com.netflix.client.RequestSpecificRetryHandler;
 import com.netflix.client.config.DefaultClientConfigImpl;
 import com.netflix.client.config.IClientConfig;
-import com.netflix.client.http.*;
 import com.netflix.client.http.HttpRequest.Verb;
 import com.netflix.client.http.HttpResponse;
 import com.netflix.config.ConfigurationManager;
 import com.netflix.discovery.DefaultEurekaClientConfig;
 import com.netflix.discovery.DiscoveryManager;
 import com.netflix.discovery.EurekaClientConfig;
-import com.netflix.hystrix.HystrixCommand;
-import com.netflix.hystrix.HystrixCommandGroupKey;
-import com.netflix.hystrix.HystrixCommandKey;
-import com.netflix.hystrix.HystrixCommandProperties;
-import com.netflix.hystrix.strategy.HystrixPlugins;
-import com.netflix.hystrix.strategy.metrics.HystrixMetricsPublisher;
-import com.netflix.hystrix.strategy.metrics.HystrixMetricsPublisherDefault;
 import com.netflix.loadbalancer.BaseLoadBalancer;
 import com.netflix.loadbalancer.DynamicServerListLoadBalancer;
 import com.netflix.niws.loadbalancer.DiscoveryEnabledServer;
@@ -228,19 +220,19 @@ class ApacheNetflixHttpClient extends AbstractLoadBalancerAwareClient<com.netfli
 
     @Override
     public com.netflix.client.http.HttpResponse execute(final com.netflix.client.http.HttpRequest request, IClientConfig requestConfig) throws Exception {
-        HystrixCommand.Setter setter = HystrixCommand.Setter.withGroupKey(new HystrixCommandGroupKey() {
-            @Override
-            public String name() {
-                return getApiName();
-            }
-        });
-
-        HystrixCommandProperties.Setter commandPropertiesDefaults = HystrixCommandProperties.Setter();
-
-        setter.andCommandPropertiesDefaults(commandPropertiesDefaults);
-        HystrixCommand<com.netflix.client.http.HttpResponse> hystrixCommand = new HystrixCommand<com.netflix.client.http.HttpResponse>(setter) {
-            @Override
-            protected HttpResponse run() throws Exception {
+//        HystrixCommand.Setter setter = HystrixCommand.Setter.withGroupKey(new HystrixCommandGroupKey() {
+//            @Override
+//            public String name() {
+//                return getApiName();
+//            }
+//        });
+//
+//        HystrixCommandProperties.Setter commandPropertiesDefaults = HystrixCommandProperties.Setter();
+//
+//        setter.andCommandPropertiesDefaults(commandPropertiesDefaults);
+//        HystrixCommand<com.netflix.client.http.HttpResponse> hystrixCommand = new HystrixCommand<com.netflix.client.http.HttpResponse>(setter) {
+//            @Override
+//            protected HttpResponse run() throws Exception {
                 LOGGER.info("sending request: {}-{}", request.getVerb(), request.getUri());
                 URI requestUri = request.getUri();
                 org.apache.http.HttpRequest httpRequest = buildHttpUriRequest(request, joiner, requestUri);
@@ -250,10 +242,10 @@ class ApacheNetflixHttpClient extends AbstractLoadBalancerAwareClient<com.netfli
                 NetflixHttpResponse netflixHttpResponse = new NetflixHttpResponse(response, requestUri, autoCloseable);
                 LOGGER.info("got response status: {} for request: {}", netflixHttpResponse.getStatus(), netflixHttpResponse.getRequestedURI());
                 return netflixHttpResponse;
-            }
-        };
-
-        return hystrixCommand.execute();
+//            }
+//        };
+//
+//        return hystrixCommand.execute();
 
 
     }
@@ -305,9 +297,9 @@ class ApacheNetflixHttpClient extends AbstractLoadBalancerAwareClient<com.netfli
 
         loadBalancer.initWithNiwsConfig(clientConfig);
 
-        if (HystrixPlugins.getInstance().getMetricsPublisher() == null) {
-            HystrixPlugins.getInstance().registerMetricsPublisher(HystrixMetricsPublisherDefault.getInstance());
-        }
+//        if (HystrixPlugins.getInstance().getMetricsPublisher() == null) {
+//            HystrixPlugins.getInstance().registerMetricsPublisher(HystrixMetricsPublisherDefault.getInstance());
+//        }
 
         RequestConfig.Builder requestBuilder = RequestConfig.custom();
         requestBuilder = requestBuilder.setConnectTimeout(metadata.getConnectTimeout());
