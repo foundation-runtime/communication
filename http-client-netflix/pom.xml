@@ -215,6 +215,11 @@
         </dependency>-->
         <dependency>
             <groupId>com.cisco.oss.foundation</groupId>
+            <artifactId>http-client-apache</artifactId>
+            <version>1.2.0-3</version>
+        </dependency>
+        <dependency>
+            <groupId>com.cisco.oss.foundation</groupId>
             <artifactId>http-client-common</artifactId>
             <version>${http-client-common-version}</version>
         </dependency>

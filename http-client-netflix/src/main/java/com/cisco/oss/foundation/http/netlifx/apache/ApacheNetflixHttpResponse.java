@@ -27,12 +27,7 @@ public class ApacheNetflixHttpResponse extends ApacheHttpResponse implements com
     public ApacheNetflixHttpResponse(org.apache.http.HttpResponse httpResponse, URI requestUri, boolean autoCloseable) {
         super(httpResponse, requestUri, autoCloseable);
     }
-    public ApacheNetflixHttpResponse(com.netflix.client.http.HttpResponse netflixHttpResponse) {
-        super();
-        this.netflixHttpResponse = netflixHttpResponse;
-    }
-
-//    @Override
+    //    @Override
 //    public int getStatus() {
 //        return httpResponse.getStatus();
 //    }
