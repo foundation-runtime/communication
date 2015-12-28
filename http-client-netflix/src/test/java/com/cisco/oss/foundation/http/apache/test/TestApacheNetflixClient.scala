@@ -26,7 +26,7 @@ import com.cisco.oss.foundation.http.api.test.{BasicHttpTestUtil, BasicHttpsTest
 import com.cisco.oss.foundation.loadbalancer.{LoadBalancerStrategy, NoActiveServersException, RequestTimeoutException}
 import org.apache.commons.configuration.{Configuration, PropertiesConfiguration}
 import org.apache.http.conn.ssl.X509HostnameVerifier
-import org.junit.{Assert, Test}
+import org.junit.{Ignore, Assert, Test}
 import org.slf4j.LoggerFactory
 
 /**
@@ -53,6 +53,7 @@ class TestApacheNetflixClient {
   val LOGGER = LoggerFactory.getLogger(classOf[TestApacheNetflixClient])
 
 
+  @Ignore
   @Test
   def realServerInvokePostRoudRobin() {
 

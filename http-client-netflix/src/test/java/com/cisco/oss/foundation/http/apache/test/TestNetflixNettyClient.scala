@@ -41,7 +41,7 @@ import io.netty.buffer.ByteBuf
 import io.reactivex.netty.protocol.http.client.{HttpClientResponse, HttpClientRequest}
 import org.apache.commons.configuration.{AbstractConfiguration, Configuration, PropertiesConfiguration}
 import org.apache.http.conn.ssl.X509HostnameVerifier
-import org.junit.{Assert, Test}
+import org.junit.{Ignore, Assert, Test}
 import org.slf4j.LoggerFactory
 import rx.exceptions.OnErrorNotImplementedException
 import rx.schedulers.Schedulers
@@ -59,6 +59,7 @@ class TestNetflixNettyClient {
 
   private val body: String = "hello1"
 
+  @Ignore
   @Test
   def testWithFactory() ={
 
@@ -90,6 +91,7 @@ class TestNetflixNettyClient {
     Assert.assertEquals(true,response.isSuccess)
   }
 
+  @Ignore
   @Test
   def testGet(): Unit ={
     FlowContextFactory.createFlowContext()
@@ -109,6 +111,7 @@ class TestNetflixNettyClient {
   }
 
 
+  @Ignore
   @Test
   def realServerInvokePostRoudRobin() {
 //    val strategy: CABFileChangedReloadingStrategy = new CABFileChangedReloadingStrategy
