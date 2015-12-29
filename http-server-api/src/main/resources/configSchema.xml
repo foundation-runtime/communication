@@ -35,6 +35,12 @@
                         <PrimitiveValue value="true"/>
                     </DefaultValue>
                 </StructureMemberDefinition>
+                <StructureMemberDefinition name="http.systemVersionFilter.isEnabled" type="BOOLEAN" advanced="true"
+                                           description="Determines whether the 'SystemVersionFilter' is enabled or not">
+                    <DefaultValue>
+                        <PrimitiveValue value="true"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
                 <StructureMemberDefinition name="http.errorHandlingFilter.isEnabled" type="BOOLEAN" advanced="true"
                                            description="Determines whether the 'ErrorHandlerFilter' is enabled or not">
                     <DefaultValue>
