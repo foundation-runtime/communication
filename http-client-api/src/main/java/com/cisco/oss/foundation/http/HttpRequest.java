@@ -19,7 +19,7 @@ package com.cisco.oss.foundation.http;
 import com.cisco.oss.foundation.flowcontext.FlowContext;
 import com.cisco.oss.foundation.flowcontext.FlowContextFactory;
 import com.cisco.oss.foundation.loadbalancer.ClientRequest;
-import com.cisco.oss.foundation.serverversion.ServerVersionFactory;
+import com.cisco.oss.foundation.systemversion.SystemVersionFactory;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 
@@ -244,7 +244,7 @@ public class HttpRequest implements ClientRequest{
             request.flowContext = FlowContextFactory.getFlowContext();
             request.headers.removeAll("FLOW_CONTEXT");
             request.headers.put("FLOW_CONTEXT", FlowContextFactory.serializeNativeFlowContext());
-            request.headers.put(ServerVersionFactory.SERVER_VERSION, ServerVersionFactory.getServerVersion());
+            request.headers.put(SystemVersionFactory.SYSTEM_VERSION, SystemVersionFactory.getSystemVersion());
             return request;
         }
     }
