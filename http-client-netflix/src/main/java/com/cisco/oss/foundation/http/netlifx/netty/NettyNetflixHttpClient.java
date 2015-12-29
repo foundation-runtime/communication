@@ -70,7 +70,6 @@ class NettyNetflixHttpClient implements HttpClient<HttpRequest, NettyNetflixHttp
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NettyNetflixHttpClient.class);
     private HostnameVerifier hostnameVerifier;
-//    public static ThreadLocal<HttpContext> HTTP_CONTEXT_THREAD_LOCAL = new ThreadLocal<>();
     protected InternalServerProxyMetadata metadata = loadServersMetadataConfiguration();
     protected boolean followRedirects = false;
     protected boolean autoEncodeUri = true;
@@ -100,8 +99,6 @@ class NettyNetflixHttpClient implements HttpClient<HttpRequest, NettyNetflixHttp
     @Override
     public NettyNetflixHttpResponse execute(HttpRequest request) {
 
-//        throw new UnsupportedOperationException("execute is currently not supported");
-
         try {
             if (enableLoadBalancing) {
                 return executeWithLoadBalancer(request);
@@ -123,17 +120,11 @@ class NettyNetflixHttpClient implements HttpClient<HttpRequest, NettyNetflixHttp
     @Override
     public NettyNetflixHttpResponse executeWithLoadBalancer(HttpRequest request) {
         return executeDirect(request);
-////        throw new UnsupportedOperationException("executeWithLoadBalancer is currently not supported");
-//        try {
-//            return ((NettyNetflixHttpResponse)executeWithLoadBalancer(buildNetflixHttpRequest(request,joiner), clientConfig));
-//        } catch (Exception e) {
-//            throw new ClientException(e.toString(), e);
-//        }
+
     }
 
     @Override
     public void executeWithLoadBalancer(HttpRequest request, final ResponseCallback<NettyNetflixHttpResponse> responseCallback) {
-//        throw new UnsupportedOperationException("ASYNC Client is currently not supported");
         HttpClientRequest<ByteBuf> httpRequest = buildNetflixHttpRequest(request, joiner);
         rx.Observable<HttpClientResponse<ByteBuf>> responseObservable = httpClient.submit(httpRequest, retryHandler, clientConfig);
 
@@ -168,11 +159,6 @@ class NettyNetflixHttpClient implements HttpClient<HttpRequest, NettyNetflixHttp
 
         clientConfig = new DefaultClientConfigImpl();
         clientConfig.loadProperties(getApiName());
-//        clientConfig.set(CommonClientConfigKey.NIWSServerListClassName, DiscoveryEnabledNIWSServerList.class.getName());
-//        clientConfig.set(IClientConfigKey.Keys.DeploymentContextBasedVipAddresses, metadata.getServiceName());
-//        clientConfig.set(CommonClientConfigKey.NFLoadBalancerRuleClassName, RoundRobinRule.class.getName());
-//        clientConfig.set(CommonClientConfigKey.NFLoadBalancerPingClassName, NIWSDiscoveryPing.class.getName());
-//        clientConfig.set(CommonClientConfigKey.VipAddressResolverClassName, SimpleVipAddressResolver.class.getName());
 
         EurekaInstanceConfig eurekaInstanceConfig = new MyDataCenterInstanceConfig(getApiName());
         EurekaClientConfig eurekaClientConfig = new DefaultEurekaClientConfig(getApiName() + ".");
@@ -184,16 +170,6 @@ class NettyNetflixHttpClient implements HttpClient<HttpRequest, NettyNetflixHttp
 
         retryHandler = new NettyNetflixRetryHandler(metadata);
 
-//        if (HystrixPlugins.getInstance().getMetricsPublisher() == null) {
-//            HystrixPlugins.getInstance().registerMetricsPublisher(HystrixMetricsPublisherDefault.getInstance());
-//        }
-
-//        RequestConfig.Builder requestBuilder = RequestConfig.custom();
-//        requestBuilder = requestBuilder.setConnectTimeout(metadata.getConnectTimeout());
-//        requestBuilder = requestBuilder.setSocketTimeout(metadata.getReadTimeout());
-//        requestBuilder = requestBuilder.setStaleConnectionCheckEnabled(metadata.isStaleConnectionCheckEnabled());
-//
-//        RequestConfig requestConfig = requestBuilder.build();
 
         boolean addSslSupport = StringUtils.isNotEmpty(metadata.getKeyStorePath()) && StringUtils.isNotEmpty(metadata.getKeyStorePassword());
 
@@ -204,107 +180,6 @@ class NettyNetflixHttpClient implements HttpClient<HttpRequest, NettyNetflixHttp
         autoEncodeUri = metadata.isAutoEncodeUri();
         followRedirects = metadata.isFollowRedirects();
 
-//        HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
-//
-//        SSLContext sslContext = null;
-//
-//        try {
-//
-//            String keystoreType = "JKS";
-//            if (addSslSupport && addTrustSupport) {
-//
-//                KeyStore keyStore = KeyStore.getInstance(keystoreType);
-//                keyStore.load(new FileInputStream(metadata.getKeyStorePath()), metadata.getKeyStorePassword().toCharArray());
-//
-//                KeyStore trustStore = KeyStore.getInstance(keystoreType);
-//                trustStore.load(new FileInputStream(metadata.getTrustStorePath()), metadata.getTrustStorePassword().toCharArray());
-//
-//                sslContext = SSLContexts.custom()
-//                        .useProtocol("TLS")
-//                        .loadKeyMaterial(keyStore, metadata.getKeyStorePassword().toCharArray())
-//                        .loadTrustMaterial(trustStore, null)
-//                        .build();
-//
-//            } else if (addSslSupport) {
-//
-//                TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-//
-//                KeyStore keyStore = KeyStore.getInstance(keystoreType);
-//                keyStore.load(new FileInputStream(metadata.getKeyStorePath()), metadata.getKeyStorePassword().toCharArray());
-//
-//                tmf.init(keyStore);
-//
-//
-//                sslContext = SSLContexts.custom()
-//                        .useProtocol("SSL")
-//                        .loadKeyMaterial(keyStore, metadata.getKeyStorePassword().toCharArray())
-//                        .build();
-//
-//                sslContext.init(null, tmf.getTrustManagers(), null);
-//
-//                SSLConnectionSocketFactory sf = new SSLConnectionSocketFactory(sslContext, hostnameVerifier);
-//
-//                httpClientBuilder.setSSLSocketFactory(sf);
-//
-//
-//            } else if (addTrustSupport) {
-//
-//                KeyStore trustStore = KeyStore.getInstance(keystoreType);
-//                trustStore.load(new FileInputStream(metadata.getTrustStorePath()), metadata.getTrustStorePassword().toCharArray());
-//
-//                sslContext = SSLContexts.custom()
-//                        .useProtocol("TLS")
-//                        .loadTrustMaterial(trustStore, null)
-//                        .build();
-//
-//            }
-//
-//            if (addSslSupport | addTrustSupport) {
-//                SSLContext.setDefault(sslContext);
-//                httpClientBuilder.setSslcontext(sslContext);
-//            }
-//
-//
-//        } catch (Exception e) {
-//            LOGGER.error("can't set TLS Support. Error is: {}", e, e);
-//        }
-//
-//
-//        httpClientBuilder.setMaxConnPerRoute(metadata.getMaxConnectionsPerAddress())
-//                .setMaxConnTotal(metadata.getMaxConnectionsTotal())
-//                .setDefaultRequestConfig(requestConfig)
-//                .evictExpiredConnections()
-//                .evictIdleConnections(metadata.getIdleTimeout(), TimeUnit.MILLISECONDS)
-//                .setKeepAliveStrategy(new InfraConnectionKeepAliveStrategy(metadata.getIdleTimeout()));
-//
-//
-//        HttpAsyncClientBuilder httpAsyncClientBuilder = HttpAsyncClients.custom();
-//
-//        httpAsyncClientBuilder.setDefaultRequestConfig(requestConfig)
-//                .setMaxConnPerRoute(metadata.getMaxConnectionsPerAddress())
-//                .setMaxConnTotal(metadata.getMaxConnectionsTotal())
-//                .setKeepAliveStrategy(new InfraConnectionKeepAliveStrategy(metadata.getIdleTimeout()))
-//                .setSSLContext(sslContext);
-//
-//        if (metadata.isDisableCookies()) {
-//            httpClientBuilder.disableCookieManagement();
-//            httpAsyncClientBuilder.disableCookieManagement();
-//        }
-//
-//        if (hostnameVerifier != null) {
-//            httpClientBuilder.setSSLHostnameVerifier(hostnameVerifier);
-//            httpAsyncClientBuilder.setSSLHostnameVerifier(hostnameVerifier);
-//        }
-//
-//        if (!followRedirects) {
-//            httpClientBuilder.disableRedirectHandling();
-//        }
-//
-//        httpClient = httpClientBuilder.build();
-//
-//        httpAsyncClient = httpAsyncClientBuilder.build();
-//
-//        httpAsyncClient.start();
 
     }
 
@@ -425,12 +300,6 @@ class NettyNetflixHttpClient implements HttpClient<HttpRequest, NettyNetflixHttp
         }
 
         InternalServerProxyMetadata metadata = new InternalServerProxyMetadata(readTimeout, connectTimeout, idleTimeout, maxConnectionsPerAddress, maxConnectionsTotal, maxQueueSizePerAddress, waitingTime, numberOfAttempts, retryDelay, hostAndPortPairs, keyStorePath, keyStorePassword, trustStorePath, trustStorePassword, followRedirects, autoCloseable, staleConnectionCheckEnabled, disableCookies, serviceDirectoryEnabled, serviceName, autoEncodeUri);
-//        metadata.getHostAndPortPairs().addAll(hostAndPortPairs);
-//        metadata.setReadTimeout(readTimeout);
-//        metadata.setConnectTimeout(connectTimeout);
-//        metadata.setNumberOfRetries(numberOfAttempts);
-//        metadata.setRetryDelay(retryDelay);
-//        metadata.setWaitingTime(waitingTime);
 
         return metadata;
 
@@ -439,37 +308,6 @@ class NettyNetflixHttpClient implements HttpClient<HttpRequest, NettyNetflixHttp
     //    @Override
     public void execute(HttpRequest request, ResponseCallback responseCallback, LoadBalancerStrategy loadBalancerStrategy, String apiName) {
         executeWithLoadBalancer(request, responseCallback);
-//        throw new UnsupportedOperationException("ASYNC Client is currently not supported");
-//        InternalServerProxy serverProxy = loadBalancerStrategy.getServerProxy(request);
-//        Throwable lastCaugtException = null;
-//
-//
-//        if (serverProxy == null) {
-//            // server proxy will be null if the configuration was not
-//            // configured properly
-//            // or if all the servers are passivated.
-//            loadBalancerStrategy.handleNullserverProxy(apiName, lastCaugtException);
-//        }
-//
-////        request = updateRequestUri((S)request, serverProxy);
-//
-//        if (request.isSilentLogging()) {
-//            LOGGER.trace("sending request: {}-{}", request.getHttpMethod(), request.getUri());
-//        } else {
-//            LOGGER.info("sending request: {}-{}", request.getHttpMethod(), request.getUri());
-//        }
-//
-//
-//        org.apache.http.HttpRequest httpRequest = null;
-//
-//        Joiner joiner = Joiner.on(",").skipNulls();
-//        URI requestUri = buildUri(request, joiner);
-//
-//        httpRequest = buildHttpUriRequest(request, joiner, requestUri);
-//
-//        HttpHost httpHost = new HttpHost(requestUri.getHost(), requestUri.getPort(), requestUri.getScheme());
-//
-//        httpAsyncClient.execute(httpHost, httpRequest, new FoundationFutureCallBack(this, request, responseCallback, serverProxy, loadBalancerStrategy, apiName));
 
     }
 
@@ -481,45 +319,6 @@ class NettyNetflixHttpClient implements HttpClient<HttpRequest, NettyNetflixHttp
         HttpClientRequest<ByteBuf> httpRequest = null;
         HttpMethod httpMethod = HttpMethod.valueOf(request.getHttpMethod().name());
 
-//        if (autoEncodeUri) {
-//            switch (request.getHttpMethod()) {
-//                case GET:
-//                    httpRequest = new HttpGet(requestUri);
-//                    break;
-//                case POST:
-//                    httpRequest = new HttpPost(requestUri);
-//                    break;
-//                case PUT:
-//                    httpRequest = new HttpPut(requestUri);
-//                    break;
-//                case DELETE:
-//                    httpRequest = new HttpDelete(requestUri);
-//                    break;
-//                case HEAD:
-//                    httpRequest = new HttpHead(requestUri);
-//                    break;
-//                case OPTIONS:
-//                    httpRequest = new HttpOptions(requestUri);
-//                    break;
-////                    case PATCH:
-////                        httpRequest = new HttpPatch(requestUri);
-////                        break;
-//                default:
-//                    throw new ClientException("You have to one of the REST verbs such as GET, POST etc.");
-//            }
-//        } else {
-//            switch (request.getVerb()) {
-//                case POST:
-//                case PUT:
-//                case DELETE:
-////                    case PATCH:
-////                        httpRequest = new BasicHttpEntityEnclosingRequest(request.getHttpMethod().method(), requestUri.toString());
-////                        break;
-//                default:
-//                    httpRequest = new BasicHttpRequest(request.getVerb().verb(), requestUri.toString());
-//            }
-//
-//        }
 
         URI uri = buildUri(request, joiner);
 
@@ -538,8 +337,6 @@ class NettyNetflixHttpClient implements HttpClient<HttpRequest, NettyNetflixHttp
             httpRequest.withHeader(key, value);
         }
 
-//        httpRequest.withHeader("FLOW_CONTEXT", FlowContextFactory.serializeNativeFlowContext());
-
         if (StringUtils.isNoneEmpty(request.getContentType())) {
             String contentType = request.getContentType();
             httpRequest.withHeader("Content-Type", contentType);
@@ -548,63 +345,6 @@ class NettyNetflixHttpClient implements HttpClient<HttpRequest, NettyNetflixHttp
         return httpRequest;
     }
 
-
-//    private static class FoundationFutureCallBack implements FutureCallback<org.apache.http.HttpResponse> {
-//        private ResponseCallback responseCallback;
-//        private InternalServerProxy serverProxy;
-//        private LoadBalancerStrategy loadBalancerStrategy;
-//        private String apiName;
-//        private HttpRequest request;
-//        private NettyNetflixHttpClient apacheHttpClient;
-//
-//
-//        private FoundationFutureCallBack(NettyNetflixHttpClient apacheHttpClient, HttpRequest request, ResponseCallback<ApacheHttpResponse> responseCallback, InternalServerProxy serverProxy, LoadBalancerStrategy loadBalancerStrategy, String apiName) {
-//            this.responseCallback = responseCallback;
-//            this.apacheHttpClient = apacheHttpClient;
-//            this.serverProxy = serverProxy;
-//            this.loadBalancerStrategy = loadBalancerStrategy;
-//            this.apiName = apiName;
-//            this.request = request;
-//        }
-//
-//        @Override
-//        public void completed(org.apache.http.HttpResponse response) {
-//
-//            serverProxy.setCurrentNumberOfAttempts(0);
-//            serverProxy.setFailedAttemptTimeStamp(0);
-//
-//            ApacheHttpResponse apacheHttpResponse = new ApacheHttpResponse(response, request.getUri(), apacheHttpClient.isAutoCloseable());
-//            if (request.isSilentLogging()) {
-//                LOGGER.trace("got response status: {} for request: {}", apacheHttpResponse.getStatus(), apacheHttpResponse.getRequestedURI());
-//            } else {
-//                LOGGER.info("got response status: {} for request: {}", apacheHttpResponse.getStatus(), apacheHttpResponse.getRequestedURI());
-//            }
-//            responseCallback.completed(apacheHttpResponse);
-//        }
-//
-//        @Override
-//        public void failed(Exception ex) {
-//
-//            try {
-//                loadBalancerStrategy.handleException(apiName, serverProxy, ex);
-//            } catch (Exception e) {
-//                LOGGER.error("Error running request {}. Error is: {}", request.getUri(), e);
-//                responseCallback.failed(e);
-//            }
-//
-//            try {
-//                apacheHttpClient.execute(request, responseCallback, loadBalancerStrategy, apiName);
-//            } catch (Throwable e) {
-////                result.getRequest().abort(e);
-//                responseCallback.failed(e);
-//            }
-//        }
-//
-//        @Override
-//        public void cancelled() {
-//            responseCallback.cancelled();
-//        }
-//    }
 
     private static class NettyNetflixRetryHandler implements RetryHandler {
         InternalServerProxyMetadata metadata = null;
