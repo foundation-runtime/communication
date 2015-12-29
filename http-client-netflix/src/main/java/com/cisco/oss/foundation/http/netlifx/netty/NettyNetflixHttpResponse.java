@@ -52,20 +52,21 @@ public class NettyNetflixHttpResponse implements HttpResponse {
 
     @Override
     public byte[] getResponse() {
-        ByteBuf buf = httpResponse.getContent().toBlocking().first();
-        byte[] bytes;
-        int offset;
-        int length = buf.readableBytes();
+        if(responseBody != null){
+            return responseBody;
+        }else{
 
-        if (buf.hasArray()) {
-            bytes = buf.array();
-            offset = buf.arrayOffset();
-        } else {
-            bytes = new byte[length];
-            buf.readBytes(bytes);
-            offset = 0;
+            ByteBuf buf = httpResponse.getContent().toBlocking().first();
+            int length = buf.readableBytes();
+
+            if (buf.hasArray()) {
+                responseBody = buf.array();
+            } else {
+                responseBody = new byte[length];
+                buf.readBytes(responseBody);
+            }
         }
-        return bytes;
+        return responseBody;
     }
 
     @Override
