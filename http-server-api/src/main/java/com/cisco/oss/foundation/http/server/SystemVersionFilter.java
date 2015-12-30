@@ -16,21 +16,22 @@
 
 package com.cisco.oss.foundation.http.server;
 
-import com.cisco.oss.foundation.flowcontext.FlowContextFactory;
 import com.cisco.oss.foundation.systemversion.SystemVersionFactory;
-import com.google.common.base.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-import javax.servlet.*;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
- * Thia filter will extract the flow context from a known header and create it if ti doesn't exist.
+ * Thia filter will extract the system version from a known header and create it if ti doesn't exist.
  */
 @Component
 @Order(11)
@@ -57,7 +58,7 @@ public class SystemVersionFilter extends AbstractInfraHttpFilter {
 			SystemVersionFactory.setSystemVersion(systemVersion);
 
 		} catch (Exception e) {
-			LOGGER.warn("problem setting flow context filter: " + e, e);
+			LOGGER.warn("problem setting system version filter: " + e, e);
 		}
 
         ((HttpServletResponse)response).setHeader(SystemVersionFactory.SYSTEM_VERSION, SystemVersionFactory.getSystemVersion());
