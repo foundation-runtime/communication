@@ -60,7 +60,7 @@ class TestNetflixNettyClient {
 
   private val body: String = "hello1"
 
-  //@Ignore
+  @Ignore
   @Test
   def testWithFactory() ={
 
@@ -93,7 +93,7 @@ class TestNetflixNettyClient {
     Assert.assertEquals(true,response.isSuccess)
   }
 
-  //@Ignore
+  @Ignore
   @Test
   def testGet(): Unit ={
     FlowContextFactory.createFlowContext()
