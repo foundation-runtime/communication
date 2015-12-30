@@ -27,6 +27,7 @@ import com.cisco.oss.foundation.http.api.test.{BasicHttpTestUtil, BasicHttpsTest
 import com.cisco.oss.foundation.http.netlifx.apache.ApacheNetflixHttpResponse
 import com.cisco.oss.foundation.http.netlifx.netty.NettyNetflixHttpClientFactory
 import com.cisco.oss.foundation.http.{HttpRequest}
+import com.cisco.oss.foundation.systemversion.SystemVersionFactory
 import io.netty.handler.codec.http.HttpMethod
 import com.netflix.appinfo.{MyDataCenterInstanceConfig, EurekaInstanceConfig}
 import com.netflix.client.{RetryHandler, IClientConfigAware}
@@ -59,11 +60,12 @@ class TestNetflixNettyClient {
 
   private val body: String = "hello1"
 
-  @Ignore
+  //@Ignore
   @Test
   def testWithFactory() ={
 
 
+    SystemVersionFactory.setSystemVersion("ALPHA")
     FlowContextFactory.createFlowContext()
 
     val request = HttpRequest.newBuilder()
@@ -91,7 +93,7 @@ class TestNetflixNettyClient {
     Assert.assertEquals(true,response.isSuccess)
   }
 
-  @Ignore
+  //@Ignore
   @Test
   def testGet(): Unit ={
     FlowContextFactory.createFlowContext()

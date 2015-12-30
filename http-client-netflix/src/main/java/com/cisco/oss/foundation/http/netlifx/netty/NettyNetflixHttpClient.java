@@ -70,7 +70,7 @@ class NettyNetflixHttpClient implements HttpClient<HttpRequest, NettyNetflixHttp
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NettyNetflixHttpClient.class);
     private HostnameVerifier hostnameVerifier;
-    protected InternalServerProxyMetadata metadata = loadServersMetadataConfiguration();
+    protected InternalServerProxyMetadata metadata = null;
     protected boolean followRedirects = false;
     protected boolean autoEncodeUri = true;
     private IClientConfig clientConfig = null;
@@ -80,11 +80,13 @@ class NettyNetflixHttpClient implements HttpClient<HttpRequest, NettyNetflixHttp
     BaseLoadBalancer loadBalancer = new DynamicServerListLoadBalancer<DiscoveryEnabledServer>();
     LoadBalancingHttpClient<ByteBuf, ByteBuf> httpClient = null;
     private RetryHandler retryHandler = null;
+    private boolean startEurekaClient = true;
 
     public NettyNetflixHttpClient(String apiName, Configuration configuration, boolean enableLoadBalancing, HostnameVerifier hostnameVerifier) {
         this.hostnameVerifier = hostnameVerifier;
         this.apiName = apiName;
         this.enableLoadBalancing = enableLoadBalancing;
+        this.metadata = loadServersMetadataConfiguration();
         configureClient();
     }
 
@@ -160,9 +162,11 @@ class NettyNetflixHttpClient implements HttpClient<HttpRequest, NettyNetflixHttp
         clientConfig = new DefaultClientConfigImpl();
         clientConfig.loadProperties(getApiName());
 
-        EurekaInstanceConfig eurekaInstanceConfig = new MyDataCenterInstanceConfig(getApiName());
-        EurekaClientConfig eurekaClientConfig = new DefaultEurekaClientConfig(getApiName() + ".");
-        DiscoveryManager.getInstance().initComponent(eurekaInstanceConfig, eurekaClientConfig);
+        if (DiscoveryManager.getInstance().getDiscoveryClient() == null && startEurekaClient) {
+            EurekaInstanceConfig eurekaInstanceConfig = new MyDataCenterInstanceConfig(getApiName());
+            EurekaClientConfig eurekaClientConfig = new DefaultEurekaClientConfig(getApiName() + ".");
+            DiscoveryManager.getInstance().initComponent(eurekaInstanceConfig, eurekaClientConfig);
+        }
 
         loadBalancer.initWithNiwsConfig(clientConfig);
 
@@ -266,6 +270,7 @@ class NettyNetflixHttpClient implements HttpClient<HttpRequest, NettyNetflixHttp
         String keyStorePassword = subset.getString("http." + LoadBalancerConstants.KEYSTORE_PASSWORD, "");
         String trustStorePath = subset.getString("http." + LoadBalancerConstants.TRUSTSTORE_PATH, "");
         String trustStorePassword = subset.getString("http." + LoadBalancerConstants.TRUSTSTORE_PASSWORD, "");
+        startEurekaClient = subset.getBoolean("http.startEurekaClient", true);
 
 
         final List<String> keys = new ArrayList<String>();

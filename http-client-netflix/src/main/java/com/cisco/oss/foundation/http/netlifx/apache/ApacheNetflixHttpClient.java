@@ -82,7 +82,9 @@ import java.util.concurrent.TimeUnit;
 class ApacheNetflixHttpClient extends AbstractLoadBalancerAwareClient<com.netflix.client.http.HttpRequest, com.netflix.client.http.HttpResponse> implements HttpClient<HttpRequest, ApacheNetflixHttpResponse> {
 
     static {
-        ConfigurationManager.install((AbstractConfiguration) ConfigurationFactory.getConfiguration());
+        if (!ConfigurationManager.isConfigurationInstalled()) {
+            ConfigurationManager.install((AbstractConfiguration) ConfigurationFactory.getConfiguration());
+        }
     }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ApacheNetflixHttpClient.class);
@@ -90,7 +92,7 @@ class ApacheNetflixHttpClient extends AbstractLoadBalancerAwareClient<com.netfli
     private CloseableHttpClient httpClient = null;
     private HostnameVerifier hostnameVerifier;
     public static ThreadLocal<HttpContext> HTTP_CONTEXT_THREAD_LOCAL = new ThreadLocal<>();
-    protected InternalServerProxyMetadata metadata = loadServersMetadataConfiguration();
+    protected InternalServerProxyMetadata metadata = null;
     protected boolean followRedirects = false;
     protected boolean autoEncodeUri = true;
     private IClientConfig clientConfig = null;
@@ -98,6 +100,7 @@ class ApacheNetflixHttpClient extends AbstractLoadBalancerAwareClient<com.netfli
     private String apiName = "HTTP";
     protected boolean enableLoadBalancing = true;
     BaseLoadBalancer loadBalancer = new DynamicServerListLoadBalancer<DiscoveryEnabledServer>();
+    private boolean startEurekaClient = true;
 
     public boolean isAutoCloseable() {
         return autoCloseable;
@@ -265,6 +268,7 @@ class ApacheNetflixHttpClient extends AbstractLoadBalancerAwareClient<com.netfli
         this.hostnameVerifier = hostnameVerifier;
         this.apiName = apiName;
         this.enableLoadBalancing = enableLoadBalancing;
+        this.metadata = loadServersMetadataConfiguration();
         configureClient();
     }
 
@@ -273,6 +277,7 @@ class ApacheNetflixHttpClient extends AbstractLoadBalancerAwareClient<com.netfli
         this.hostnameVerifier = hostnameVerifier;
         this.apiName = apiName;
         this.enableLoadBalancing = enableLoadBalancing;
+        this.metadata = loadServersMetadataConfiguration();
         configureClient();
     }
 
@@ -301,9 +306,11 @@ class ApacheNetflixHttpClient extends AbstractLoadBalancerAwareClient<com.netfli
 //        clientConfig.set(CommonClientConfigKey.NFLoadBalancerPingClassName, NIWSDiscoveryPing.class.getName());
 //        clientConfig.set(CommonClientConfigKey.VipAddressResolverClassName, SimpleVipAddressResolver.class.getName());
 
-        EurekaInstanceConfig eurekaInstanceConfig = new MyDataCenterInstanceConfig(getApiName());
-        EurekaClientConfig eurekaClientConfig = new DefaultEurekaClientConfig(getApiName() + ".");
-        DiscoveryManager.getInstance().initComponent(eurekaInstanceConfig, eurekaClientConfig);
+        if (DiscoveryManager.getInstance().getDiscoveryClient() == null && startEurekaClient) {
+            EurekaInstanceConfig eurekaInstanceConfig = new MyDataCenterInstanceConfig(getApiName());
+            EurekaClientConfig eurekaClientConfig = new DefaultEurekaClientConfig(getApiName() + ".");
+            DiscoveryManager.getInstance().initComponent(eurekaInstanceConfig, eurekaClientConfig);
+        }
 
         loadBalancer.initWithNiwsConfig(clientConfig);
 
@@ -521,6 +528,7 @@ class ApacheNetflixHttpClient extends AbstractLoadBalancerAwareClient<com.netfli
         String keyStorePassword = subset.getString("http." + LoadBalancerConstants.KEYSTORE_PASSWORD, "");
         String trustStorePath = subset.getString("http." + LoadBalancerConstants.TRUSTSTORE_PATH, "");
         String trustStorePassword = subset.getString("http." + LoadBalancerConstants.TRUSTSTORE_PASSWORD, "");
+        startEurekaClient = subset.getBoolean("http.startEurekaClient", true);
 
 
         final List<String> keys = new ArrayList<String>();
