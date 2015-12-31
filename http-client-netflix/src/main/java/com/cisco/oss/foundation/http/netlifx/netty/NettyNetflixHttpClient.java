@@ -17,9 +17,7 @@
 package com.cisco.oss.foundation.http.netlifx.netty;
 
 import com.cisco.oss.foundation.configuration.ConfigurationFactory;
-import com.cisco.oss.foundation.flowcontext.FlowContextFactory;
 import com.cisco.oss.foundation.http.*;
-import com.cisco.oss.foundation.loadbalancer.InternalServerProxy;
 import com.cisco.oss.foundation.loadbalancer.LoadBalancerConstants;
 import com.cisco.oss.foundation.loadbalancer.LoadBalancerStrategy;
 import com.google.common.base.Joiner;
@@ -34,15 +32,11 @@ import com.netflix.discovery.DiscoveryManager;
 import com.netflix.discovery.EurekaClientConfig;
 import com.netflix.loadbalancer.BaseLoadBalancer;
 import com.netflix.loadbalancer.DynamicServerListLoadBalancer;
-import com.netflix.loadbalancer.reactive.ExecutionContext;
-import com.netflix.loadbalancer.reactive.ExecutionInfo;
-import com.netflix.loadbalancer.reactive.ExecutionListener;
 import com.netflix.niws.loadbalancer.DiscoveryEnabledServer;
 import com.netflix.ribbon.transport.netty.RibbonTransport;
 import com.netflix.ribbon.transport.netty.http.LoadBalancingHttpClient;
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.HttpMethod;
-import io.reactivex.netty.RxNetty;
 import io.reactivex.netty.protocol.http.client.HttpClientRequest;
 import io.reactivex.netty.protocol.http.client.HttpClientResponse;
 import org.apache.commons.configuration.AbstractConfiguration;
@@ -70,7 +64,6 @@ class NettyNetflixHttpClient implements HttpClient<HttpRequest, NettyNetflixHttp
         if (!ConfigurationManager.isConfigurationInstalled()) {
             ConfigurationManager.install((AbstractConfiguration) ConfigurationFactory.getConfiguration());
         }
-//        RxNetty.useEventLoopProvider(new InfraSingleNioLoopProvider());
     }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NettyNetflixHttpClient.class);
@@ -175,38 +168,9 @@ class NettyNetflixHttpClient implements HttpClient<HttpRequest, NettyNetflixHttp
 
         loadBalancer.initWithNiwsConfig(clientConfig);
 
-        List<ExecutionListener<HttpClientRequest<ByteBuf>, HttpClientResponse<ByteBuf>>> listeners = new ArrayList<>(1);
-        ExecutionListener<HttpClientRequest<ByteBuf>, HttpClientResponse<ByteBuf>> listener = new ExecutionListener<HttpClientRequest<ByteBuf>, HttpClientResponse<ByteBuf>>() {
-            @Override
-            public void onExecutionStart(ExecutionContext<HttpClientRequest<ByteBuf>> context) throws AbortExecutionException {
-                LOGGER.info("onExecutionStart");
-            }
+        httpClient = RibbonTransport.newHttpClient(loadBalancer, clientConfig);
 
-            @Override
-            public void onStartWithServer(ExecutionContext<HttpClientRequest<ByteBuf>> context, ExecutionInfo info) throws AbortExecutionException {
-                LOGGER.info("onStartWithServer");
-            }
-
-            @Override
-            public void onExceptionWithServer(ExecutionContext<HttpClientRequest<ByteBuf>> context, Throwable exception, ExecutionInfo info) {
-                LOGGER.info("onExceptionWithServer");
-            }
-
-            @Override
-            public void onExecutionSuccess(ExecutionContext<HttpClientRequest<ByteBuf>> context, HttpClientResponse<ByteBuf> response, ExecutionInfo info) {
-                LOGGER.info("onExecutionSuccess");
-            }
-
-            @Override
-            public void onExecutionFailed(ExecutionContext<HttpClientRequest<ByteBuf>> context, Throwable finalException, ExecutionInfo info) {
-                LOGGER.info("onExecutionFailed");
-            }
-        };
-
-        listeners.add(listener);
         retryHandler = new NettyNetflixRetryHandler(metadata);
-        httpClient = RibbonTransport.newHttpClient(loadBalancer, clientConfig, retryHandler, listeners);
-
 
 
         boolean addSslSupport = StringUtils.isNotEmpty(metadata.getKeyStorePath()) && StringUtils.isNotEmpty(metadata.getKeyStorePassword());
