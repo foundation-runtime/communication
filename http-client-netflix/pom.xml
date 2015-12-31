@@ -130,7 +130,7 @@
             <dependency>
                 <groupId>com.cisco.oss.foundation</groupId>
                 <artifactId>commons</artifactId>
-                <version>1.0.3-2</version>
+                <version>1.0.4-1</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
