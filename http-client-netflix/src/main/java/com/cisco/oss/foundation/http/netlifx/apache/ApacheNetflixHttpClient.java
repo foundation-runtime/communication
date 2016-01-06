@@ -132,6 +132,7 @@ class ApacheNetflixHttpClient extends AbstractLoadBalancerAwareClient<com.netfli
         try {
             return ((ApacheNetflixHttpResponse) executeWithLoadBalancer(buildNetflixHttpRequest(request, joiner), clientConfig));
         } catch (Exception e) {
+            LOGGER.error("error executing client request: {}", e, e);
             throw new ClientException(e.toString(), e);
         }
     }

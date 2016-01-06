@@ -1,11 +1,15 @@
 package com.cisco.oss.foundation.http.netlifx.netty;
 
+import com.cisco.oss.foundation.http.ClientException;
 import com.cisco.oss.foundation.http.HttpResponse;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufInputStream;
 import io.reactivex.netty.protocol.http.client.HttpClientResponse;
 import io.reactivex.netty.protocol.http.client.HttpResponseHeaders;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.Collection;
@@ -47,7 +51,7 @@ public class NettyNetflixHttpResponse implements HttpResponse {
 
     @Override
     public boolean hasResponseBody() {
-        return httpResponse.getContent() != null;
+        return httpResponse.getContent() != null || responseBody != null;
     }
 
     @Override
@@ -56,7 +60,7 @@ public class NettyNetflixHttpResponse implements HttpResponse {
             return responseBody;
         }else{
 
-            ByteBuf buf = httpResponse.getContent().toBlocking().first();
+            ByteBuf buf = httpResponse.getContent().doOnNext(ByteBuf::retain).toBlocking().first();
             int length = buf.readableBytes();
 
             if (buf.hasArray()) {
@@ -65,7 +69,9 @@ public class NettyNetflixHttpResponse implements HttpResponse {
                 responseBody = new byte[length];
                 buf.readBytes(responseBody);
             }
+            buf.release();
         }
+
         return responseBody;
     }
 
@@ -76,13 +82,19 @@ public class NettyNetflixHttpResponse implements HttpResponse {
 
     @Override
     public String getResponseAsString(String charset) {
-        ByteBuf byteBuf = httpResponse.getContent().toBlocking().first();
-        return byteBuf.toString(Charset.forName(charset));
+//        ByteBuf byteBuf = httpResponse.getContent().toBlocking().first();
+//        return byteBuf.toString(Charset.forName(charset));
+        try {
+            return new String(getResponse(), charset);
+        } catch (UnsupportedEncodingException e) {
+            throw new ClientException("can't create response: " + e, e);
+        }
     }
 
     @Override
     public InputStream getInputStream() {
-        throw new UnsupportedOperationException();
+        byte[] response = getResponse();
+        return new ByteArrayInputStream(response);
     }
 
     @Override
