@@ -76,6 +76,11 @@
                         <PrimitiveValue value="true"/>
                     </DefaultValue>
                 </StructureMemberDefinition>
+                <StructureMemberDefinition name="queue.isPersistent" type="BOOLEAN" advanced="true">
+                    <DefaultValue>
+                        <PrimitiveValue value="true"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
                 <StructureMemberDefinition name="queue.isMonitoringEnabled" type="BOOLEAN" advanced="true"
                                            required="false">
                     <DefaultValue>

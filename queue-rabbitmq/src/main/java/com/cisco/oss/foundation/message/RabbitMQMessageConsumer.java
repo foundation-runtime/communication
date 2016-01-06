@@ -70,7 +70,7 @@ public class RabbitMQMessageConsumer implements MessageConsumer {
                 LOGGER.error("error waiting for init to finish: " + e);
             }
             Channel channel = RabbitMQMessagingFactory.getChannel();
-            channel.exchangeDeclare(subscribedTo, exchangeType, true, false, false, null);
+            channel.exchangeDeclare(subscribedTo, exchangeType, isDurable, false, false, null);
 
             Map<String, Object> args = new HashMap<String, Object>();
 
@@ -88,7 +88,7 @@ public class RabbitMQMessageConsumer implements MessageConsumer {
                 args.put("x-dead-letter-exchange", DLQ);
             }
 
-            String queue = channel.queueDeclare(queueName, true, false, false, args).getQueue();
+            String queue = channel.queueDeclare(queueName, isDurable, false, false, args).getQueue();
 
             Map<String, String> filters = ConfigUtil.parseSimpleArrayAsMap(consumerName + ".queue.filters");
             if (filters != null && !filters.isEmpty()) {

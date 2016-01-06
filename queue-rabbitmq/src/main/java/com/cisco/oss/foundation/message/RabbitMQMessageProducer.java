@@ -45,6 +45,8 @@ class RabbitMQMessageProducer extends AbstractMessageProducer {
     private String groupId = "";
     private long expiration = 1800000;
     private AtomicBoolean isInitialized = new AtomicBoolean(false);
+    private boolean isDurable = false;
+    private boolean isPersistent = false;
 
 
     RabbitMQMessageProducer(String producerName) {
@@ -59,10 +61,12 @@ class RabbitMQMessageProducer extends AbstractMessageProducer {
         //update expiration
         expiration = subset.getLong("queue.expiration", 1800000);
         groupId = subset.getString("queue.groupId", "");
+        isDurable = subset.getBoolean("queue.isDurable", true);
+        isPersistent = subset.getBoolean("queue.isPersistent", true);
 
         try {
             Channel channel = RabbitMQMessagingFactory.getChannel();
-            channel.exchangeDeclare(queueName, "topic", true, false, false, null);
+            channel.exchangeDeclare(queueName, "topic", isDurable, false, false, null);
             isInitialized.set(true);
         } catch (QueueException e) {
             LOGGER.debug("can't init producer as its underlying connection is not ready");
@@ -120,7 +124,8 @@ class RabbitMQMessageProducer extends AbstractMessageProducer {
     }
 
     private void sendMessageInternal(byte[] message, Map<String, Object> messageHeaders) {
-        AMQP.BasicProperties basicProperties = new AMQP.BasicProperties.Builder().headers(messageHeaders).deliveryMode(2).build();
+        int deliveryMode = isPersistent ? 2 : 1;
+        AMQP.BasicProperties basicProperties = new AMQP.BasicProperties.Builder().headers(messageHeaders).deliveryMode(deliveryMode).build();
         try {
             String routingKey = "";
             Object routingKeyObj = messageHeaders.get(RabbitMQConstants.ROUTING_KEY);
