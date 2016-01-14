@@ -41,20 +41,25 @@ public abstract class AbstractInfraHttpFilter implements Filter {
 
 	@Value("${spring.application.name}")
 	protected String serviceName = null;//ConfigurationFactory.getConfiguration().getString("spring.application.name");
-	private String enabledKey = null;
+	protected String enabledKey = null;
 	private static boolean filterConfigurationDynamicRefreshEnabled = ConfigurationFactory.getConfiguration().getBoolean("http.filterConfigurationDynamicRefreshEnabled", false);
 	protected Map<String, String> filterConfigCache = new HashMap<String, String>();
 	private Configuration configuration = ConfigurationFactory.getConfiguration();
 
 	public AbstractInfraHttpFilter() {
+		if(serviceName == null){
+			serviceName = ConfigurationFactory.getConfiguration().getString("spring.application.name");
+		}
+		this.enabledKey = serviceName + "." + getKillSwitchFlag();
     }
     public AbstractInfraHttpFilter(String serviceName) {
-        this.serviceName = serviceName;
+		this.serviceName = serviceName;
+		this.enabledKey = serviceName + "." + getKillSwitchFlag();
     }
 
 	@Override
 	public void init(FilterConfig filterConfig) throws ServletException {
-        this.enabledKey = serviceName + "." + getKillSwitchFlag();
+
 	}
 
 	@Override
@@ -84,7 +89,7 @@ public abstract class AbstractInfraHttpFilter implements Filter {
 		}
 	}
 
-    private boolean getConfigValue(String key, boolean defaultValue) {
+    protected boolean getConfigValue(String key, boolean defaultValue) {
 
         if (filterConfigurationDynamicRefreshEnabled) {
             return configuration.getBoolean(key, defaultValue);
