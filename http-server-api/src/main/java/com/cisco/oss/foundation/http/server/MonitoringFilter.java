@@ -47,6 +47,7 @@ public class MonitoringFilter extends AbstractInfraHttpFilter {
     private boolean isMonitoringWithWrappers = false;
     private boolean uniqueUriMonitoringEnabled = false;
     private List<BoyerMoore> boyers = new ArrayList<BoyerMoore>();
+    private boolean isRegistered = false;
 
     public MonitoringFilter() {
         super();
@@ -57,7 +58,15 @@ public class MonitoringFilter extends AbstractInfraHttpFilter {
         if (!uniqueUriMonitoringEnabled) {
             populateBoyersList();
         }
-        MonitoringAgentFactory.getInstance().register();
+        regiterMonitoring();
+    }
+
+    private void regiterMonitoring() {
+        if (!isRegistered && getConfigValue(enabledKey, isEnabledByDefault())){
+            MonitoringAgentFactory.getInstance().register();
+            isRegistered = true;
+        }
+
     }
 
     public MonitoringFilter(String serviceName, HttpThreadPool threadPool) {
@@ -70,7 +79,7 @@ public class MonitoringFilter extends AbstractInfraHttpFilter {
         if (!uniqueUriMonitoringEnabled) {
             populateBoyersList();
         }
-        MonitoringAgentFactory.getInstance().register();
+        regiterMonitoring();
     }
 
     private void populateBoyersList() {
@@ -94,6 +103,8 @@ public class MonitoringFilter extends AbstractInfraHttpFilter {
 
     @Override
     public void doFilterImpl(final ServletRequest request, final ServletResponse response, final FilterChain chain) throws IOException, ServletException {
+
+        regiterMonitoring();
 
         final long startTime = System.currentTimeMillis();
         HttpServletRequest httpServletRequest = (HttpServletRequest) request;
