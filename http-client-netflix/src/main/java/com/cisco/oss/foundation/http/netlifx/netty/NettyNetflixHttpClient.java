@@ -17,6 +17,7 @@
 package com.cisco.oss.foundation.http.netlifx.netty;
 
 import com.cisco.oss.foundation.configuration.ConfigurationFactory;
+import com.cisco.oss.foundation.flowcontext.FlowContextFactory;
 import com.cisco.oss.foundation.http.*;
 import com.cisco.oss.foundation.loadbalancer.LoadBalancerConstants;
 import com.cisco.oss.foundation.loadbalancer.LoadBalancerStrategy;
@@ -24,8 +25,10 @@ import com.google.common.base.Joiner;
 import com.netflix.appinfo.EurekaInstanceConfig;
 import com.netflix.appinfo.MyDataCenterInstanceConfig;
 import com.netflix.client.RetryHandler;
+import com.netflix.client.config.CommonClientConfigKey;
 import com.netflix.client.config.DefaultClientConfigImpl;
 import com.netflix.client.config.IClientConfig;
+import com.netflix.client.config.IClientConfigKey;
 import com.netflix.config.ConfigurationManager;
 import com.netflix.discovery.DefaultEurekaClientConfig;
 import com.netflix.discovery.DiscoveryManager;
@@ -36,6 +39,9 @@ import com.netflix.niws.loadbalancer.DiscoveryEnabledServer;
 import com.netflix.ribbon.transport.netty.RibbonTransport;
 import com.netflix.ribbon.transport.netty.http.LoadBalancingHttpClient;
 import io.netty.buffer.ByteBuf;
+import io.netty.channel.ChannelDuplexHandler;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelPromise;
 import io.netty.handler.codec.http.HttpMethod;
 import io.reactivex.netty.protocol.http.client.HttpClientRequest;
 import io.reactivex.netty.protocol.http.client.HttpClientResponse;
@@ -89,7 +95,6 @@ class NettyNetflixHttpClient implements HttpClient<HttpRequest, NettyNetflixHttp
     }
 
 
-
     public boolean isAutoCloseable() {
         return autoCloseable;
     }
@@ -114,7 +119,9 @@ class NettyNetflixHttpClient implements HttpClient<HttpRequest, NettyNetflixHttp
     public NettyNetflixHttpResponse executeDirect(HttpRequest request) {
         HttpClientRequest<ByteBuf> httpRequest = buildNetflixHttpRequest(request, joiner);
         rx.Observable<HttpClientResponse<ByteBuf>> responseObservable = httpClient.submit(httpRequest, retryHandler, clientConfig);
-        return new NettyNetflixHttpResponse(responseObservable.toBlocking().first());
+        HttpClientResponse<ByteBuf> httpResponse = responseObservable.toBlocking().first();
+        ByteBuf content = httpResponse.getContent().doOnNext(ByteBuf::retain).toBlocking().first();
+        return new NettyNetflixHttpResponse(httpResponse, content);
     }
 
     @Override
@@ -129,9 +136,10 @@ class NettyNetflixHttpClient implements HttpClient<HttpRequest, NettyNetflixHttp
         rx.Observable<HttpClientResponse<ByteBuf>> responseObservable = httpClient.submit(httpRequest, retryHandler, clientConfig);
 
         responseObservable.subscribe(new Subscriber<HttpClientResponse<ByteBuf>>() {
+
             @Override
             public void onCompleted() {
-//                responseCallback.
+                LOGGER.debug("Http Response Completed");
             }
 
             @Override
@@ -141,8 +149,29 @@ class NettyNetflixHttpClient implements HttpClient<HttpRequest, NettyNetflixHttp
             }
 
             @Override
-            public void onNext(HttpClientResponse<ByteBuf> byteBufHttpClientResponse) {
-                responseCallback.completed(new NettyNetflixHttpResponse(byteBufHttpClientResponse));
+            public void onNext(HttpClientResponse<ByteBuf> httpClientResponse) {
+
+                httpClientResponse.getContent().subscribe(new Subscriber<ByteBuf>() {
+
+                    private ByteBuf responseContent = null;
+
+                    @Override
+                    public void onCompleted() {
+                        responseCallback.completed(new NettyNetflixHttpResponse(httpClientResponse, responseContent));
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        LOGGER.error("error serving request: {}", e, e);
+                        responseCallback.failed(e);
+                    }
+
+                    @Override
+                    public void onNext(ByteBuf content) {
+                        content.retain();
+                        this.responseContent = content;
+                    }
+                });
             }
         });
 
@@ -171,7 +200,6 @@ class NettyNetflixHttpClient implements HttpClient<HttpRequest, NettyNetflixHttp
         httpClient = RibbonTransport.newHttpClient(loadBalancer, clientConfig);
 
         retryHandler = new NettyNetflixRetryHandler(metadata);
-
 
         boolean addSslSupport = StringUtils.isNotEmpty(metadata.getKeyStorePath()) && StringUtils.isNotEmpty(metadata.getKeyStorePassword());
 
@@ -308,13 +336,11 @@ class NettyNetflixHttpClient implements HttpClient<HttpRequest, NettyNetflixHttp
 
     }
 
-    //    @Override
     public void execute(HttpRequest request, ResponseCallback responseCallback, LoadBalancerStrategy loadBalancerStrategy, String apiName) {
         executeWithLoadBalancer(request, responseCallback);
 
     }
 
-    //    @Override
     public void close() {
     }
 

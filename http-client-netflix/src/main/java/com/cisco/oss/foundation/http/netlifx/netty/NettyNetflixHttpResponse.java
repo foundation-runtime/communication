@@ -6,6 +6,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufInputStream;
 import io.reactivex.netty.protocol.http.client.HttpClientResponse;
 import io.reactivex.netty.protocol.http.client.HttpResponseHeaders;
+import rx.functions.Action1;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -16,6 +17,9 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Created by Yair Ogen (yaogen) on 13/12/2015.
@@ -23,13 +27,26 @@ import java.util.Map;
 public class NettyNetflixHttpResponse implements HttpResponse {
     private URI requestUri = null;
     private byte[] responseBody;
+    private ByteBuf responseByteBuf;
     private boolean isClosed = false;
     private HttpClientResponse<ByteBuf> httpResponse;
 
 
-    public NettyNetflixHttpResponse(HttpClientResponse<ByteBuf> httpResponse) {
+    public NettyNetflixHttpResponse(HttpClientResponse<ByteBuf> httpResponse, ByteBuf responseByteBuf) {
         super();
         this.httpResponse = httpResponse;
+        this.responseByteBuf = responseByteBuf;
+        if(responseByteBuf != null){
+            int length = responseByteBuf.readableBytes();
+
+            if (responseByteBuf.hasArray()) {
+                responseBody = responseByteBuf.array();
+            } else {
+                responseBody = new byte[length];
+                responseByteBuf.readBytes(responseBody);
+            }
+            responseByteBuf.release();
+        }
     }
 
     @Override
@@ -45,7 +62,6 @@ public class NettyNetflixHttpResponse implements HttpResponse {
         for (Map.Entry<String, String> allHeader : allHeaders) {
             headers.put(allHeader.getKey(),httpHeaders.getAll(allHeader.getKey()));
         }
-//        return httpResponse.getHttpHeaders();
         return headers;
     }
 
@@ -59,20 +75,8 @@ public class NettyNetflixHttpResponse implements HttpResponse {
         if(responseBody != null){
             return responseBody;
         }else{
-
-            ByteBuf buf = httpResponse.getContent().doOnNext(ByteBuf::retain).toBlocking().first();
-            int length = buf.readableBytes();
-
-            if (buf.hasArray()) {
-                responseBody = buf.array();
-            } else {
-                responseBody = new byte[length];
-                buf.readBytes(responseBody);
-            }
-            buf.release();
+            throw new UnsupportedOperationException("response content should not be null");
         }
-
-        return responseBody;
     }
 
     @Override
