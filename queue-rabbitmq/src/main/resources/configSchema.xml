@@ -58,6 +58,11 @@
                         <PrimitiveValue value="true"/>
                     </DefaultValue>
                 </StructureMemberDefinition>
+                <StructureMemberDefinition name="queue.deadLetterExchangeName" type="STRING" advanced="true">
+                    <DefaultValue>
+                        <PrimitiveValue value="DLQ"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
                 <StructureMemberDefinition name="queue.subscribedTo" type="STRING" required="false" advanced="true"/>
             </StructureDefinition>
         </ParameterType>
