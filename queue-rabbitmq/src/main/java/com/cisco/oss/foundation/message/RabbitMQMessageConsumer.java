@@ -62,6 +62,7 @@ public class RabbitMQMessageConsumer implements MessageConsumer {
             long expiration = subset.getLong("queue.expiration", 1800000);
             long maxLength = subset.getLong("queue.maxLength", -1);
             boolean deadLetterIsEnabled = subset.getBoolean("queue.deadLetterIsEnabled", true);
+            String deadLetterExchangeName = subset.getString("queue.deadLetterExchangeName", DLQ);
             String subscribedTo = isSubscription ? subset.getString("queue.subscribedTo", "") : queueName;
             String exchangeType = isSubscription ? "topic" : "direct";
             try {
@@ -84,8 +85,8 @@ public class RabbitMQMessageConsumer implements MessageConsumer {
 
 
             if (deadLetterIsEnabled) {
-                channel.exchangeDeclare(DLQ, exchangeType, true, false, false, null);
-                args.put("x-dead-letter-exchange", DLQ);
+                channel.exchangeDeclare(deadLetterExchangeName, exchangeType, true, false, false, null);
+                args.put("x-dead-letter-exchange", deadLetterExchangeName);
             }
 
             String queue = channel.queueDeclare(queueName, isDurable, false, false, args).getQueue();
