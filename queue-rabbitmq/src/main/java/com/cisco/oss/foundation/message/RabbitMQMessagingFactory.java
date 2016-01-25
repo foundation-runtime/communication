@@ -98,7 +98,7 @@ public class RabbitMQMessagingFactory {
                             if (message.ack)
                                 channel.basicAck(message.deliveryTag, false);
                             else
-                                channel.basicNack(message.deliveryTag, false, true);
+                                channel.basicNack(message.deliveryTag, false, false);
                         }
 
                     } catch (Exception e) {
