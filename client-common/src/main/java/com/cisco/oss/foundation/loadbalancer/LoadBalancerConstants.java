@@ -46,7 +46,7 @@ public final class LoadBalancerConstants {
     public static final int DEFAULT_READ_TIMEOUT = 5000;
     public static final int DEFAULT_WAITING_TIME = 60000;
     public static final int DEFAULT_NUMBER_OF_ATTEMPTS = 3;
-    public static final int DEFAULT_RETRY_DELAY = 1500;
+    public static final int DEFAULT_RETRY_DELAY = 500;
 
     public static final String FLOW_CONTEXT_HEADER = "FLOW_CONTEXT";
     public static final String IDLE_TIME_OUT = "idleTimeout";
