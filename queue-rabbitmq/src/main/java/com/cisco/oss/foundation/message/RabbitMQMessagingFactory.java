@@ -98,7 +98,7 @@ public class RabbitMQMessagingFactory {
                             if (message.ack)
                                 channel.basicAck(message.deliveryTag, false);
                             else
-                                channel.basicNack(message.deliveryTag, false, false);
+                                channel.basicNack(message.deliveryTag, false, message.requeue);
                         }
 
                     } catch (Exception e) {
@@ -211,15 +211,28 @@ public class RabbitMQMessagingFactory {
         messageAckQueue.add(new AckNackMessage(channelNumber, deliveryTag, false));
     }
 
+    public static void nackMessage(Integer channelNumber, Long deliveryTag, boolean requeue) {
+        messageAckQueue.add(new AckNackMessage(channelNumber, deliveryTag, false, requeue));
+    }
+
     static class AckNackMessage implements Comparable<AckNackMessage> {
         private final Integer channelNumber;
         private final Long deliveryTag;
         private final boolean ack;
+        private final boolean requeue;
+
+        public AckNackMessage(Integer channelNumber, Long deliveryTag, boolean ack, boolean requeue) {
+            this.channelNumber = channelNumber;
+            this.deliveryTag = deliveryTag;
+            this.ack = ack;
+            this.requeue = requeue;
+        }
 
         public AckNackMessage(Integer channelNumber, Long deliveryTag, boolean ack) {
             this.channelNumber = channelNumber;
             this.deliveryTag = deliveryTag;
             this.ack = ack;
+            this.requeue = false;
         }
 
         @Override
