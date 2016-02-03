@@ -43,7 +43,19 @@ public interface MessageConsumer {
      */
     void registerMessageHandler(MessageHandler messageHandler);
 
+    /**
+     * register a handler that will receive messages asynchronously. This method will no block.
+     * Note: in many cases you should not use this interface directly. Instead extend a abstract class from the vendor specific API implementation
+     * @param messageHandler - the message handler instance that will be called-back when new messages arrive.
+     * @param autoAck - set to true to auto acknowledge messages once they get into the handler
+     */
     void registerMessageHandler(MessageHandler messageHandler, boolean autoAck);
+
+    /**
+     * Calling this method will stop the async message handling and resuming it will require to call #registerMessageHandler again
+     * return true if unregister was successful
+     */
+    boolean unRregisterMessageHandler();
 
     /**
      * close this consumer. This is useful for resource cleanup.
