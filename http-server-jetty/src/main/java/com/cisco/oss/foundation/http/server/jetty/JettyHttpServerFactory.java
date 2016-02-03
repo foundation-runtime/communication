@@ -17,14 +17,6 @@
 package com.cisco.oss.foundation.http.server.jetty;
 
 import com.cisco.oss.foundation.configuration.ConfigurationFactory;
-import com.cisco.oss.foundation.directory.RegistrationManager;
-import com.cisco.oss.foundation.directory.ServiceDirectory;
-import com.cisco.oss.foundation.directory.ServiceInstanceHealth;
-import com.cisco.oss.foundation.directory.entity.OperationalStatus;
-import com.cisco.oss.foundation.directory.entity.ProvidedServiceInstance;
-import com.cisco.oss.foundation.directory.entity.ServiceInstance;
-import com.cisco.oss.foundation.directory.exception.ServiceException;
-import com.cisco.oss.foundation.directory.impl.DirectoryServiceClient;
 import com.cisco.oss.foundation.http.server.HttpServerFactory;
 import com.cisco.oss.foundation.http.server.ServerFailedToStartException;
 import com.cisco.oss.foundation.ip.utils.IpUtils;
@@ -62,25 +54,15 @@ public enum JettyHttpServerFactory implements HttpServerFactory, JettyHttpServer
 
     private final static Logger LOGGER = LoggerFactory.getLogger(JettyHttpServerFactory.class);
 
-    static{
+    static {
         try {
             Configuration configuration = ConfigurationFactory.getConfiguration();
-            String sdHost = configuration.getString("service.sd.host", "");
-            int sdPort = configuration.getInt("service.sd.port", -1);
-
-            if(StringUtils.isNotBlank(sdHost)){
-                ServiceDirectory.getServiceDirectoryConfig().setProperty( DirectoryServiceClient.SD_API_SD_SERVER_FQDN_PROPERTY, sdHost);
-            }
-
-            if(sdPort > 0){
-                ServiceDirectory.getServiceDirectoryConfig().setProperty( DirectoryServiceClient.SD_API_SD_SERVER_PORT_PROPERTY, sdPort);
-            }
         } catch (Exception e) {
-            LOGGER.error("Can't assign service Directory host and port properties: {}",e ,e);
+            LOGGER.error("Can't assign service Directory host and port properties: {}", e, e);
         }
     }
 
-    private static final Map<String, Pair<Server,ProvidedServiceInstance>> servers = new ConcurrentHashMap<String, Pair<Server,ProvidedServiceInstance>>();
+    private static final Map<String, Server> servers = new ConcurrentHashMap<String, Server>();
 
     private JettyHttpServerFactory() {
     }
@@ -227,12 +209,11 @@ public enum JettyHttpServerFactory implements HttpServerFactory, JettyHttpServer
         boolean sessionManagerEnabled = configuration.getBoolean(serviceName + ".http.sessionManagerEnabled", false);
 
 
-
 //        ContextHandlerCollection handler = new ContextHandlerCollection();
 
         ServletContextHandler context = new ServletContextHandler();
 
-        if(sessionManagerEnabled){
+        if (sessionManagerEnabled) {
             context = new ServletContextHandler(ServletContextHandler.SESSIONS);
         }
 
@@ -332,17 +313,13 @@ public enum JettyHttpServerFactory implements HttpServerFactory, JettyHttpServer
 
             server.start();
 
-            ProvidedServiceInstance instance = null;
-            if (serviceDirectoryEnabled) {
-                instance = registerWithSDServer(serviceName, host, port);
-            }
 
-            servers.put(serviceName, Pair.of(server,instance));
+            servers.put(serviceName, server);
             if (sslPort != -1 && sslConnectionFactory != null) {
                 LOGGER.info("Https server: {} started on {}", serviceName, sslPort);
             }
 
-            if(!useHttpsOnly){
+            if (!useHttpsOnly) {
                 LOGGER.info("Http server: {} started on {}", serviceName, port);
             }
 
@@ -353,35 +330,6 @@ public enum JettyHttpServerFactory implements HttpServerFactory, JettyHttpServer
         }
     }
 
-    private ProvidedServiceInstance registerWithSDServer(final String serviceName, String host, int port) throws Exception {
-        // Get a RegistrationManager instance from ServiceDirectory.
-// The ServiceDirectory will load a default ServiceDirectoryConfig and instantialize a RegistrationManager instance.
-        final RegistrationManager registrationManager = ServiceDirectory.getRegistrationManager();
-
-
-// Construct the service instance. serviceName and providerId together uniquely identify a service instance where providerId is defined as "address-port".
-        final ProvidedServiceInstance instance = new ProvidedServiceInstance(serviceName, host, port);
-
-// Setting the service instance URI. URI is defined as tcp://address:port for the TCP end point
-        String serverHost = "0.0.0.0".equals(host) ? IpUtils.getIpAddress() : host;
-        instance.setUri("http://" + serverHost + ":" + port + "");
-        instance.setAddress(serverHost);
-        instance.setPort(port);
-
-        instance.setStatus(OperationalStatus.UP);
-
-        registrationManager.registerService(instance, null);
-
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            public void run() {
-                unRegisterInstance(serviceName, instance);
-            }
-        });
-
-        return instance;
-
-
-    }
 
     /**
      * start a new http server
@@ -409,38 +357,24 @@ public enum JettyHttpServerFactory implements HttpServerFactory, JettyHttpServer
      */
     @Override
     public void stopHttpServer(String serviceName) {
-        Pair<Server, ProvidedServiceInstance> pair = servers.get(serviceName);
-        if (pair != null) {
-            Server server = pair.getLeft();
-            if (server != null) {
-                try {
-                    server.stop();
-                    servers.remove(serviceName);
-                    LOGGER.info("Http server: {} stopped", serviceName);
-                } catch (Exception e) {
-                    LOGGER.error("Problem stopping the http {} server. Error is {}.", serviceName, e);
-                }
-            }
-            ProvidedServiceInstance instance = pair.getRight();
-            if(instance != null){
-                unRegisterInstance(serviceName, instance);
+        Server server = servers.get(serviceName);
+
+        if (server != null) {
+            try {
+                server.stop();
+                servers.remove(serviceName);
+                LOGGER.info("Http server: {} stopped", serviceName);
+            } catch (Exception e) {
+                LOGGER.error("Problem stopping the http {} server. Error is {}.", serviceName, e);
             }
         }
     }
 
-    private void unRegisterInstance(String serviceName, ProvidedServiceInstance instance) {
-        try {
-            final RegistrationManager registrationManager = ServiceDirectory.getRegistrationManager();
-            registrationManager.unregisterService(instance.getServiceName(),instance.getProviderId());
-        } catch (ServiceException e) {
-            LOGGER.info("Problem stopping the http {} server. Probably already un-registered. Error is {}.", serviceName, e);
-        }
-    }
 
 
     @Override
     public void setErrorHandler(String serviceName, ErrorHandler errorHandler) {
-        Server server = servers.get(serviceName).getLeft();
+        Server server = servers.get(serviceName);
         if (server != null) {
             server.addBean(errorHandler);
         }
