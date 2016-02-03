@@ -176,12 +176,14 @@ public class RabbitMQMessageConsumer implements MessageConsumer {
         if (isRegistered.compareAndSet(true,false)) {
             if (consumer != null) {
                 try {
-                    consumer.getChannel().basicCancel(consumer.getConsumerTag());
+                    consumer.getChannel().basicCancel(this.consumerTag);
                     success = true;
                 } catch (IOException e) {
                     LOGGER.error("can't unregsiter the handler. reaon: {}", e, e);
                 }
             }
+        }else{
+            LOGGER.warn("can't unregister as there is no handler currently registered");
         }
         return success;
 
