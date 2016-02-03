@@ -17,12 +17,6 @@
 package com.cisco.oss.foundation.loadbalancer;
 
 import com.cisco.oss.foundation.configuration.ConfigurationFactory;
-import com.cisco.oss.foundation.directory.LookupManager;
-import com.cisco.oss.foundation.directory.NotificationHandler;
-import com.cisco.oss.foundation.directory.ServiceDirectory;
-import com.cisco.oss.foundation.directory.entity.ServiceInstance;
-import com.cisco.oss.foundation.directory.exception.ServiceException;
-import com.cisco.oss.foundation.directory.impl.DirectoryServiceClient;
 import com.google.common.collect.Lists;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.lang3.StringUtils;
@@ -48,16 +42,6 @@ public abstract class AbstractLoadBalancerStrategy<S extends ClientRequest> impl
     static{
         try {
             Configuration configuration = ConfigurationFactory.getConfiguration();
-            String sdHost = configuration.getString("service.sd.host", "");
-            int sdPort = configuration.getInt("service.sd.port", -1);
-
-            if(StringUtils.isNotBlank(sdHost)){
-                ServiceDirectory.getServiceDirectoryConfig().setProperty( DirectoryServiceClient.SD_API_SD_SERVER_FQDN_PROPERTY, sdHost);
-            }
-
-            if(sdPort > 0){
-                ServiceDirectory.getServiceDirectoryConfig().setProperty( DirectoryServiceClient.SD_API_SD_SERVER_PORT_PROPERTY, sdPort);
-            }
         } catch (Exception e) {
             LOGGER.error("Can't assign service Directory host and port properties: {}",e ,e);
         }
@@ -70,74 +54,22 @@ public abstract class AbstractLoadBalancerStrategy<S extends ClientRequest> impl
     long retryDelay;
     int numberOfAttempts;
     private String serviceName = "UNKNOWN";
-    private boolean serviceDirectoryEnabled = false;
-    private LookupManager lookupManager = null;
 
     public AbstractLoadBalancerStrategy(String serviceName, boolean serviceDirectoryEnabled, long waitingTime, String clientName, long retryDelay, int numberOfAttempts) {
         this.serviceName = serviceName;
-        this.serviceDirectoryEnabled = serviceDirectoryEnabled;
         this.waitingTime = waitingTime;
         this.clientName = clientName;
         this.retryDelay = retryDelay;
         this.numberOfAttempts = numberOfAttempts;
-        if (isServiceDirectoryEnabled()) {
-            initSDLookupManager();
-        }
+
     }
 
-    private void initSDLookupManager() {
-        try {
-            lookupManager = ServiceDirectory.getLookupManager();
-            lookupManager.addNotificationHandler(serviceName, new NotificationHandler() {
-                @Override
-                public void serviceInstanceAvailable(ServiceInstance serviceInstance) {
-                    String host = serviceInstance.getAddress();
-                    int port = serviceInstance.getPort();
-                    InternalServerProxy internalServerProxy = createInternalServerProxy(host, port);
-
-                    AbstractLoadBalancerStrategy.readWriteLock.writeLock().lock();
-                    try {
-                        serverProxies.add(internalServerProxy);
-                    } finally {
-                        AbstractLoadBalancerStrategy.readWriteLock.writeLock().unlock();
-                    }
-
-                    LOGGER.info(internalServerProxy + " is now available");
-
-                }
-
-                @Override
-                public void serviceInstanceUnavailable(ServiceInstance serviceInstance) {
-                    String host = serviceInstance.getAddress();
-                    int port = serviceInstance.getPort();
-                    InternalServerProxy internalServerProxy = createInternalServerProxy(host, port);
-                    AbstractLoadBalancerStrategy.readWriteLock.writeLock().lock();
-                    try {
-                        serverProxies.remove(internalServerProxy);
-                    } finally {
-                        AbstractLoadBalancerStrategy.readWriteLock.writeLock().unlock();
-                    }
-                    LOGGER.info(internalServerProxy + " is now un-available");
-
-                }
-
-                @Override
-                public void serviceInstanceChange(ServiceInstance serviceInstance) {
-                    LOGGER.info("{} has changed metadata to: {}", serviceInstance.getServiceName(), serviceInstance.getMetadata());
-                }
-            });
-        } catch (ServiceException e) {
-            LOGGER.error("can't init SD lookup manager: {}", e);
-        }
-    }
 
     public String getServiceName() {
         return serviceName;
     }
 
-    public boolean isServiceDirectoryEnabled() {
-        return serviceDirectoryEnabled;
-    }
+
 
     public Throwable handleException(final String apiName, final InternalServerProxy serverProxy, final Throwable throwable) {
 
@@ -220,46 +152,6 @@ public abstract class AbstractLoadBalancerStrategy<S extends ClientRequest> impl
     }
 
     public List<InternalServerProxy> getServerProxies() {
-        if ((serverProxies == null || serverProxies.isEmpty()) && isServiceDirectoryEnabled()) {
-            if (lookupManager == null) {
-                initSDLookupManager();
-            }
-
-            if (lookupManager != null) {
-
-                try {
-                    // Look up all ServiceInstances of the Service.
-                    List<ServiceInstance> allServiceInstances = lookupManager.lookupInstances(serviceName);
-
-                    List<InternalServerProxy> serversList = Lists.newCopyOnWriteArrayList();
-
-
-                    for (ServiceInstance serviceInstance : allServiceInstances) {
-                        String host = serviceInstance.getAddress();
-                        int port = serviceInstance.getPort();
-                        final InternalServerProxy internalServerProxy = createInternalServerProxy(host, port);
-                        serversList.add(internalServerProxy);
-                    }
-
-                    AbstractLoadBalancerStrategy.readWriteLock.writeLock().lock();
-                    try {
-
-                        serverProxies = serversList;
-
-
-                    } finally {
-                        AbstractLoadBalancerStrategy.readWriteLock.writeLock().unlock();
-                    }
-                } catch (ServiceException e) {
-                    throw new NoActiveServersException("can't get server instance from service directory server. error is: " + e, e);
-                }
-
-
-            } else {
-                throw new NoActiveServersException("no Service Directory lookup manager - can't get active servers", null);
-            }
-
-        }
         return serverProxies;
     }
 
