@@ -16,6 +16,7 @@
 
 package com.cisco.oss.foundation.core.test;
 
+import com.cisco.oss.foundation.configuration.ConfigurationFactory;
 import com.cisco.oss.foundation.message.MessageProducer;
 import com.cisco.oss.foundation.message.RabbitMQMessagingFactory;
 
@@ -29,6 +30,8 @@ import java.util.concurrent.Executors;
  */
 public class RabbitMQProducerMain {
 
+    private int num_of_iter = ConfigurationFactory.getConfiguration().getInt("num_of_iter",100000);
+
     public static void main(String[] args) throws Exception {
 
         final MessageProducer producer = RabbitMQMessagingFactory.createProducer("example");
@@ -41,24 +44,24 @@ public class RabbitMQProducerMain {
             System.in.read(bytes);
 //            producer.sendMessage("hello: " + new String(bytes));
 
-//            for (int i=0; i < 500; i++) {
-//                sendMessage(producer, bytes,"1");
+            for (int i=0; i < 500; i++) {
+                sendMessage(producer, bytes,"1");
 //                Thread.sleep(1000);
-//            }
-            Runnable target = new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        sendMessage(producer, bytes, "1");
-                    } catch (Exception e) {
-                        System.err.println(e.toString());
-                    }
-                }
-            };
+            }
+//            Runnable target = new Runnable() {
+//                @Override
+//                public void run() {
+//                    try {
+//                        sendMessage(producer, bytes, "1");
+//                    } catch (Exception e) {
+//                        System.err.println(e.toString());
+//                    }
+//                }
+//            };
 
 //            new Thread(target).start();
 
-            threadPool.execute(target);
+//            threadPool.execute(target);
 
 
 

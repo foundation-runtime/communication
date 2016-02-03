@@ -166,6 +166,21 @@ public class RabbitMQMessageConsumer implements MessageConsumer {
     }
 
     @Override
+    public boolean unRregisterMessageHandler() {
+        boolean success = false;
+        if (consumer != null) {
+            try {
+                consumer.getChannel().basicCancel(consumer.getConsumerTag());
+                success = true;
+            } catch (IOException e) {
+                LOGGER.error("can't un regsiter the handler. reaon: {}", e, e);
+            }
+        }
+        return success;
+
+    }
+
+    @Override
     public void close() {
     }
 
