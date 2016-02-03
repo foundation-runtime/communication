@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -47,6 +48,8 @@ public class RabbitMQMessageConsumer implements MessageConsumer {
 
     private String queueName = "";
     private QueueingConsumer consumer = null;
+    private AtomicBoolean isRegistered = new AtomicBoolean(false);
+    private String consumerTag = null;
 
     private AtomicInteger nextIndex = new AtomicInteger(0);
 
@@ -136,19 +139,21 @@ public class RabbitMQMessageConsumer implements MessageConsumer {
     }
 
     public void registerMessageHandler(MessageHandler messageHandler, boolean autoAck) {
-        try {
-            if (messageHandler instanceof AbstractRabbitMQMessageHandler) {
-                String consumerTag = FlowContextFactory.getFlowContext() != null ? FlowContextFactory.getFlowContext().getUniqueId() : "N/A";
-                Channel channel = RabbitMQMessagingFactory.getChannel();
-                ((AbstractRabbitMQMessageHandler) messageHandler).setChannelNumber(channel.getChannelNumber());
-                channel.basicConsume(queueName, autoAck, consumerTag, (Consumer) messageHandler);
-            } else {
-                throw new IllegalArgumentException("Using RabbitMQ consumerThreadLocal you must provide a valid RabbitMQ massage handler");
-            }
+        if (isRegistered.compareAndSet(false, true)) {
+            try {
+                if (messageHandler instanceof AbstractRabbitMQMessageHandler) {
+                    String consumerTag = FlowContextFactory.getFlowContext() != null ? FlowContextFactory.getFlowContext().getUniqueId() : "N/A";
+                    Channel channel = RabbitMQMessagingFactory.getChannel();
+                    ((AbstractRabbitMQMessageHandler) messageHandler).setChannelNumber(channel.getChannelNumber());
+                    this.consumerTag = channel.basicConsume(queueName, autoAck, consumerTag, (Consumer) messageHandler);
+                } else {
+                    throw new IllegalArgumentException("Using RabbitMQ consumerThreadLocal you must provide a valid RabbitMQ massage handler");
+                }
 
-        } catch (IOException e) {
+            } catch (IOException e) {
 //            LOGGER.error("can't register a MessageHandler: {}", e);
-            throw new QueueException("can't register a MessageHandler: " + e, e);
+                throw new QueueException("can't register a MessageHandler: " + e, e);
+            }
         }
     }
 
@@ -168,12 +173,14 @@ public class RabbitMQMessageConsumer implements MessageConsumer {
     @Override
     public boolean unRregisterMessageHandler() {
         boolean success = false;
-        if (consumer != null) {
-            try {
-                consumer.getChannel().basicCancel(consumer.getConsumerTag());
-                success = true;
-            } catch (IOException e) {
-                LOGGER.error("can't un regsiter the handler. reaon: {}", e, e);
+        if (isRegistered.compareAndSet(true,false)) {
+            if (consumer != null) {
+                try {
+                    consumer.getChannel().basicCancel(consumer.getConsumerTag());
+                    success = true;
+                } catch (IOException e) {
+                    LOGGER.error("can't unregsiter the handler. reaon: {}", e, e);
+                }
             }
         }
         return success;
