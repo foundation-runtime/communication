@@ -50,6 +50,7 @@ public class RabbitMQMessageConsumer implements MessageConsumer {
     private QueueingConsumer consumer = null;
     private AtomicBoolean isRegistered = new AtomicBoolean(false);
     private String consumerTag = null;
+    private int channelNumber = -1;
 
     private AtomicInteger nextIndex = new AtomicInteger(0);
 
@@ -144,6 +145,7 @@ public class RabbitMQMessageConsumer implements MessageConsumer {
                 if (messageHandler instanceof AbstractRabbitMQMessageHandler) {
                     String consumerTag = FlowContextFactory.getFlowContext() != null ? FlowContextFactory.getFlowContext().getUniqueId() : "N/A";
                     Channel channel = RabbitMQMessagingFactory.getChannel();
+                    this.channelNumber = channel.getChannelNumber();
                     ((AbstractRabbitMQMessageHandler) messageHandler).setChannelNumber(channel.getChannelNumber());
                     this.consumerTag = channel.basicConsume(queueName, autoAck, consumerTag, (Consumer) messageHandler);
                 } else {
@@ -173,16 +175,12 @@ public class RabbitMQMessageConsumer implements MessageConsumer {
     @Override
     public boolean unRregisterMessageHandler() {
         boolean success = false;
-        if (isRegistered.compareAndSet(true,false)) {
+        if (isRegistered.compareAndSet(true, false)) {
             if (consumer != null) {
-                try {
-                    consumer.getChannel().basicCancel(this.consumerTag);
-                    success = true;
-                } catch (IOException e) {
-                    LOGGER.error("can't unregsiter the handler. reaon: {}", e, e);
-                }
+                RabbitMQMessagingFactory.cancelHandler(channelNumber, this.consumerTag);
+                success = true;
             }
-        }else{
+        } else {
             LOGGER.warn("can't unregister as there is no handler currently registered");
         }
         return success;
