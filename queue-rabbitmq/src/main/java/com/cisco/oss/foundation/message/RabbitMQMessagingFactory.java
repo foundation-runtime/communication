@@ -46,7 +46,8 @@ public class RabbitMQMessagingFactory {
     public static ThreadLocal<Channel> channelThreadLocal = new ThreadLocal<>();
     //    private static List<Channel> channels = new CopyOnWriteArrayList<>();
     private static PriorityBlockingQueue<AckNackMessage> messageAckQueue = new PriorityBlockingQueue<AckNackMessage>(10000);
-    private static Map<Integer, Channel> channels = new ConcurrentHashMap<Integer, Channel>();
+    private static PriorityBlockingQueue<CancelMessage> cancelQueue = new PriorityBlockingQueue<CancelMessage>(50);
+    static Map<Integer, Channel> channels = new ConcurrentHashMap<Integer, Channel>();
     private static Connection connection = null;
     private static AtomicBoolean IS_RECONNECT_THREAD_RUNNING = new AtomicBoolean(false);
     static AtomicBoolean IS_CONNECTED = new AtomicBoolean(false);
@@ -109,6 +110,29 @@ public class RabbitMQMessagingFactory {
         };
         rabbitAckThread.setDaemon(true);
         rabbitAckThread.start();
+
+        Thread cancelHandlerThread = new Thread("rabbitCancelHandlerThread") {
+            @Override
+            public void run() {
+
+                while (true) {
+                    try {
+
+                        CancelMessage message = cancelQueue.take();
+
+                        Channel channel = channels.get(message.channelNumber);
+                        if (channel != null && channel.isOpen()) {
+                            channel.basicCancel(message.consumerTag);
+                        }
+
+                    } catch (Exception e) {
+                        LOGGER.error(e.toString(), e);
+                    }
+                }
+            }
+        };
+        cancelHandlerThread.setDaemon(true);
+        cancelHandlerThread.start();
     }
 
 
@@ -211,8 +235,30 @@ public class RabbitMQMessagingFactory {
         messageAckQueue.add(new AckNackMessage(channelNumber, deliveryTag, false));
     }
 
+    public static void cancelHandler(Integer channelNumber, String consumerTag) {
+        cancelQueue.add(new CancelMessage(channelNumber, consumerTag));
+    }
+
     public static void nackMessage(Integer channelNumber, Long deliveryTag, boolean requeue) {
         messageAckQueue.add(new AckNackMessage(channelNumber, deliveryTag, false, requeue));
+    }
+
+    static class CancelMessage implements Comparable<CancelMessage> {
+        private final Integer channelNumber;
+        private final String consumerTag;
+
+        public CancelMessage(Integer channelNumber, String consumerTag) {
+            this.channelNumber = channelNumber;
+            this.consumerTag = consumerTag;
+        }
+
+        @Override
+        public int compareTo(CancelMessage o) {
+            if (o == null)
+                return 1;
+
+            return this.channelNumber.compareTo(o.channelNumber);
+        }
     }
 
     static class AckNackMessage implements Comparable<AckNackMessage> {
