@@ -50,6 +50,7 @@ public class RabbitMQMessageConsumer implements MessageConsumer {
     private QueueingConsumer consumer = null;
     private AtomicBoolean isRegistered = new AtomicBoolean(false);
     private String consumerTag = null;
+    private int channelNumber = -1;
 
     private AtomicInteger nextIndex = new AtomicInteger(0);
 
@@ -144,7 +145,8 @@ public class RabbitMQMessageConsumer implements MessageConsumer {
                 if (messageHandler instanceof AbstractRabbitMQMessageHandler) {
                     String consumerTag = FlowContextFactory.getFlowContext() != null ? FlowContextFactory.getFlowContext().getUniqueId() : "N/A";
                     Channel channel = RabbitMQMessagingFactory.getChannel();
-                    ((AbstractRabbitMQMessageHandler) messageHandler).setChannelNumber(channel.getChannelNumber());
+                    this.channelNumber = channel.getChannelNumber();
+                    ((AbstractRabbitMQMessageHandler) messageHandler).setChannelNumber(channelNumber);
                     this.consumerTag = channel.basicConsume(queueName, autoAck, consumerTag, (Consumer) messageHandler);
                 } else {
                     throw new IllegalArgumentException("Using RabbitMQ consumerThreadLocal you must provide a valid RabbitMQ massage handler");
@@ -176,7 +178,7 @@ public class RabbitMQMessageConsumer implements MessageConsumer {
         if (isRegistered.compareAndSet(true,false)) {
             if (consumer != null) {
                 try {
-                    consumer.getChannel().basicCancel(this.consumerTag);
+                    RabbitMQMessagingFactory.channels.get(channelNumber).basicCancel(this.consumerTag);
                     success = true;
                 } catch (IOException e) {
                     LOGGER.error("can't unregsiter the handler. reaon: {}", e, e);

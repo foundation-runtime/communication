@@ -46,7 +46,7 @@ public class RabbitMQMessagingFactory {
     public static ThreadLocal<Channel> channelThreadLocal = new ThreadLocal<>();
     //    private static List<Channel> channels = new CopyOnWriteArrayList<>();
     private static PriorityBlockingQueue<AckNackMessage> messageAckQueue = new PriorityBlockingQueue<AckNackMessage>(10000);
-    private static Map<Integer, Channel> channels = new ConcurrentHashMap<Integer, Channel>();
+    static Map<Integer, Channel> channels = new ConcurrentHashMap<Integer, Channel>();
     private static Connection connection = null;
     private static AtomicBoolean IS_RECONNECT_THREAD_RUNNING = new AtomicBoolean(false);
     static AtomicBoolean IS_CONNECTED = new AtomicBoolean(false);
