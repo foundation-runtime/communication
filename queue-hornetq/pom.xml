@@ -19,7 +19,7 @@
     <parent>
         <groupId>com.cisco.oss.foundation</groupId>
         <artifactId>foundation-common-base</artifactId>
-        <version>1.0.1-7</version>
+        <version>1.0.1-8</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.cisco.oss.foundation.queue</groupId>
@@ -104,7 +104,7 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-jms</artifactId>
-            <version>4.1.2.RELEASE</version>
+            <version>4.2.4.RELEASE</version>
         </dependency>
         <dependency>
             <groupId>org.hornetq</groupId>
@@ -136,7 +136,7 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
-            <version>4.1.2.RELEASE</version>
+            <version>4.2.4.RELEASE</version>
             <scope>test</scope>
         </dependency>
         <dependency>

@@ -19,13 +19,13 @@
     <parent>
         <groupId>com.cisco.oss.foundation</groupId>
         <artifactId>foundation-common-base</artifactId>
-        <version>1.0.1-7</version>
+        <version>1.0.1-8</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.cisco.oss.foundation</groupId>
     <artifactId>http-common</artifactId>
     <version>1.0.0-2-SNAPSHOT</version>
-    <name>client-common</name>
+    <name>http-common</name>
     <description>This project is the common library for http client and server in the cisco oss foundation runtime</description>
     <url>https://github.com/foundation-runtime/communication/http-common</url>
     <packaging>jar</packaging>
