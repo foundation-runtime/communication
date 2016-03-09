@@ -26,7 +26,8 @@
             <StructureDefinition>
                 <StructureMemberDefinition name="queue.name" type="STRING" advanced="true" required="false"/>
                 <StructureMemberDefinition name="queue.filter" type="STRING" advanced="true" required="false"/>
-                <StructureMemberDefinition name="queue.filters" type="STRING" advanced="true" required="false" isArray="true"/>
+                <StructureMemberDefinition name="queue.filters" type="STRING" advanced="true" required="false"
+                                           isArray="true"/>
                 <StructureMemberDefinition name="queue.expiration" type="LONG" advanced="true" unit="milliseconds">
                     <DefaultValue>
                         <PrimitiveValue value="1800000"/>
@@ -96,7 +97,8 @@
         </ParameterType>
 
 
-        <Parameter name="service.rabbitmq.security.isEnabled" type="BOOLEAN" description="Enable security authentication">
+        <Parameter name="service.rabbitmq.security.isEnabled" type="BOOLEAN"
+                   description="Enable security authentication">
             <DefaultValue>
                 <PrimitiveValue value="false"></PrimitiveValue>
             </DefaultValue>
@@ -174,6 +176,33 @@
                     <StructureMemberValue name="jmxPort" value="3900"/>
                 </StructureValue>
             </DefaultValue>-->
+        </Parameter>
+
+        <Parameter name="service.rabbitmq.admin.connections" isArray="true" type="STRUCTURE"
+                   description="Connection identifier for queue server(s). For HornetQ this is the connection to HornetQ's jndi service.">
+            <StructureDefinition>
+                <StructureMemberDefinition name="host" type="STRING" required="false"/>
+                <StructureMemberDefinition name="port" type="INTEGER" required="false"/>
+            </StructureDefinition>
+        </Parameter>
+
+        <Parameter name="service.rabbitmq.admin.userName" type="STRING"
+                   description="User name for accessing the Queue with security">
+            <DefaultValue>
+                <PrimitiveValue value="guest"/>
+            </DefaultValue>
+        </Parameter>
+
+        <Parameter name="service.rabbitmq.admin.password" type="STRING"
+                   description="Password for accessing the Queue with security">
+            <DefaultValue>
+                <PrimitiveValue value="guest"/>
+            </DefaultValue>
+            <EnabledBy parameterName="service.rabbitmq.security.isEnabled" operator="E">
+                <Value>
+                    <PrimitiveValue value="true"/>
+                </Value>
+            </EnabledBy>
         </Parameter>
 
         <Parameter name="service.rabbitmq.attachRetryDelay" type="INTEGER" unit="MILLISECONDS"
