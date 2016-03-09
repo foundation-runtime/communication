@@ -132,14 +132,14 @@ public class RabbitMQMessagingFactory {
             connectionFactory.setTopologyRecoveryEnabled(true);
 
             Configuration configuration = ConfigurationFactory.getConfiguration();
-            Configuration subsetBase = configuration.subset("service.queue");
+            Configuration subsetBase = configuration.subset("service.rabbitmq");
             Configuration subsetSecurity = subsetBase.subset("security");
 
             String userName = subsetSecurity.getString("userName");
             String password = subsetSecurity.getString("password");
             boolean isEnabled = subsetSecurity.getBoolean("isEnabled");
 
-            final Map<String, Map<String, String>> serverConnections = ConfigUtil.parseComplexArrayStructure("service.queue.connections");
+            final Map<String, Map<String, String>> serverConnections = ConfigUtil.parseComplexArrayStructure("service.rabbitmq.connections");
             final ArrayList<String> serverConnectionKeys = Lists.newArrayList(serverConnections.keySet());
             Collections.sort(serverConnectionKeys);
 
@@ -291,7 +291,7 @@ public class RabbitMQMessagingFactory {
                         } catch (Exception e) {
                             LOGGER.trace("reconnect failed: " + e);
                             try {
-                                Thread.sleep(ConfigurationFactory.getConfiguration().getInt("service.queue.attachRetryDelay", 10000));
+                                Thread.sleep(ConfigurationFactory.getConfiguration().getInt("service.rabbitmq.attachRetryDelay", 10000));
                             } catch (InterruptedException e1) {
                                 LOGGER.trace("thread interrupted!!!", e1);
                             }

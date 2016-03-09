@@ -69,7 +69,7 @@
                 <StringEnum value="HornetQ"/>
                 <StringEnum value="ActiveMQ"/>
             </Range>
-            <EnabledBy parameterName="service.queue.isEnabled" operator="E">
+            <EnabledBy parameterName="service.rabbitmq.isEnabled" operator="E">
                 <Value>
                     <PrimitiveValue value="true"/>
                 </Value>

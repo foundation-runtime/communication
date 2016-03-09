@@ -96,25 +96,25 @@
         </ParameterType>
 
 
-        <Parameter name="service.queue.security.isEnabled" type="BOOLEAN" description="Enable security authentication">
+        <Parameter name="service.rabbitmq.security.isEnabled" type="BOOLEAN" description="Enable security authentication">
             <DefaultValue>
                 <PrimitiveValue value="false"></PrimitiveValue>
             </DefaultValue>
         </Parameter>
 
-        <Parameter name="service.queue.security.userName" type="STRING"
+        <Parameter name="service.rabbitmq.security.userName" type="STRING"
                    description="User name for accessing the Queue with security">
             <DefaultValue>
                 <PrimitiveValue value="hquser"/>
             </DefaultValue>
         </Parameter>
 
-        <Parameter name="service.queue.security.password" type="STRING"
+        <Parameter name="service.rabbitmq.security.password" type="STRING"
                    description="Password for accessing the Queue with security">
             <DefaultValue>
                 <PrimitiveValue value="hquser"/>
             </DefaultValue>
-            <EnabledBy parameterName="service.queue.security.isEnabled" operator="E">
+            <EnabledBy parameterName="service.rabbitmq.security.isEnabled" operator="E">
                 <Value>
                     <PrimitiveValue value="true"/>
                 </Value>
@@ -122,7 +122,7 @@
         </Parameter>
 
 
-        <Parameter name="service.queue.connections" isArray="true" type="STRUCTURE"
+        <Parameter name="service.rabbitmq.connections" isArray="true" type="STRUCTURE"
                    description="Connection identifier for queue server(s). For HornetQ this is the connection to HornetQ's jndi service.">
             <StructureDefinition>
                 <StructureMemberDefinition name="host" type="STRING" required="false"/>
@@ -176,7 +176,7 @@
             </DefaultValue>-->
         </Parameter>
 
-        <Parameter name="service.queue.attachRetryDelay" type="INTEGER" unit="MILLISECONDS"
+        <Parameter name="service.rabbitmq.attachRetryDelay" type="INTEGER" unit="MILLISECONDS"
                    description="Delay between attempts to attach to the queue server(s)"
                    advanced="true">
             <DefaultValue>
