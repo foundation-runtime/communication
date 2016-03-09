@@ -173,20 +173,20 @@ public class HornetQMessagingFactory {
 
 //            nettyFactory = HornetQClient.createServerLocatorWithoutHA(new TransportConfiguration(NettyConnectorFactory.class.getName())).createSessionFactory();
             Configuration configuration = ConfigurationFactory.getConfiguration();
-            Configuration subset = configuration.subset("service.queue.connections");
+            Configuration subset = configuration.subset("service.hornetq.connections");
 
-            final Map<String, Map<String, String>> serverConnections = ConfigUtil.parseComplexArrayStructure("service.queue.connections");
+            final Map<String, Map<String, String>> serverConnections = ConfigUtil.parseComplexArrayStructure("service.hornetq.connections");
             boolean isVersionPrinted = false;
             if (serverConnections != null && !serverConnections.isEmpty()) {
                 if (isActiveActiveMode(subset)) {
                     final ArrayList<String> serverConnectionKeys = Lists.newArrayList(serverConnections.keySet());
                     Collections.sort(serverConnectionKeys);
                     for (String serverConnectionKey : serverConnectionKeys) {
-                        String host1Param = "service.queue.connections." + serverConnectionKey + ".instance1.host";
-                        String port1Param = "service.queue.connections." + serverConnectionKey + ".instance1.port";
-                        String jmxPort1Param = "service.queue.connections." + serverConnectionKey + ".instance1.jmxPort";
-                        String host2Param = "service.queue.connections." + serverConnectionKey + ".instance2.host";
-                        String port2Param = "service.queue.connections." + serverConnectionKey + ".instance2.port";
+                        String host1Param = "service.hornetq.connections." + serverConnectionKey + ".instance1.host";
+                        String port1Param = "service.hornetq.connections." + serverConnectionKey + ".instance1.port";
+                        String jmxPort1Param = "service.hornetq.connections." + serverConnectionKey + ".instance1.jmxPort";
+                        String host2Param = "service.hornetq.connections." + serverConnectionKey + ".instance2.host";
+                        String port2Param = "service.hornetq.connections." + serverConnectionKey + ".instance2.port";
                         String host1 = configuration.getString(host1Param, null);
                         String port1 = configuration.getString(port1Param, null);
                         String host2 = configuration.getString(host2Param, null);
@@ -250,7 +250,7 @@ public class HornetQMessagingFactory {
                 }
 
             } else {
-                throw new IllegalArgumentException("'service.queue.connections' must contain at least on host/port pair.");
+                throw new IllegalArgumentException("'service.hornetq.connections' must contain at least on host/port pair.");
             }
 
             setupConsumers();
@@ -449,7 +449,7 @@ public class HornetQMessagingFactory {
                     } catch (Exception e) {
                         LOGGER.trace("failed to reconnect. retrying...", e);
                         try {
-                            Thread.sleep(ConfigurationFactory.getConfiguration().getInt("service.queue.attachRetryDelay", 10000));
+                            Thread.sleep(ConfigurationFactory.getConfiguration().getInt("service.hornetq.attachRetryDelay", 10000));
                         } catch (InterruptedException e1) {
                             LOGGER.trace("thread interrupted!!!", e1);
                         }

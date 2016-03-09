@@ -25,7 +25,7 @@
     <groupId>com.cisco.oss.foundation.queue</groupId>
     <artifactId>queue-hornetq</artifactId>
     <name>queue-hornetq</name>
-    <version>1.0.4-1-SNAPSHOT</version>
+    <version>1.1.0-1-SNAPSHOT</version>
     <description>This project is a hornetq implementation for the queue-api library.</description>
     <url>https://github.com/foundation-runtime/communication/tree/master/queue-hornetq</url>
     <issueManagement>

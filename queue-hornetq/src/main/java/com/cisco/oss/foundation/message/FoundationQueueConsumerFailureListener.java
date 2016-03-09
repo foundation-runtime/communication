@@ -73,7 +73,7 @@ public class FoundationQueueConsumerFailureListener implements SessionFailureLis
                 } catch (Exception e) {
                     LOGGER.trace("failed to reconnect. retrying...", e);
                     try {
-                        Thread.sleep(ConfigurationFactory.getConfiguration().getInt("service.queue.attachRetryDelay", 10000));
+                        Thread.sleep(ConfigurationFactory.getConfiguration().getInt("service.hornetq.attachRetryDelay", 10000));
                     } catch (InterruptedException e1) {
                         LOGGER.trace("thread interrupted!!!", e1);
                     }
