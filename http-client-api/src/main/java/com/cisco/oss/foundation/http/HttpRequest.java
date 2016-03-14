@@ -111,7 +111,11 @@ public class HttpRequest implements ClientRequest{
      * Return a new instance of HttpRequest replacing the URI.
      */
     HttpRequest replaceUri(URI newURI) {
-        return (new Builder()).uri(newURI)
+        Builder builder = new Builder();
+        if(this.silentLogging){
+            builder.silentLogging();
+        }
+        return builder.uri(newURI)
                 .entity(this.getEntity())
                 .headers(this.headers)
                 .lbKey(this.lbKey)
