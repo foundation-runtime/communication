@@ -122,6 +122,7 @@ public class HttpRequest implements ClientRequest{
                 .contentType(this.contentType)
                 .queryParams(this.queryParams)
                 .FlowContext(this.flowContext)
+
                 .httpMethod(this.getHttpMethod()).build();
     }
 
