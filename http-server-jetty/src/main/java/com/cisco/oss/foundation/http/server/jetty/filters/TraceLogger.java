@@ -116,7 +116,12 @@ public class TraceLogger implements Closeable, AsyncListener {
         Enumeration<String> enames = httpReq.getHeaderNames();
         while (enames.hasMoreElements()) {
             String name = enames.nextElement();
-            builder.append("\t").append(name).append(": ").append(httpReq.getHeader(name)).append("\n");
+            String value = httpReq.getHeader(name);
+            builder.append("\t").append(name).append(": ");
+            if (value != null) {
+              builder.append(httpReq.getHeader(name));
+            } 
+            builder.append("\n");
         }
         LOGGER.debug(builder.toString());
 
