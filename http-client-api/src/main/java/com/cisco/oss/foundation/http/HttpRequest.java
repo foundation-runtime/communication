@@ -186,7 +186,15 @@ public class HttpRequest implements ClientRequest{
         }
 
         public Builder headers(Multimap<String, String> headers) {
-            request.headers = headers;
+            return headers(headers, true);
+        }
+
+        public Builder headers(Multimap<String, String> headers, boolean overrideExisting) {
+            if (overrideExisting) {
+                request.headers = headers;
+            }else{
+                request.headers.putAll(headers);
+            }
             return this;
         }
 
