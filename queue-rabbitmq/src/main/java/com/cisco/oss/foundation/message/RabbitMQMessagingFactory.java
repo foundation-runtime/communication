@@ -102,7 +102,7 @@ public class RabbitMQMessagingFactory {
                         }
 
                     } catch (Exception e) {
-                        LOGGER.error(e.toString(), e);
+                        LOGGER.error("Problem in ACK Thread: {}",e.toString(), e);
                     }
                 }
             }

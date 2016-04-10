@@ -92,6 +92,7 @@ public abstract class AbstractRabbitMQConcurrentMessageHandler extends AbstractR
     }
 
     public void onException(Message message, Throwable throwable) {
+        LOGGER.error("Problem handling message: {}. error is: {}", message, throwable.toString(), throwable);
         if(messageIdentifier != null){
             String identifier = messageIdentifier.getIdentifier(message);
             if (StringUtils.isNotEmpty(identifier)){
