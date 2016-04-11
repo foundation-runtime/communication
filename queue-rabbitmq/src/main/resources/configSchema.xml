@@ -213,6 +213,14 @@
             </DefaultValue>
         </Parameter>
 
+        <Parameter name="service.rabbitmq.requestHeartbeat" type="INTEGER" unit="SECONDS"
+                   description="Frequency of heartbeats to detect ba tcp connections and recover"
+                   advanced="true">
+            <DefaultValue>
+                <PrimitiveValue value="10"/>
+            </DefaultValue>
+        </Parameter>
+
         <Parameter name="messageHandling.threadpool.size" type="INTEGER"
                    description="set the maximun size of a thread pool that will get application messages"
                    advanced="true">

@@ -101,8 +101,9 @@ public class RabbitMQMessagingFactory {
                                 channel.basicNack(message.deliveryTag, false, message.requeue);
                         }
 
+
                     } catch (Exception e) {
-                        LOGGER.error("Problem in ACK Thread: {}",e.toString(), e);
+                        LOGGER.error("Problem in ACK Thread: {}", e.toString(), e);
                     }
                 }
             }
@@ -131,9 +132,13 @@ public class RabbitMQMessagingFactory {
             connectionFactory.setAutomaticRecoveryEnabled(true);
             connectionFactory.setTopologyRecoveryEnabled(true);
 
+
             Configuration configuration = ConfigurationFactory.getConfiguration();
             Configuration subsetBase = configuration.subset("service.rabbitmq");
             Configuration subsetSecurity = subsetBase.subset("security");
+
+            int requestHeartbeat = subsetBase.getInt("requestHeartbeat", 10);
+            connectionFactory.setRequestedHeartbeat(requestHeartbeat);
 
             String userName = subsetSecurity.getString("userName");
             String password = subsetSecurity.getString("password");
@@ -174,6 +179,14 @@ public class RabbitMQMessagingFactory {
                     IS_BLOCKED.set(false);
                 }
             });
+
+            connection.addShutdownListener(new ShutdownListener() {
+                @Override
+                public void shutdownCompleted(ShutdownSignalException cause) {
+                    LOGGER.error("Connection shutdown detected. Reason: {}", cause.toString(), cause);
+                }
+            });
+
             IS_CONNECTED.set(true);
             INIT_LATCH.countDown();
 
@@ -308,7 +321,7 @@ public class RabbitMQMessagingFactory {
         }
     }
 
-    public static boolean deleteQueue(String queueName){
+    public static boolean deleteQueue(String queueName) {
         try {
             getChannel().queueDelete(queueName);
             return true;
@@ -318,7 +331,7 @@ public class RabbitMQMessagingFactory {
         }
     }
 
-    public static boolean deleteQueue(String queueName, boolean deleteOnlyIfNotUsed, boolean deeltenlyIfNotEmpty){
+    public static boolean deleteQueue(String queueName, boolean deleteOnlyIfNotUsed, boolean deeltenlyIfNotEmpty) {
         try {
             getChannel().queueDelete(queueName, deleteOnlyIfNotUsed, deeltenlyIfNotEmpty);
             return true;
@@ -328,7 +341,7 @@ public class RabbitMQMessagingFactory {
         }
     }
 
-    public static boolean deleteExchange(String exchangeName){
+    public static boolean deleteExchange(String exchangeName) {
         try {
             getChannel().exchangeDelete(exchangeName);
             return true;
@@ -339,7 +352,7 @@ public class RabbitMQMessagingFactory {
     }
 
 
-    public static boolean deleteExchange(String exchangeName, boolean deleteOnlyIfNotUsed){
+    public static boolean deleteExchange(String exchangeName, boolean deleteOnlyIfNotUsed) {
         try {
             getChannel().exchangeDelete(exchangeName, deleteOnlyIfNotUsed);
             return true;
