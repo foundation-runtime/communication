@@ -22,6 +22,14 @@ import com.cisco.oss.foundation.configuration.FoundationConfigurationListener;
 import com.cisco.oss.foundation.configuration.FoundationConfigurationListenerRegistry;
 import com.google.common.collect.Lists;
 import com.rabbitmq.client.*;
+import net.jodah.lyra.ConnectionOptions;
+import net.jodah.lyra.Connections;
+import net.jodah.lyra.config.Config;
+import net.jodah.lyra.config.RecoveryPolicy;
+import net.jodah.lyra.event.ChannelListener;
+import net.jodah.lyra.event.ConnectionListener;
+import net.jodah.lyra.event.ConsumerListener;
+import net.jodah.lyra.util.Duration;
 import org.apache.commons.configuration.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -128,31 +136,100 @@ public class RabbitMQMessagingFactory {
 
     static void connect() {
         try {
-            ConnectionFactory connectionFactory = new ConnectionFactory();
-            connectionFactory.setAutomaticRecoveryEnabled(true);
-            connectionFactory.setTopologyRecoveryEnabled(true);
-
-
-            Configuration configuration = ConfigurationFactory.getConfiguration();
-            Configuration subsetBase = configuration.subset("service.rabbitmq");
-            Configuration subsetSecurity = subsetBase.subset("security");
-
-            int requestHeartbeat = subsetBase.getInt("requestHeartbeat", 10);
-            connectionFactory.setRequestedHeartbeat(requestHeartbeat);
-
-            String userName = subsetSecurity.getString("userName");
-            String password = subsetSecurity.getString("password");
-            boolean isEnabled = subsetSecurity.getBoolean("isEnabled");
 
             final Map<String, Map<String, String>> serverConnections = ConfigUtil.parseComplexArrayStructure("service.rabbitmq.connections");
             final ArrayList<String> serverConnectionKeys = Lists.newArrayList(serverConnections.keySet());
             Collections.sort(serverConnectionKeys);
 
-            if (isEnabled) {
-                connectionFactory.setUsername(userName);
-                connectionFactory.setPassword(password);
+            Config config = new Config()
+                    .withRecoveryPolicy(new RecoveryPolicy()
+                            .withBackoff(Duration.seconds(1), Duration.seconds(30))
+                            .withMaxAttempts(20))
+                    .withConnectionRecoveryPolicy(new RecoveryPolicy().withBackoff(Duration.seconds(1), Duration.seconds(30))
+                            .withMaxAttempts(20))
+                    .withConsumerRecovery(true)
+                    .withExchangeRecovery(true)
+                    .withQueueRecovery(true)
+                    .withConnectionListeners(new ConnectionListener() {
+                        @Override
+                        public void onCreate(Connection connection) {
+                            LOGGER.trace("connection create: {}", connection);
+                        }
 
-            }
+                        @Override
+                        public void onCreateFailure(Throwable failure) {
+                            LOGGER.error("connection create failed: {}", failure.toString(), failure);
+                        }
+
+                        @Override
+                        public void onRecoveryStarted(Connection connection) {
+                            LOGGER.trace("connection recovery started: {}", connection);
+
+                        }
+
+                        @Override
+                        public void onRecovery(Connection connection) {
+                            LOGGER.trace("connection recovered: {}", connection);
+                        }
+
+                        @Override
+                        public void onRecoveryCompleted(Connection connection) {
+                            LOGGER.trace("connection recovery completed: {}", connection);
+                        }
+
+                        @Override
+                        public void onRecoveryFailure(Connection connection, Throwable failure) {
+                            LOGGER.error("connection recovery failed: {}", failure.toString(), failure);
+                        }
+                    })
+                    .withChannelListeners(new ChannelListener() {
+                        @Override
+                        public void onCreate(Channel channel) {
+                            LOGGER.trace("channel create: {}", channel);
+                        }
+
+                        @Override
+                        public void onCreateFailure(Throwable failure) {
+                            LOGGER.error("channel create failed: {}", failure.toString(), failure);
+                        }
+
+                        @Override
+                        public void onRecoveryStarted(Channel channel) {
+                            LOGGER.trace("channel recovery started: {}", channel);
+                        }
+
+                        @Override
+                        public void onRecovery(Channel channel) {
+                            LOGGER.trace("channel recovered: {}", channel);
+                        }
+
+                        @Override
+                        public void onRecoveryCompleted(Channel channel) {
+                            LOGGER.trace("channel recovery completed: {}", channel);
+                        }
+
+                        @Override
+                        public void onRecoveryFailure(Channel channel, Throwable failure) {
+                            LOGGER.error("channel recovery failed: {}", failure.toString(), failure);
+                        }
+                    })
+                    .withConsumerListeners(new ConsumerListener() {
+                        @Override
+                        public void onRecoveryStarted(Consumer consumer, Channel channel) {
+                            LOGGER.trace("consumer create. consumer: {}, channel: {}", consumer, channel);
+                        }
+
+                        @Override
+                        public void onRecoveryCompleted(Consumer consumer, Channel channel) {
+                            LOGGER.trace("consumer recovery completed: {}, channel: {}", consumer, channel);
+                        }
+
+                        @Override
+                        public void onRecoveryFailure(Consumer consumer, Channel channel, Throwable failure) {
+                            LOGGER.error("consumer recovery failed. consumer: {}, channel: {}, error: {}", consumer, channel, failure.toString(), failure);
+                        }
+                    });
+
 
             List<Address> addresses = new ArrayList<>(5);
 
@@ -167,7 +244,42 @@ public class RabbitMQMessagingFactory {
 //              connectionFactory.setPort(Integer.parseInt(port));
             }
             Address[] addrs = new Address[0];
-            connection = connectionFactory.newConnection(addresses.toArray(addrs));
+//            connection = connectionFactory.newConnection(addresses.toArray(addrs));
+
+
+            ConnectionOptions options = new ConnectionOptions()
+                    .withAddresses(addresses.toArray(addrs));
+
+
+
+
+//            ConnectionFactory connectionFactory = new ConnectionFactory();
+//            connectionFactory.setAutomaticRecoveryEnabled(true);
+//            connectionFactory.setTopologyRecoveryEnabled(true);
+
+
+            Configuration configuration = ConfigurationFactory.getConfiguration();
+            Configuration subsetBase = configuration.subset("service.rabbitmq");
+            Configuration subsetSecurity = subsetBase.subset("security");
+
+            int requestHeartbeat = subsetBase.getInt("requestHeartbeat", 10);
+//            connectionFactory.setRequestedHeartbeat(requestHeartbeat);
+
+            String userName = subsetSecurity.getString("userName");
+            String password = subsetSecurity.getString("password");
+            boolean isEnabled = subsetSecurity.getBoolean("isEnabled");
+
+
+            if (isEnabled) {
+                options
+                        .withUsername(userName)
+                        .withPassword(password);
+
+            }
+
+            connection = Connections.create(options, config);
+
+
             connection.addBlockedListener(new BlockedListener() {
                 public void handleBlocked(String reason) throws IOException {
                     LOGGER.error("RabbitMQ connection is now blocked. Port: {}, Reason: {}", connection.getPort(), reason);
