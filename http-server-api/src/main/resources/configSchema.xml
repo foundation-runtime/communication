@@ -235,6 +235,12 @@
                         <PrimitiveValue value="false"/>
                     </DefaultValue>
                 </StructureMemberDefinition>
+                <StructureMemberDefinition name="http.multiPartEnabled" type="BOOLEAN" advanced="true"
+                                           description="Set to true to add multi part config element to your servlets on this server" required="false">
+                    <DefaultValue>
+                        <PrimitiveValue value="false"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
                 <StructureMemberDefinition name="http.servletContextPath" type="STRING" advanced="true"
                                            description="sets the servlet context path" required="false">
                     <DefaultValue>
