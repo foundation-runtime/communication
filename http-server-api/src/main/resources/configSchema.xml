@@ -124,6 +124,12 @@
                         <PrimitiveValue value="1000"/>
                     </DefaultValue>
                 </StructureMemberDefinition>
+                <StructureMemberDefinition name="http.workerThreadKeepAlive" type="INTEGER" advanced="true" required="false" unit="seconds"
+                                           description="time to keep alive idle worker threads. time is in seconds">
+                    <DefaultValue>
+                        <PrimitiveValue value="180"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
                 <StructureMemberDefinition name="http.port" type="INTEGER" description="http service port">
                     <DefaultValue>
                         <PrimitiveValue value="8080"/>
