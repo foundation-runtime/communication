@@ -36,13 +36,13 @@ import java.util.Map;
 public class HttpRequest implements ClientRequest{
 
     protected URI uri;
-    private Multimap<String, String> headers = ArrayListMultimap.create();
-    private Multimap<String, String> queryParams = ArrayListMultimap.create();
+    protected Multimap<String, String> headers = ArrayListMultimap.create();
+    protected Multimap<String, String> queryParams = ArrayListMultimap.create();
     private byte[] entity;
-    private HttpMethod httpMethod;
-    private String lbKey;
-    private FlowContext flowContext;
-    private String contentType = "application/json";
+    protected HttpMethod httpMethod;
+    protected String lbKey;
+    protected FlowContext flowContext;
+    protected String contentType = "application/json";
 
     protected boolean httpsEnabled = false;
     protected boolean retryOnServerBusy = false;
@@ -61,7 +61,7 @@ public class HttpRequest implements ClientRequest{
         this.contentType = contentType;
     }
 
-    private HttpRequest() {
+    protected HttpRequest() {
         this.httpMethod = HttpMethod.GET;
     }
 

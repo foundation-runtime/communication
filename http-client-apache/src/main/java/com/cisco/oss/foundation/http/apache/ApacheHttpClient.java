@@ -287,6 +287,12 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
             } else {
                 throw new ClientException("sending content for request type " + request.getHttpMethod() + " is not supported!");
             }
+        }else{
+            if (request instanceof ApacheHttpRequest && httpRequest instanceof HttpEntityEnclosingRequest){
+                HttpEntityEnclosingRequest httpEntityEnclosingRequestBase = (HttpEntityEnclosingRequest) httpRequest;
+                ApacheHttpRequest apacheHttpRequest = (ApacheHttpRequest) request;
+                httpEntityEnclosingRequestBase.setEntity(apacheHttpRequest.getApacheHttpEntity());
+            }
         }
 
 
