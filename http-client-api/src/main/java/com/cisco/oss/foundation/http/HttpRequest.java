@@ -110,7 +110,7 @@ public class HttpRequest implements ClientRequest{
     /**
      * Return a new instance of HttpRequest replacing the URI.
      */
-    HttpRequest replaceUri(URI newURI) {
+    public HttpRequest replaceUri(URI newURI) {
         Builder builder = new Builder();
         if(this.silentLogging){
             builder.silentLogging();

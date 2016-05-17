@@ -58,11 +58,13 @@ class TestApacheClient {
     val multipartEntityBuilder = MultipartEntityBuilder.create()
     val httpEntity = multipartEntityBuilder.build()
 
-    val httpRequest: HttpRequest = requestBuilder
+    val httpRequest: ApacheHttpRequest = requestBuilder
       .uri("")
       .contentType("mime")
       .apacheEntity(httpEntity)
       .build()
+
+    ApacheHttpClientFactory.createHttpClient("clientTest", propsConfiguration)
 
     clientTest.execute(httpRequest);
   }

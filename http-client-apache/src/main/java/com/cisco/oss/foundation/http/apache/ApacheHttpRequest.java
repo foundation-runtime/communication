@@ -30,7 +30,8 @@ public class ApacheHttpRequest extends HttpRequest {
     }
 
 
-    HttpRequest replaceUri(URI newURI) {
+    @Override
+    public HttpRequest replaceUri(URI newURI) {
         Builder builder = new Builder();
         if(this.silentLogging){
             builder.silentLogging();
@@ -157,7 +158,7 @@ public class ApacheHttpRequest extends HttpRequest {
             return this;
         }
 
-        public HttpRequest build() {
+        public ApacheHttpRequest build() {
             request.flowContext = FlowContextFactory.getFlowContext();
             request.headers.removeAll("FLOW_CONTEXT");
             request.headers.put("FLOW_CONTEXT", FlowContextFactory.serializeNativeFlowContext());
