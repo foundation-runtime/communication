@@ -1,160 +1,59 @@
-/*
- * Copyright 2015 Cisco Systems, Inc.
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *  http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- */
-
-package com.cisco.oss.foundation.http;
+package com.cisco.oss.foundation.http.apache;
 
 import com.cisco.oss.foundation.flowcontext.FlowContext;
 import com.cisco.oss.foundation.flowcontext.FlowContextFactory;
-import com.cisco.oss.foundation.loadbalancer.ClientRequest;
-import com.cisco.oss.foundation.systemversion.SystemVersionFactory;
-import com.google.common.collect.ArrayListMultimap;
+import com.cisco.oss.foundation.http.HttpMethod;
+import com.cisco.oss.foundation.http.HttpRequest;
 import com.google.common.collect.Multimap;
+import org.apache.http.HttpEntity;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
-import java.util.Collection;
-import java.util.Map;
 
 /**
- * Representation of a Http Request. This class is immutable. you should build it using the builder.
- * Created by Yair Ogen on 12/30/13.
+ * Created by Yair Ogen (yaogen) on 17/05/2016.
  */
-public class HttpRequest implements ClientRequest{
+public class ApacheHttpRequest extends HttpRequest {
 
-    protected URI uri;
-    protected Multimap<String, String> headers = ArrayListMultimap.create();
-    protected Multimap<String, String> queryParams = ArrayListMultimap.create();
-    protected byte[] entity;
-    protected HttpMethod httpMethod;
-    protected String lbKey;
-    protected FlowContext flowContext;
-    protected String contentType = "application/json";
+    private HttpEntity apacheHttpEntity;
 
-    protected boolean httpsEnabled = false;
-    protected boolean retryOnServerBusy = false;
-
-    protected boolean queryParamsParseAsMultiValue = false;
-
-
-    protected boolean silentLogging = false;
-
-
-    public String getContentType() {
-        return contentType;
+    public HttpEntity getApacheHttpEntity() {
+        return apacheHttpEntity;
     }
 
-    public void setContentType(String contentType) {
-        this.contentType = contentType;
+    public void setApacheHttpEntity(HttpEntity apacheHttpEntity) {
+        this.apacheHttpEntity = apacheHttpEntity;
     }
 
-    protected HttpRequest() {
-        this.httpMethod = HttpMethod.GET;
+    public ApacheHttpRequest() {
     }
 
-    public static Builder newBuilder() {
-        return new Builder();
-    }
 
-    public FlowContext getFlowContext() {
-        return flowContext;
-    }
-
-    public String getLbKey() {
-        return lbKey;
-    }
-
-    protected final HttpRequest setLbKey(String lbKey) {
-        this.lbKey = lbKey;
-        return this;
-    }
-
-    public final URI getUri() {
-        return uri;
-    }
-
-    protected final HttpRequest setUri(URI uri) {
-        this.uri = uri;
-        return this;
-    }
-
-    public Map<String, Collection<String>> getQueryParams() {
-        return queryParams.asMap();
-    }
-
-    public HttpMethod getHttpMethod() {
-        return httpMethod;
-    }
-
-    public Map<String, Collection<String>> getHeaders() {
-        return headers.asMap();
-    }
-
-    public byte[] getEntity() {
-        return entity;
-    }
-
-    /**
-     * Return a new instance of HttpRequest replacing the URI.
-     */
     HttpRequest replaceUri(URI newURI) {
         Builder builder = new Builder();
         if(this.silentLogging){
             builder.silentLogging();
         }
-        return builder.uri(newURI)
+        return builder
+                .apacheEntity(this.getApacheHttpEntity())
+                .uri(newURI)
                 .entity(this.getEntity())
                 .headers(this.headers)
                 .lbKey(this.lbKey)
                 .contentType(this.contentType)
                 .queryParams(this.queryParams)
                 .FlowContext(this.flowContext)
-
-                .httpMethod(this.getHttpMethod()).build();
+                .httpMethod(this.getHttpMethod())
+                .build();
     }
 
-    @Override
-    public String toString() {
-        return "HttpRequest{" +
-                "uri=" + uri +
-                ", headers=" + headers +
-                ", queryParams=" + queryParams +
-                ", httpMethod=" + httpMethod +
-                ", contentType='" + contentType + '\'' +
-                '}';
+    public static Builder newBuilder() {
+        return new Builder();
     }
 
-    public boolean isHttpsEnabled() {
-        return httpsEnabled;
-    }
-
-    public boolean isSilentLogging() {
-        return silentLogging;
-    }
-
-    public boolean isQueryParamsParseAsMultiValue() {
-        return queryParamsParseAsMultiValue;
-    }
-
-    /**
-     * The builder for the HttpRequest
-     */
-    public static class Builder {
-
-        private HttpRequest request = new HttpRequest();
+    public static class Builder extends HttpRequest.Builder{
+        private ApacheHttpRequest request = new ApacheHttpRequest();
 
         public Builder uri(URI uri) {
             request.setUri(uri);
@@ -253,14 +152,18 @@ public class HttpRequest implements ClientRequest{
             return this;
         }
 
+        public Builder apacheEntity(HttpEntity httpEntity) {
+            request.setApacheHttpEntity(httpEntity);
+            return this;
+        }
+
         public HttpRequest build() {
             request.flowContext = FlowContextFactory.getFlowContext();
             request.headers.removeAll("FLOW_CONTEXT");
             request.headers.put("FLOW_CONTEXT", FlowContextFactory.serializeNativeFlowContext());
-            request.headers.put(SystemVersionFactory.SYSTEM_VERSION, SystemVersionFactory.getSystemVersion());
             return request;
         }
     }
 
-}
 
+}
