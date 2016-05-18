@@ -32,6 +32,7 @@ import com.netflix.client.AbstractLoadBalancerAwareClient;
 import com.netflix.client.RequestSpecificRetryHandler;
 import com.netflix.client.config.DefaultClientConfigImpl;
 import com.netflix.client.config.IClientConfig;
+import com.netflix.client.http.HttpHeaders;
 import com.netflix.client.http.HttpRequest.Verb;
 import com.netflix.config.ConfigurationManager;
 import com.netflix.discovery.DefaultEurekaClientConfig;
@@ -681,10 +682,11 @@ class ApacheNetflixHttpClient extends AbstractLoadBalancerAwareClient<com.netfli
         }
 
 
-        Map<String, Collection<String>> headers = request.getHeaders();
-        for (Map.Entry<String, Collection<String>> stringCollectionEntry : headers.entrySet()) {
-            String key = stringCollectionEntry.getKey();
-            Collection<String> stringCollection = stringCollectionEntry.getValue();
+//        Map<String, Collection<String>> headers = request.getHeaders();
+        HttpHeaders headers = request.getHttpHeaders();
+        for (Map.Entry<String, String> entries :  headers.getAllHeaders()) {
+            String key = entries.getKey();
+            Collection<String> stringCollection = headers.getAllValues(key);
             String value = joiner.join(stringCollection);
             httpRequest.setHeader(key, value);
         }
