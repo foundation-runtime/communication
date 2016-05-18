@@ -58,7 +58,9 @@
     </developers>
     <properties>
         <foundation-common-base-version>1.0.1-5</foundation-common-base-version>
-        <http-client-common-version>1.1.2-4</http-client-common-version>
+        <commons-version>1.0.4-1</commons-version>
+        <http-client-common-version>1.1.2-5</http-client-common-version>
+        <http-client-api-version>1.2.0-1-SNAPSHOT</http-client-api-version>
         <logging-api-version>1.0.2-1</logging-api-version>
         <logging-log4j-version>1.0.2-1</logging-log4j-version>
         <jetty-version>8.1.16.v20140903</jetty-version>
@@ -120,6 +122,20 @@
             </plugin>            
         </plugins>
     </build>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.cisco.oss.foundation</groupId>
+                <artifactId>http-client-api</artifactId>
+                <version>${http-client-api-version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.cisco.oss.foundation</groupId>
+                <artifactId>commons</artifactId>
+                <version>${commons-version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
     <dependencies>
         <dependency>
             <groupId>com.cisco.oss.foundation</groupId>
@@ -137,12 +153,17 @@
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
-            <version>4.4.1</version>
+            <version>4.5.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpmime</artifactId>
+            <version>4.5.2</version>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpasyncclient</artifactId>
-            <version>4.1</version>
+            <version>4.1.1</version>
         </dependency>
         <dependency>
             <groupId>com.cisco.oss.foundation</groupId>
