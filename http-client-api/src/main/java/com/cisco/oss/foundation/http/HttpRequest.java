@@ -257,7 +257,9 @@ public class HttpRequest implements ClientRequest{
             request.flowContext = FlowContextFactory.getFlowContext();
             request.headers.removeAll("FLOW_CONTEXT");
             request.headers.put("FLOW_CONTEXT", FlowContextFactory.serializeNativeFlowContext());
-            request.headers.put(SystemVersionFactory.SYSTEM_VERSION, SystemVersionFactory.getSystemVersion());
+            if (SystemVersionFactory.getSystemVersion() != null) {
+                request.headers.put(SystemVersionFactory.SYSTEM_VERSION, SystemVersionFactory.getSystemVersion());
+            }
             return request;
         }
     }
