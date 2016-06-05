@@ -68,7 +68,7 @@ public class RabbitMQMessageConsumer implements MessageConsumer {
             boolean deadLetterIsEnabled = subset.getBoolean("queue.deadLetterIsEnabled", true);
             String deadLetterExchangeName = subset.getString("queue.deadLetterExchangeName", DLQ);
             String subscribedTo = isSubscription ? subset.getString("queue.subscribedTo", "") : queueName;
-            String exchangeType = isSubscription ? "topic" : "direct";
+            String exchangeType = subset.getString("queue.exchangeType", isSubscription ? "topic" : "direct");
             try {
                 RabbitMQMessagingFactory.INIT_LATCH.await();
             } catch (InterruptedException e) {
