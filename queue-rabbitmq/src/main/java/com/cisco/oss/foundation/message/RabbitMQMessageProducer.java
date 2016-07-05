@@ -67,7 +67,7 @@ class RabbitMQMessageProducer extends AbstractMessageProducer {
         isPersistent = subset.getBoolean("queue.isPersistent", true);
 
         try {
-            Channel channel = RabbitMQMessagingFactory.getChannel();
+            Channel channel = RabbitMQMessagingFactory.getProducerChannel();
             channel.exchangeDeclare(queueName, exchangeType, isDurable, false, false, null);
             isInitialized.set(true);
         } catch (QueueException e) {
@@ -108,7 +108,7 @@ class RabbitMQMessageProducer extends AbstractMessageProducer {
                 sendMessageInternal(message, messageHeaders);
             }else{
                 try {
-                    Channel channel = RabbitMQMessagingFactory.getChannel();
+                    Channel channel = RabbitMQMessagingFactory.getProducerChannel();
                     channel.exchangeDeclare(queueName, "topic", true, false, false, null);
                     isInitialized.set(true);
                     sendMessageInternal(message, messageHeaders);
@@ -134,12 +134,12 @@ class RabbitMQMessageProducer extends AbstractMessageProducer {
             if(routingKeyObj!= null  && StringUtils.isNotBlank(routingKeyObj.toString())){
                 routingKey = routingKeyObj.toString();
             }
-            RabbitMQMessagingFactory.getChannel().basicPublish(queueName, routingKey, basicProperties, message);
+            RabbitMQMessagingFactory.getProducerChannel().basicPublish(queueName, routingKey, basicProperties, message);
         } catch (AlreadyClosedException e) {
             LOGGER.warn("an error occurred trying to publish message: {}", e);
             RabbitMQMessagingFactory.channelThreadLocal.set(null);
             try {
-                RabbitMQMessagingFactory.getChannel().basicPublish(queueName, "", basicProperties, message);
+                RabbitMQMessagingFactory.getProducerChannel().basicPublish(queueName, "", basicProperties, message);
             } catch (Exception e1) {
                 startReConnectThread();
                 throw new QueueException("an error occurred trying to publish message: " + e1, e1);

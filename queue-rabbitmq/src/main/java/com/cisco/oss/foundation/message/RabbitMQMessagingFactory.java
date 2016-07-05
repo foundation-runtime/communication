@@ -47,7 +47,8 @@ public class RabbitMQMessagingFactory {
     //    private static List<Channel> channels = new CopyOnWriteArrayList<>();
     private static PriorityBlockingQueue<AckNackMessage> messageAckQueue = new PriorityBlockingQueue<AckNackMessage>(10000);
     static Map<Integer, Channel> channels = new ConcurrentHashMap<Integer, Channel>();
-    private static Connection connection = null;
+    private static Connection consumerConnection = null;
+    private static Connection producerConnection = null;
     private static AtomicBoolean IS_RECONNECT_THREAD_RUNNING = new AtomicBoolean(false);
     static AtomicBoolean IS_CONNECTED = new AtomicBoolean(false);
     static CountDownLatch INIT_LATCH = new CountDownLatch(1);
@@ -76,7 +77,12 @@ public class RabbitMQMessagingFactory {
                         channel.close();
                     }
 
-                    connection.close();
+                    if (consumerConnection != null) {
+                        consumerConnection.close();
+                    }
+                    if (producerConnection != null) {
+                        producerConnection.close();
+                    }
 
                 } catch (Exception e) {
                     LOGGER.error("can't close RabbitMQ resources, error: {}", e, e);
@@ -167,25 +173,10 @@ public class RabbitMQMessagingFactory {
 //              connectionFactory.setPort(Integer.parseInt(port));
             }
             Address[] addrs = new Address[0];
-            connection = connectionFactory.newConnection(addresses.toArray(addrs));
-            connection.addBlockedListener(new BlockedListener() {
-                public void handleBlocked(String reason) throws IOException {
-                    LOGGER.error("RabbitMQ connection is now blocked. Port: {}, Reason: {}", connection.getPort(), reason);
-                    IS_BLOCKED.set(true);
-                }
-
-                public void handleUnblocked() throws IOException {
-                    LOGGER.info("RabbitMQ connection is now un-blocked. Port: {}", connection.getPort());
-                    IS_BLOCKED.set(false);
-                }
-            });
-
-            connection.addShutdownListener(new ShutdownListener() {
-                @Override
-                public void shutdownCompleted(ShutdownSignalException cause) {
-                    LOGGER.error("Connection shutdown detected. Reason: {}", cause.toString(), cause);
-                }
-            });
+            consumerConnection = connectionFactory.newConnection(addresses.toArray(addrs));
+            producerConnection = connectionFactory.newConnection(addresses.toArray(addrs));
+            addConnectionListeners(consumerConnection);
+            addConnectionListeners(producerConnection);
 
             IS_CONNECTED.set(true);
             INIT_LATCH.countDown();
@@ -197,11 +188,51 @@ public class RabbitMQMessagingFactory {
         }
     }
 
-    static Channel getChannel() {
+    private static void addConnectionListeners(final Connection connection) {
+        connection.addBlockedListener(new BlockedListener() {
+            public void handleBlocked(String reason) throws IOException {
+                LOGGER.error("RabbitMQ connection is now blocked. Port: {}, Reason: {}", connection.getPort(), reason);
+                IS_BLOCKED.set(true);
+            }
+
+            public void handleUnblocked() throws IOException {
+                LOGGER.info("RabbitMQ connection is now un-blocked. Port: {}", connection.getPort());
+                IS_BLOCKED.set(false);
+            }
+        });
+
+        connection.addShutdownListener(new ShutdownListener() {
+            @Override
+            public void shutdownCompleted(ShutdownSignalException cause) {
+                LOGGER.error("Connection shutdown detected. Reason: {}", cause.toString(), cause);
+            }
+        });
+    }
+
+    static Channel getConsumerChannel() {
         try {
             if (channelThreadLocal.get() == null) {
-                if (connection != null) {
-                    Channel channel = connection.createChannel();
+                if (consumerConnection != null) {
+                    Channel channel = consumerConnection.createChannel();
+                    channelThreadLocal.set(channel);
+                    channels.put(channel.getChannelNumber(), channel);
+                } else {
+                    throw new QueueException("RabbitMQ appears to be down. Please try again later.");
+                }
+            }
+
+            return channelThreadLocal.get();
+        } catch (IOException e) {
+            throw new QueueException("can't create channel: " + e.toString(), e);
+        }
+
+    }
+
+    static Channel getProducerChannel() {
+        try {
+            if (channelThreadLocal.get() == null) {
+                if (producerConnection != null) {
+                    Channel channel = producerConnection.createChannel();
                     channelThreadLocal.set(channel);
                     channels.put(channel.getChannelNumber(), channel);
                 } else {
@@ -323,7 +354,7 @@ public class RabbitMQMessagingFactory {
 
     public static boolean deleteQueue(String queueName) {
         try {
-            getChannel().queueDelete(queueName);
+            getConsumerChannel().queueDelete(queueName);
             return true;
         } catch (IOException e) {
             LOGGER.warn("can't delete queue: {}", e);
@@ -333,7 +364,7 @@ public class RabbitMQMessagingFactory {
 
     public static boolean deleteQueue(String queueName, boolean deleteOnlyIfNotUsed, boolean deeltenlyIfNotEmpty) {
         try {
-            getChannel().queueDelete(queueName, deleteOnlyIfNotUsed, deeltenlyIfNotEmpty);
+            getConsumerChannel().queueDelete(queueName, deleteOnlyIfNotUsed, deeltenlyIfNotEmpty);
             return true;
         } catch (IOException e) {
             LOGGER.warn("can't delete queue: {}", e);
@@ -343,7 +374,7 @@ public class RabbitMQMessagingFactory {
 
     public static boolean deleteExchange(String exchangeName) {
         try {
-            getChannel().exchangeDelete(exchangeName);
+            getConsumerChannel().exchangeDelete(exchangeName);
             return true;
         } catch (IOException e) {
             LOGGER.warn("can't delete exchange: {}", e);
@@ -354,7 +385,7 @@ public class RabbitMQMessagingFactory {
 
     public static boolean deleteExchange(String exchangeName, boolean deleteOnlyIfNotUsed) {
         try {
-            getChannel().exchangeDelete(exchangeName, deleteOnlyIfNotUsed);
+            getConsumerChannel().exchangeDelete(exchangeName, deleteOnlyIfNotUsed);
             return true;
         } catch (IOException e) {
             LOGGER.warn("can't delete exchange: {}", e);
