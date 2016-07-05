@@ -75,7 +75,7 @@ public class RabbitMQMessageConsumer implements MessageConsumer {
             } catch (InterruptedException e) {
                 LOGGER.error("error waiting for init to finish: " + e);
             }
-            Channel channel = RabbitMQMessagingFactory.getChannel();
+            Channel channel = RabbitMQMessagingFactory.getConsumerChannel();
             channel.exchangeDeclare(subscribedTo, exchangeType, isDurable, false, false, null);
 
             Map<String, Object> args = new HashMap<String, Object>();
@@ -145,7 +145,7 @@ public class RabbitMQMessageConsumer implements MessageConsumer {
             try {
                 if (messageHandler instanceof AbstractRabbitMQMessageHandler) {
                     String consumerTag = FlowContextFactory.getFlowContext() != null ? FlowContextFactory.getFlowContext().getUniqueId() : "N/A";
-                    Channel channel = RabbitMQMessagingFactory.getChannel();
+                    Channel channel = RabbitMQMessagingFactory.getConsumerChannel();
                     this.channelNumber = channel.getChannelNumber();
                     ((AbstractRabbitMQMessageHandler) messageHandler).setChannelNumber(channelNumber);
                     this.consumerTag = channel.basicConsume(queueName, autoAck, consumerTag, (Consumer) messageHandler);
