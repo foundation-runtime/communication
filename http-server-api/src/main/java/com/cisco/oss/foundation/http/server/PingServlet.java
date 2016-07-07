@@ -33,7 +33,7 @@ import java.io.IOException;
  * Date: 10/16/13
  * Time: 3:26 PM
  */
-@Controller("probe")
+//@Controller("probe")
 public class PingServlet extends HttpServlet {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(PingServlet.class);

@@ -24,4 +24,10 @@ public class ServletConfiguration {
     public SimpleServletHandlerAdapter getSimpleServletHandlerAdapter(){
         return new SimpleServletHandlerAdapter();
     }
+
+    @ConditionalOnExpression("#{'${${spring.application.name}.http.pingtFilter.isEnabled}' != null && '${${spring.application.name}.http.pingtFilter.isEnabled}'.toLowerCase().equals('false')}")
+    @Bean
+    public PingServlet probe(){
+        return new PingServlet();
+    }
 }
