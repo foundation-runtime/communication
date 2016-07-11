@@ -25,7 +25,7 @@
     <groupId>com.cisco.oss.foundation</groupId>
     <artifactId>http-server-api</artifactId>
     <name>http-server-api</name>
-    <version>1.1.5-5-SNAPSHOT</version>
+    <version>1.1.5-6-SNAPSHOT</version>
     <description>This project is the http server api library in the cisco vss foundation runtime</description>
     <url>https://github.com/foundation-runtime/communication/http-server-api</url>
     <packaging>jar</packaging>

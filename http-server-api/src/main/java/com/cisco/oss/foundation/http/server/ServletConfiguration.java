@@ -26,7 +26,7 @@ public class ServletConfiguration {
 //    }
 
     @ConditionalOnExpression("#{'${${spring.application.name}.http.pingFilter.isEnabled}' != null && '${${spring.application.name}.http.pingFilter.isEnabled}'.toLowerCase().equals('false')}")
-    @Bean
+    @Bean (name="probe")
     public PingServlet probe(){
         return new PingServlet();
     }
