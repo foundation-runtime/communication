@@ -16,14 +16,14 @@ import org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter;
 @Configuration
 public class ServletConfiguration {
 
-    @Value("${spring.application.name}")
-    private String serviceName = null;
-
-    @ConditionalOnExpression("#{'${${spring.application.name}.http.pingFilter.isEnabled}' != null && '${${spring.application.name}.http.pingFilter.isEnabled}'.toLowerCase().equals('false')}")
-    @Bean
-    public SimpleServletHandlerAdapter getSimpleServletHandlerAdapter(){
-        return new SimpleServletHandlerAdapter();
-    }
+//    @Value("${spring.application.name}")
+//    private String serviceName = null;
+//
+//    @ConditionalOnExpression("#{'${${spring.application.name}.http.pingFilter.isEnabled}' != null && '${${spring.application.name}.http.pingFilter.isEnabled}'.toLowerCase().equals('false')}")
+//    @Bean
+//    public SimpleServletHandlerAdapter getSimpleServletHandlerAdapter(){
+//        return new SimpleServletHandlerAdapter();
+//    }
 
     @ConditionalOnExpression("#{'${${spring.application.name}.http.pingFilter.isEnabled}' != null && '${${spring.application.name}.http.pingFilter.isEnabled}'.toLowerCase().equals('false')}")
     @Bean
