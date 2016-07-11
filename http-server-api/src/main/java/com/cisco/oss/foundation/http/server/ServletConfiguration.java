@@ -19,13 +19,13 @@ public class ServletConfiguration {
     @Value("${spring.application.name}")
     private String serviceName = null;
 
-    @ConditionalOnExpression("#{'${${spring.application.name}.http.pingtFilter.isEnabled}' != null && '${${spring.application.name}.http.pingtFilter.isEnabled}'.toLowerCase().equals('false')}")
+    @ConditionalOnExpression("#{'${${spring.application.name}.http.pingFilter.isEnabled}' != null && '${${spring.application.name}.http.pingFilter.isEnabled}'.toLowerCase().equals('false')}")
     @Bean
     public SimpleServletHandlerAdapter getSimpleServletHandlerAdapter(){
         return new SimpleServletHandlerAdapter();
     }
 
-    @ConditionalOnExpression("#{'${${spring.application.name}.http.pingtFilter.isEnabled}' != null && '${${spring.application.name}.http.pingtFilter.isEnabled}'.toLowerCase().equals('false')}")
+    @ConditionalOnExpression("#{'${${spring.application.name}.http.pingFilter.isEnabled}' != null && '${${spring.application.name}.http.pingFilter.isEnabled}'.toLowerCase().equals('false')}")
     @Bean
     public PingServlet probe(){
         return new PingServlet();
