@@ -35,6 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.net.UnknownHostException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
@@ -141,12 +142,14 @@ public class RabbitMQMessagingFactory {
             final ArrayList<String> serverConnectionKeys = Lists.newArrayList(serverConnections.keySet());
             Collections.sort(serverConnectionKeys);
 
+            int maxRetryAttempts = ConfigurationFactory.getConfiguration().getInt("service.rabbitmq.maxRetryAttempts",1000);
+
             Config config = new Config()
                     .withRecoveryPolicy(new RecoveryPolicy()
                             .withBackoff(Duration.seconds(1), Duration.seconds(30))
-                            .withMaxAttempts(20))
+                            .withMaxAttempts(maxRetryAttempts))
                     .withConnectionRecoveryPolicy(new RecoveryPolicy().withBackoff(Duration.seconds(1), Duration.seconds(30))
-                            .withMaxAttempts(20))
+                            .withMaxAttempts(maxRetryAttempts))
                     .withConsumerRecovery(true)
                     .withExchangeRecovery(true)
                     .withQueueRecovery(true)
@@ -230,6 +233,7 @@ public class RabbitMQMessagingFactory {
                         }
                     });
 
+            config.getRecoverableExceptions().add(UnknownHostException.class);
 
             List<Address> addresses = new ArrayList<>(5);
 
