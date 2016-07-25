@@ -1,6 +1,7 @@
 package com.cisco.oss.foundation.core.test;
 
 import com.cisco.oss.foundation.message.RabbitMQAdmin;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -8,6 +9,7 @@ import org.junit.Test;
  */
 public class AdminTest {
 
+    @Ignore
     @Test
     public void testAdmin(){
         RabbitMQAdmin.INSTANCE.initAdmin();
