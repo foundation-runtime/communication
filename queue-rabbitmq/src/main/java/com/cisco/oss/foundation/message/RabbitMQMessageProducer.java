@@ -45,6 +45,7 @@ class RabbitMQMessageProducer extends AbstractMessageProducer {
     private String groupId = "";
     private long expiration = 1800000;
     private AtomicBoolean isInitialized = new AtomicBoolean(false);
+    private String exchangeType = "";
     private boolean isDurable = false;
     private boolean isPersistent = false;
 
@@ -61,12 +62,13 @@ class RabbitMQMessageProducer extends AbstractMessageProducer {
         //update expiration
         expiration = subset.getLong("queue.expiration", 1800000);
         groupId = subset.getString("queue.groupId", "");
+        exchangeType = subset.getString("queue.exchangeType", "topic");
         isDurable = subset.getBoolean("queue.isDurable", true);
         isPersistent = subset.getBoolean("queue.isPersistent", true);
 
         try {
             Channel channel = RabbitMQMessagingFactory.getChannel();
-            channel.exchangeDeclare(queueName, "topic", isDurable, false, false, null);
+            channel.exchangeDeclare(queueName, exchangeType, isDurable, false, false, null);
             isInitialized.set(true);
         } catch (QueueException e) {
             LOGGER.debug("can't init producer as its underlying connection is not ready");

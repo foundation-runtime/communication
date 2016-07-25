@@ -61,8 +61,10 @@ public class SystemVersionFilter extends AbstractInfraHttpFilter {
 			LOGGER.warn("problem setting system version filter: " + e, e);
 		}
 
-        ((HttpServletResponse)response).setHeader(SystemVersionFactory.SYSTEM_VERSION, SystemVersionFactory.getSystemVersion());
-        chain.doFilter(request, response);
+		if (SystemVersionFactory.getSystemVersion() != null) {
+			((HttpServletResponse)response).setHeader(SystemVersionFactory.SYSTEM_VERSION, SystemVersionFactory.getSystemVersion());
+		}
+		chain.doFilter(request, response);
 
 
 	}

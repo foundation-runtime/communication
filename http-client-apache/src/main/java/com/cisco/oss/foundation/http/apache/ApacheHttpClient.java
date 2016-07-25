@@ -278,7 +278,6 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
 
         }
 
-
         byte[] entity = request.getEntity();
         if (entity != null) {
             if (httpRequest instanceof HttpEntityEnclosingRequest) {
@@ -287,8 +286,13 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
             } else {
                 throw new ClientException("sending content for request type " + request.getHttpMethod() + " is not supported!");
             }
+        }else{
+            if (request instanceof ApacheHttpRequest && httpRequest instanceof HttpEntityEnclosingRequest){
+                HttpEntityEnclosingRequest httpEntityEnclosingRequestBase = (HttpEntityEnclosingRequest) httpRequest;
+                ApacheHttpRequest apacheHttpRequest = (ApacheHttpRequest) request;
+                httpEntityEnclosingRequestBase.setEntity(apacheHttpRequest.getApacheHttpEntity());
+            }
         }
-
 
         Map<String, Collection<String>> headers = request.getHeaders();
         for (Map.Entry<String, Collection<String>> stringCollectionEntry : headers.entrySet()) {

@@ -49,6 +49,11 @@
                         <PrimitiveValue value="false"/>
                     </DefaultValue>
                 </StructureMemberDefinition>
+                <StructureMemberDefinition name="queue.exchangeType" type="STRING" advanced="true">
+                    <DefaultValue>
+                        <PrimitiveValue value="topic"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
                 <StructureMemberDefinition name="queue.isDurable" type="BOOLEAN" advanced="true">
                     <DefaultValue>
                         <PrimitiveValue value="true"/>
@@ -65,6 +70,11 @@
                     </DefaultValue>
                 </StructureMemberDefinition>
                 <StructureMemberDefinition name="queue.subscribedTo" type="STRING" required="false" advanced="true"/>
+                <StructureMemberDefinition name="queue.isExclusive" type="BOOLEAN" required="false" advanced="true">
+                    <DefaultValue>
+                        <PrimitiveValue value="false"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
             </StructureDefinition>
         </ParameterType>
 

@@ -20,6 +20,7 @@ import com.cisco.oss.foundation.configuration.ConfigurationFactory;
 import org.slf4j.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -32,7 +33,7 @@ import java.io.IOException;
  * Date: 10/16/13
  * Time: 3:26 PM
  */
-//@Component ("/probe")
+//@Controller("probe")
 public class PingServlet extends HttpServlet {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(PingServlet.class);
@@ -42,9 +43,13 @@ public class PingServlet extends HttpServlet {
     @Value("${spring.application.name}")
     private String serviceName = null;
 
-    public PingServlet(String serviceName) {
-        this.serviceName = serviceName;
+    public PingServlet(){
         enableLogging = ConfigurationFactory.getConfiguration().getBoolean(serviceName + "http.pingFilter.enableLogging", false);
+    }
+
+    public PingServlet(String serviceName) {
+        super();
+        this.serviceName = serviceName;
     }
 
     @Override

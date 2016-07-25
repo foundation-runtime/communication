@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
+import javax.servlet.MultipartConfigElement;
 import javax.servlet.Servlet;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -207,6 +208,7 @@ public enum JettyHttpServerFactory implements HttpServerFactory, JettyHttpServer
 
         Configuration configuration = ConfigurationFactory.getConfiguration();
         boolean sessionManagerEnabled = configuration.getBoolean(serviceName + ".http.sessionManagerEnabled", false);
+        boolean multipartEnabled = configuration.getBoolean(serviceName + ".http.multiPartEnabled", false);
 
 
 //        ContextHandlerCollection handler = new ContextHandlerCollection();
@@ -228,7 +230,11 @@ public enum JettyHttpServerFactory implements HttpServerFactory, JettyHttpServer
                 context.setEventListeners(eventListeners.toArray(new EventListener[0]));
             }
 
-            context.addServlet(new ServletHolder(entry.getValue()), entry.getKey());
+            ServletHolder servletHolder = new ServletHolder(entry.getValue());
+            if (multipartEnabled) {
+                servletHolder.getRegistration().setMultipartConfig(new MultipartConfigElement(""));
+            }
+            context.addServlet(servletHolder, entry.getKey());
 
         }
 

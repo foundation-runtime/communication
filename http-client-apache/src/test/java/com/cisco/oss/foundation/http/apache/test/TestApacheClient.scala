@@ -17,16 +17,18 @@
 package com.cisco.oss.foundation.http.apache.test
 
 import java.security.cert.X509Certificate
-import javax.net.ssl.{SSLSocket, SSLSession}
+import javax.net.ssl.{SSLSession, SSLSocket}
 
 import org.apache.http.conn.ssl.X509HostnameVerifier
 import org.slf4j.LoggerFactory
-import org.junit.Test
-import com.cisco.oss.foundation.http.HttpRequest
-import com.cisco.oss.foundation.http.apache.{ApacheHttpClientFactory, ApacheHttpResponse}
-import com.cisco.oss.foundation.loadbalancer.{LoadBalancerStrategy, RequestTimeoutException, NoActiveServersException}
-import com.cisco.oss.foundation.http.api.test.{BasicHttpsTestUtil, MultithreadTestUtil, BasicHttpTestUtil}
+import org.junit.{Ignore, Test}
+import com.cisco.oss.foundation.http.{HttpMethod, HttpRequest}
+import com.cisco.oss.foundation.http.apache.{ApacheHttpClientFactory, ApacheHttpRequest, ApacheHttpResponse}
+import com.cisco.oss.foundation.loadbalancer.{LoadBalancerStrategy, NoActiveServersException, RequestTimeoutException}
+import com.cisco.oss.foundation.http.api.test.{BasicHttpTestUtil, BasicHttpsTestUtil, MultithreadTestUtil}
 import org.apache.commons.configuration.{Configuration, PropertiesConfiguration}
+import org.apache.http.HttpEntity
+import org.apache.http.entity.mime.MultipartEntityBuilder
 
 /**
  * Created by Yair Ogen on 1/19/14.
@@ -49,6 +51,25 @@ class TestApacheClient {
   val clientHttpsTest = ApacheHttpClientFactory.createHttpClient("clientHttpsTest", propsConfiguration, verifier)
 
   val LOGGER = LoggerFactory.getLogger(classOf[TestApacheClient])
+
+  @Test
+  @Ignore
+  def testMultiPart(): Unit ={
+    val requestBuilder = ApacheHttpRequest.newBuilder();
+    val multipartEntityBuilder = MultipartEntityBuilder.create()
+    val httpEntity = multipartEntityBuilder.build()
+
+    val httpRequest: ApacheHttpRequest = requestBuilder
+      .uri("")
+        .httpMethod(HttpMethod.POST)
+      .contentType("mime")
+      .apacheEntity(httpEntity)
+      .build()
+
+    ApacheHttpClientFactory.createHttpClient("clientTest", propsConfiguration)
+
+    clientTest.execute(httpRequest);
+  }
 
   @Test
   def basicGoogleFetch() {

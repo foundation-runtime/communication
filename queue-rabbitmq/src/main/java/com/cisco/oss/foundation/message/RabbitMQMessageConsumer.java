@@ -68,7 +68,8 @@ public class RabbitMQMessageConsumer implements MessageConsumer {
             boolean deadLetterIsEnabled = subset.getBoolean("queue.deadLetterIsEnabled", true);
             String deadLetterExchangeName = subset.getString("queue.deadLetterExchangeName", DLQ);
             String subscribedTo = isSubscription ? subset.getString("queue.subscribedTo", "") : queueName;
-            String exchangeType = isSubscription ? "topic" : "direct";
+            String exchangeType = subset.getString("queue.exchangeType", isSubscription ? "topic" : "direct");
+            boolean isExclusive = subset.getBoolean("queue.isExclusive", false);
             try {
                 RabbitMQMessagingFactory.INIT_LATCH.await();
             } catch (InterruptedException e) {
@@ -93,7 +94,7 @@ public class RabbitMQMessageConsumer implements MessageConsumer {
                 args.put("x-dead-letter-exchange", deadLetterExchangeName);
             }
 
-            String queue = channel.queueDeclare(queueName, isDurable, false, false, args).getQueue();
+            String queue = channel.queueDeclare(queueName, isDurable, isExclusive, false, args).getQueue();
 
             Map<String, String> filters = ConfigUtil.parseSimpleArrayAsMap(consumerName + ".queue.filters");
             if (filters != null && !filters.isEmpty()) {
