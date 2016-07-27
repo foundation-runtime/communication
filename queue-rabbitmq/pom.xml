@@ -24,7 +24,7 @@
     <groupId>com.cisco.oss.foundation.queue</groupId>
     <artifactId>queue-rabbitmq</artifactId>
     <name>queue-rabbitmq</name>
-    <version>1.5.0-3</version>
+    <version>1.5.0-4-SNAPSHOT</version>
     <description>This project is a rabbitmq implementation for the queue-api library.</description>
     <url>https://github.com/foundation-runtime/communication/tree/master/queue-rabbitmq</url>
     <issueManagement>
@@ -56,7 +56,7 @@
         <connection>scm:git:git@github.com:foundation-runtime/communication.git</connection>
         <developerConnection>scm:git:git@github.com:foundation-runtime/communication.git</developerConnection>
         <url>https://github.com/foundation-runtime/communication.git</url>
-        <tag>queue-rabbitmq-1.5.0-3</tag>
+        <tag>HEAD</tag>
     </scm>
     <organization>
         <name>Cisco</name>
