@@ -24,7 +24,7 @@
     <groupId>com.cisco.oss.foundation.queue</groupId>
     <artifactId>queue-rabbitmq</artifactId>
     <name>queue-rabbitmq</name>
-    <version>1.4.0-3-SNAPSHOT</version>
+    <version>1.5.0-3-SNAPSHOT</version>
     <description>This project is a rabbitmq implementation for the queue-api library.</description>
     <url>https://github.com/foundation-runtime/communication/tree/master/queue-rabbitmq</url>
     <issueManagement>
@@ -110,6 +110,11 @@
             <groupId>com.rabbitmq</groupId>
             <artifactId>amqp-client</artifactId>
             <version>${rabbitmq-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>net.jodah</groupId>
+            <artifactId>lyra</artifactId>
+            <version>0.5.2</version>
         </dependency>
         <dependency>
             <groupId>com.cisco.oss.foundation</groupId>

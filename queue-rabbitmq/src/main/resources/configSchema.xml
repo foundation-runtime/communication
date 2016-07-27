@@ -134,6 +134,14 @@
         </Parameter>
 
 
+        <Parameter name="service.rabbitmq.maxRetryAttempts" type="INTEGER"
+                   description="Max times rabbit client rties to automatically reconnect">
+            <DefaultValue>
+                <PrimitiveValue value="1000"/>
+            </DefaultValue>
+        </Parameter>
+
+
         <Parameter name="service.rabbitmq.connections" isArray="true" type="STRUCTURE"
                    description="Connection identifier for queue server(s). For HornetQ this is the connection to HornetQ's jndi service.">
             <StructureDefinition>
@@ -141,11 +149,6 @@
                 <StructureMemberDefinition name="port" type="INTEGER" required="false">
                     <!--<DefaultValue>
                         <PrimitiveValue value="5900"/>
-                    </DefaultValue>-->
-                </StructureMemberDefinition>
-                <StructureMemberDefinition name="jmxPort" type="INTEGER" required="false">
-                    <!--<DefaultValue>
-                        <PrimitiveValue value="3900"/>
                     </DefaultValue>-->
                 </StructureMemberDefinition>
                 <StructureMemberDefinition name="instance1" type="STRUCTURE" required="false">
