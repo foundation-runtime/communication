@@ -51,11 +51,16 @@ public class FlowContextFilter extends AbstractInfraHttpFilter {
 
         final long startTime = System.currentTimeMillis();
 
+        String actualFCHeader = HttpServerFactory.FLOW_CONTEXT_HEADER_UPPER;
         try {
             HttpServletRequest httpServletRequest = (HttpServletRequest)request;
-            String flowCtxtStr = httpServletRequest.getHeader(HttpServerFactory.FLOW_CONTEXT_HEADER);
-            if(!Strings.isNullOrEmpty(flowCtxtStr)){
-                FlowContextFactory.deserializeNativeFlowContext(flowCtxtStr);
+            String flowCtxtStrLower = httpServletRequest.getHeader(HttpServerFactory.FLOW_CONTEXT_HEADER_LOWER);
+            String flowCtxtStrUpper = httpServletRequest.getHeader(HttpServerFactory.FLOW_CONTEXT_HEADER_UPPER);
+            if(!Strings.isNullOrEmpty(flowCtxtStrLower)){
+                FlowContextFactory.deserializeNativeFlowContext(flowCtxtStrLower);
+                actualFCHeader = HttpServerFactory.FLOW_CONTEXT_HEADER_LOWER;
+            }else if(!Strings.isNullOrEmpty(flowCtxtStrUpper)){
+                FlowContextFactory.deserializeNativeFlowContext(flowCtxtStrUpper);
             }else{
                 FlowContextFactory.createFlowContext();
             }
@@ -64,7 +69,7 @@ public class FlowContextFilter extends AbstractInfraHttpFilter {
 			LOGGER.warn("problem setting flow context filter: " + e, e);
 		}
 
-        ((HttpServletResponse)response).setHeader(HttpServerFactory.FLOW_CONTEXT_HEADER, FlowContextFactory.serializeNativeFlowContext());
+        ((HttpServletResponse)response).setHeader(actualFCHeader, FlowContextFactory.serializeNativeFlowContext());
         chain.doFilter(request, response);
 
 		if (request.isAsyncStarted()) {

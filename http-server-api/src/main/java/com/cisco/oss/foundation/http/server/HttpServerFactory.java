@@ -31,7 +31,8 @@ import java.util.Map;
 public interface HttpServerFactory {
 
     static final String X_FORWARD_FOR_HEADER = "x-forwarded-for";
-    static final String FLOW_CONTEXT_HEADER = "FLOW_CONTEXT";
+    static final String FLOW_CONTEXT_HEADER_UPPER = "FLOW_CONTEXT";
+    static final String FLOW_CONTEXT_HEADER_LOWER = "flow_context";
 
     /**
      * start a new http server
