@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -41,20 +42,26 @@ public class HttpMethodFilter extends AbstractInfraHttpFilter {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(HttpMethodFilter.class);
 	private final Set<String> methods = new HashSet<String>(5);
+//	@Autowired
+//	private ConfigurationFactory configurationFactory;
 	
 	public HttpMethodFilter(){
 		super();
-		methods.add("TRACE");
-		updateAllowedMethodsFromConfig(serviceName);
+
 	}
 
     public HttpMethodFilter(String serviceName){
 		super(serviceName);
+		init();
+	}
+
+	@PostConstruct
+	public void init() {
 		methods.add("TRACE");
 		updateAllowedMethodsFromConfig(serviceName);
 	}
 
-	
+
 	private void updateAllowedMethodsFromConfig(String serviceName) {
 		Configuration configuration = ConfigurationFactory.getConfiguration();
 		Configuration subset = configuration.subset(serviceName + ".http.httpMethodFilter.methods");

@@ -28,10 +28,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
+import java.io.IOException;
 import java.util.*;
 
 @Component
@@ -51,6 +52,11 @@ public class MonitoringFilter extends AbstractInfraHttpFilter {
 
     public MonitoringFilter() {
         super();
+
+    }
+
+    @PostConstruct
+    public void initMonitoringFilter() {
         description = ConfigurationFactory.getConfiguration().getString(serviceName + ".http.serviceDescription", "DEFAULT_DESCRIPTION");
         port = ConfigurationFactory.getConfiguration().getInt(serviceName + ".http.port", 8080);
         serviceDetails = new ServiceDetails(description, serviceName, "HTTP", port);
@@ -223,7 +229,7 @@ public class MonitoringFilter extends AbstractInfraHttpFilter {
 
     @Override
     protected boolean isEnabledByDefault() {
-        return true;
+        return false;
     }
 
 

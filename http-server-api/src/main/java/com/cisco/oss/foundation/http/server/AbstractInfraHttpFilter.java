@@ -17,10 +17,12 @@
 package com.cisco.oss.foundation.http.server;
 
 import com.cisco.oss.foundation.configuration.ConfigurationFactory;
-import org.apache.commons.configuration.Configuration;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
@@ -34,27 +36,36 @@ import java.util.Map;
  * @author Yair Ogen
  * 
  */
-@Component
+@Service
+@Order(2)
 public abstract class AbstractInfraHttpFilter implements Filter {
 
-
+    @Autowired
+    private ConfigurationFactory configurationFactory;
 
 	@Value("${spring.application.name}")
 	protected String serviceName = null;//ConfigurationFactory.getConfiguration().getString("spring.application.name");
 	protected String enabledKey = null;
-	private static boolean filterConfigurationDynamicRefreshEnabled = ConfigurationFactory.getConfiguration().getBoolean("http.filterConfigurationDynamicRefreshEnabled", false);
+	private static boolean filterConfigurationDynamicRefreshEnabled = false;
 	protected Map<String, String> filterConfigCache = new HashMap<String, String>();
-	private Configuration configuration = ConfigurationFactory.getConfiguration();
 
 	public AbstractInfraHttpFilter() {
-		if(serviceName == null){
-			serviceName = ConfigurationFactory.getConfiguration().getString("spring.application.name");
-		}
-		this.enabledKey = serviceName + "." + getKillSwitchFlag();
+//        init();
     }
+
+    @PostConstruct
+    public void init() {
+        filterConfigurationDynamicRefreshEnabled = ConfigurationFactory.getConfiguration().getBoolean("http.filterConfigurationDynamicRefreshEnabled", false);
+        if(serviceName == null){
+            serviceName = ConfigurationFactory.getConfiguration().getString("spring.application.name");
+        }
+        this.enabledKey = serviceName + "." + getKillSwitchFlag();
+    }
+
     public AbstractInfraHttpFilter(String serviceName) {
 		this.serviceName = serviceName;
 		this.enabledKey = serviceName + "." + getKillSwitchFlag();
+		init();
     }
 
 	@Override
@@ -92,11 +103,11 @@ public abstract class AbstractInfraHttpFilter implements Filter {
     protected boolean getConfigValue(String key, boolean defaultValue) {
 
         if (filterConfigurationDynamicRefreshEnabled) {
-            return configuration.getBoolean(key, defaultValue);
+            return ConfigurationFactory.getConfiguration().getBoolean(key, defaultValue);
         } else {
 
             if (!filterConfigCache.containsKey(key)) {
-                filterConfigCache.put(key, configuration.getBoolean(key, defaultValue)+"");
+                filterConfigCache.put(key, ConfigurationFactory.getConfiguration().getBoolean(key, defaultValue)+"");
             }
 
             return Boolean.valueOf(filterConfigCache.get(key));
@@ -106,11 +117,11 @@ public abstract class AbstractInfraHttpFilter implements Filter {
 	protected String getConfigValue(String key, String defaultValue) {
 
 		if (filterConfigurationDynamicRefreshEnabled) {
-			return configuration.getString(key, defaultValue);
+			return ConfigurationFactory.getConfiguration().getString(key, defaultValue);
 		} else {
 
 			if (!filterConfigCache.containsKey(key)) {
-				filterConfigCache.put(key, configuration.getString(key, defaultValue));
+				filterConfigCache.put(key, ConfigurationFactory.getConfiguration().getString(key, defaultValue));
 			}
 
 			return filterConfigCache.get(key);

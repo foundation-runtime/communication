@@ -17,10 +17,9 @@
 package com.cisco.oss.foundation.http.server;
 
 import com.cisco.oss.foundation.configuration.ConfigurationFactory;
-import org.slf4j.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Controller;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;

@@ -19,8 +19,6 @@ package com.cisco.oss.foundation.http.server;
 import com.cisco.oss.foundation.systemversion.SystemVersionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.annotation.Order;
-import org.springframework.stereotype.Component;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -33,8 +31,8 @@ import java.io.IOException;
 /**
  * Thia filter will extract the system version from a known header and create it if ti doesn't exist.
  */
-@Component
-@Order(11)
+//@Component
+//@Order(11)
 public class SystemVersionFilter extends AbstractInfraHttpFilter {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(SystemVersionFilter.class);
