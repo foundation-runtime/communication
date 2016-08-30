@@ -2,10 +2,12 @@ package com.cisco.oss.foundation.http.server.jetty;
 
 import com.cisco.oss.foundation.configuration.ConfigurationFactory;
 import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.ErrorHandler;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
+import org.eclipse.jetty.webapp.WebAppContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.embedded.jetty.JettyEmbeddedServletContainerFactory;
@@ -38,6 +40,7 @@ public class EmbeddedJettyConfig {
         int idleTimeout = ConfigurationFactory.getConfiguration().getInt(serviceName + ".http.connectionIdleTime",180000);
         int acceptQueueSize = ConfigurationFactory.getConfiguration().getInt(serviceName + ".http.acceptQueueSize", 0);
         final JettyEmbeddedServletContainerFactory factory =  new JettyEmbeddedServletContainerFactory(Integer.valueOf(port));
+
         factory.addServerCustomizers(new JettyServerCustomizer() {
             @Override
             public void customize(final Server server) {
@@ -52,6 +55,10 @@ public class EmbeddedJettyConfig {
 
                 if(errorHandler != null){
                     server.addBean(errorHandler);
+                    Handler handler = server.getHandler();
+                    if (handler instanceof WebAppContext){
+                        ((WebAppContext)handler).setErrorHandler(errorHandler);
+                    }
                 }
 
 //                threadPool.setIdleTimeout(Integer.valueOf(idleTimeout));
