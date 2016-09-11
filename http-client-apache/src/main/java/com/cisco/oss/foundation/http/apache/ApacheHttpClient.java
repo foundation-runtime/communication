@@ -213,6 +213,22 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
     }
 
     @Override
+    public void executeDirect(HttpRequest request, ResponseCallback responseCallback) {
+
+        org.apache.http.HttpRequest httpRequest = null;
+
+        Joiner joiner = Joiner.on(",").skipNulls();
+        URI requestUri = buildUri(request, joiner);
+
+        httpRequest = buildHttpUriRequest(request, joiner, requestUri);
+
+        HttpHost httpHost = new HttpHost(requestUri.getHost(),requestUri.getPort(),requestUri.getScheme());
+
+        httpAsyncClient.execute(httpHost, httpRequest, new FoundationDirectFutureCallBack(apiName, request, this, responseCallback));
+
+    }
+
+    @Override
     public HttpResponse executeDirect(HttpRequest request) {
 
         org.apache.http.HttpRequest httpRequest = null;
@@ -406,6 +422,42 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
             }
         } catch (IOException e) {
             LOGGER.warn("can't close http client: {}", e);
+        }
+    }
+
+    private static class FoundationDirectFutureCallBack implements FutureCallback<org.apache.http.HttpResponse> {
+
+        private ResponseCallback responseCallback;
+        private String apiName;
+        private HttpRequest request;
+        private ApacheHttpClient apacheHttpClient;
+
+        public FoundationDirectFutureCallBack(String apiName, HttpRequest request, ApacheHttpClient apacheHttpClient, ResponseCallback responseCallback) {
+            this.responseCallback=responseCallback;
+            this.apiName = apiName;
+            this.request = request;
+            this.apacheHttpClient = apacheHttpClient;
+        }
+
+        @Override
+        public void completed(org.apache.http.HttpResponse response) {
+            ApacheHttpResponse apacheHttpResponse = new ApacheHttpResponse(response, request.getUri(), apacheHttpClient.isAutoCloseable());
+            if (request.isSilentLogging()) {
+                LOGGER.trace("got response status: {} for request: {}", apacheHttpResponse.getStatus(), apacheHttpResponse.getRequestedURI());
+            }else{
+                LOGGER.info("got response status: {} for request: {}", apacheHttpResponse.getStatus(), apacheHttpResponse.getRequestedURI());
+            }
+            responseCallback.completed(apacheHttpResponse);
+        }
+
+        @Override
+        public void failed(Exception ex) {
+            responseCallback.failed(ex);
+        }
+
+        @Override
+        public void cancelled() {
+            responseCallback.cancelled();
         }
     }
 
