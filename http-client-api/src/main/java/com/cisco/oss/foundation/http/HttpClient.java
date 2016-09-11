@@ -44,6 +44,13 @@ public interface HttpClient<S extends HttpRequest, R extends HttpResponse> {
     R executeDirect(S request);
 
     /**
+     * execute a request directly - assumes a fully constructed url
+     * @param request - the http request
+     * * @param responseCallback - teh call back that will get the response asynchronously.
+     */
+    void executeDirect(S request, ResponseCallback<R> responseCallback);
+
+    /**
      * execute with load balancing. by default RoundRobin will be used. this api assumes partial uri in the request
      * @param request - the http request
      * @return the http response
