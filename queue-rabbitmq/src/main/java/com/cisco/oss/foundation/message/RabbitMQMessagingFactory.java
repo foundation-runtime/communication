@@ -35,6 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.net.NoRouteToHostException;
 import java.net.UnknownHostException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -61,6 +62,10 @@ public class RabbitMQMessagingFactory {
     static AtomicBoolean IS_CONNECTED = new AtomicBoolean(false);
     static CountDownLatch INIT_LATCH = new CountDownLatch(1);
     static AtomicBoolean IS_BLOCKED = new AtomicBoolean(false);
+    static AtomicBoolean IS_CONN_OR_CH_UP_INT = new AtomicBoolean(false);
+    static AtomicBoolean IS_CONSUMER_UP_INT = new AtomicBoolean(false);
+
+
 
 
     static {
@@ -162,6 +167,7 @@ public class RabbitMQMessagingFactory {
                         @Override
                         public void onCreateFailure(Throwable failure) {
                             LOGGER.error("connection create failed: {}", failure.toString(), failure);
+                            IS_CONN_OR_CH_UP_INT.set(false);
                         }
 
                         @Override
@@ -178,11 +184,13 @@ public class RabbitMQMessagingFactory {
                         @Override
                         public void onRecoveryCompleted(Connection connection) {
                             LOGGER.trace("connection recovery completed: {}", connection);
+                            IS_CONN_OR_CH_UP_INT.set(true);
                         }
 
                         @Override
                         public void onRecoveryFailure(Connection connection, Throwable failure) {
                             LOGGER.error("connection recovery failed: {}", failure.toString(), failure);
+                            IS_CONN_OR_CH_UP_INT.set(false);
                         }
                     })
                     .withChannelListeners(new ChannelListener() {
@@ -194,6 +202,7 @@ public class RabbitMQMessagingFactory {
                         @Override
                         public void onCreateFailure(Throwable failure) {
                             LOGGER.error("channel create failed: {}", failure.toString(), failure);
+                            IS_CONN_OR_CH_UP_INT.set(false);
                         }
 
                         @Override
@@ -209,11 +218,13 @@ public class RabbitMQMessagingFactory {
                         @Override
                         public void onRecoveryCompleted(Channel channel) {
                             LOGGER.trace("channel recovery completed: {}", channel);
+                            IS_CONN_OR_CH_UP_INT.set(true);
                         }
 
                         @Override
                         public void onRecoveryFailure(Channel channel, Throwable failure) {
                             LOGGER.error("channel recovery failed: {}", failure.toString(), failure);
+                            IS_CONN_OR_CH_UP_INT.set(false);
                         }
                     })
                     .withConsumerListeners(new ConsumerListener() {
@@ -225,15 +236,18 @@ public class RabbitMQMessagingFactory {
                         @Override
                         public void onRecoveryCompleted(Consumer consumer, Channel channel) {
                             LOGGER.trace("consumer recovery completed: {}, channel: {}", consumer, channel);
+                            IS_CONSUMER_UP_INT.set(true);
                         }
 
                         @Override
                         public void onRecoveryFailure(Consumer consumer, Channel channel, Throwable failure) {
                             LOGGER.error("consumer recovery failed. consumer: {}, channel: {}, error: {}", consumer, channel, failure.toString(), failure);
+                            IS_CONSUMER_UP_INT.set(false);
                         }
                     });
 
             config.getRecoverableExceptions().add(UnknownHostException.class);
+            config.getRecoverableExceptions().add(NoRouteToHostException.class);
 
             List<Address> addresses = new ArrayList<>(5);
 
@@ -244,23 +258,11 @@ public class RabbitMQMessagingFactory {
                 String host = serverConnection.get("host");
                 int port = Integer.parseInt(serverConnection.get("port"));
                 addresses.add(new Address(host, port));
-//              connectionFactory.setHost(host);
-//              connectionFactory.setPort(Integer.parseInt(port));
             }
             Address[] addrs = new Address[0];
-//            connection = connectionFactory.newConnection(addresses.toArray(addrs));
-
 
             ConnectionOptions options = new ConnectionOptions()
                     .withAddresses(addresses.toArray(addrs));
-
-
-
-
-//            ConnectionFactory connectionFactory = new ConnectionFactory();
-//            connectionFactory.setAutomaticRecoveryEnabled(true);
-//            connectionFactory.setTopologyRecoveryEnabled(true);
-
 
             Configuration configuration = ConfigurationFactory.getConfiguration();
             Configuration subsetBase = configuration.subset("service.rabbitmq");
@@ -304,6 +306,8 @@ public class RabbitMQMessagingFactory {
             });
 
             IS_CONNECTED.set(true);
+            IS_CONN_OR_CH_UP_INT.set(true);
+            IS_CONSUMER_UP_INT.set(true);
             INIT_LATCH.countDown();
 
         } catch (Exception e) {
@@ -476,6 +480,14 @@ public class RabbitMQMessagingFactory {
             LOGGER.warn("can't delete exchange: {}", e);
             return false;
         }
+    }
+
+    public static Boolean isConnectionOrChannelUp() {
+        return IS_CONN_OR_CH_UP_INT.get();
+    }
+
+    public static Boolean isConsumerUp() {
+        return IS_CONSUMER_UP_INT.get();
     }
 
 
