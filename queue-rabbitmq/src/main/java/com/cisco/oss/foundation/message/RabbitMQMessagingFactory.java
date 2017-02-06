@@ -173,6 +173,7 @@ public class RabbitMQMessagingFactory {
                         @Override
                         public void onRecoveryStarted(Connection connection) {
                             LOGGER.trace("connection recovery started: {}", connection);
+                            IS_CONNECCTION_OR_CHANNEL_UP.set(false);
 
                         }
 
@@ -208,6 +209,7 @@ public class RabbitMQMessagingFactory {
                         @Override
                         public void onRecoveryStarted(Channel channel) {
                             LOGGER.trace("channel recovery started: {}", channel);
+                            IS_CONNECCTION_OR_CHANNEL_UP.set(false);
                         }
 
                         @Override
@@ -231,6 +233,7 @@ public class RabbitMQMessagingFactory {
                         @Override
                         public void onRecoveryStarted(Consumer consumer, Channel channel) {
                             LOGGER.trace("consumer create. consumer: {}, channel: {}", consumer, channel);
+                            IS_CONSUMER_UP.set(false);
                         }
 
                         @Override
