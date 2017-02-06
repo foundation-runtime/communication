@@ -13,6 +13,14 @@ public class AdminTest {
     @Test
     public void testAdmin(){
         RabbitMQAdmin.INSTANCE.initAdmin();
-        RabbitMQAdmin.INSTANCE.getQueueLength("Yair-test-queue");
+        int testQueueLength = RabbitMQAdmin.INSTANCE.getQueueLength("Yair-test-queue");
+        System.out.println("testQueueLength: " + testQueueLength);
+        String overview = "";
+        for (int i=0; i<10;i++) {
+            overview = RabbitMQAdmin.INSTANCE.getOverview(true);
+        }
+        System.out.println("overview: " + overview);
+
+
     }
 }
