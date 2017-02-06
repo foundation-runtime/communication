@@ -24,7 +24,7 @@ import java.util.Map;
 public enum RabbitMQAdmin {
     INSTANCE;
 
-    private RabbitMQAdmin(){
+    private RabbitMQAdmin() {
         Configuration configuration = ConfigurationFactory.getConfiguration();
 
         final Map<String, Map<String, String>> serverConnections = ConfigUtil.parseComplexArrayStructure("service.rabbitmq.admin.connections");
@@ -47,20 +47,24 @@ public enum RabbitMQAdmin {
     }
 
     private HttpClient httpClient;
+    private String authStringEncoded;
 
-    public void initAdmin(){
-        if(httpClient== null){
+    public void initAdmin(String adminUser, String adminPwd) {
+        if (httpClient == null) {
             httpClient = ApacheHttpClientFactory.createHttpClient("rabbitMqAdmin");
+            String authString = adminUser + ":" + adminPwd;
+            byte[] authEncBytes = Base64.encodeBase64(authString.getBytes());
+            authStringEncoded = new String(authEncBytes);
         }
     }
 
-    public int getQueueLength(String queueName){
-
+    public void initAdmin() {
         String adminUser = ConfigurationFactory.getConfiguration().getString("service.rabbitmq.admin.userName");
         String adminPwd = ConfigurationFactory.getConfiguration().getString("service.rabbitmq.admin.password");
-        String authString = adminUser + ":" + adminPwd;
-        byte[] authEncBytes = Base64.encodeBase64(authString.getBytes());
-        String authStringEnc = new String(authEncBytes);
+        initAdmin(adminUser, adminPwd);
+    }
+
+    public int getQueueLength(String queueName) {
 
 
         String uri = "api/queues/%2f/" + queueName;
@@ -68,7 +72,7 @@ public enum RabbitMQAdmin {
                 .uri(uri)
                 .httpMethod(HttpMethod.GET)
                 .header("Accept", "application/json")
-                .header("Authorization", "Basic " + authStringEnc)
+                .header("Authorization", "Basic " + authStringEncoded)
                 .build();
 
         HttpResponse httpResponse = null;
@@ -79,10 +83,39 @@ public enum RabbitMQAdmin {
         }
         int status = httpResponse.getStatus();
         String responseAsString = httpResponse.getResponseAsString();
-        if(status == 200){
+        if (status == 200) {
             Object queueLength = JsonPath.read(responseAsString, "$.backing_queue_status.len");
-            return (Integer)queueLength;
-        }else{
+            return (Integer) queueLength;
+        } else {
+            throw new RabbitMQAdminException("Got bad response from rabbitmq server. Code: " + status + ". Reason: " + responseAsString);
+        }
+    }
+
+    public String getOverview() {
+        return getOverview(false);
+    }
+
+    public String getOverview(boolean getFullOverview) {
+
+        String uri = "api/overview";
+        HttpRequest httpRequest = HttpRequest.newBuilder()
+                .uri(uri)
+                .httpMethod(getFullOverview ? HttpMethod.GET : HttpMethod.HEAD)
+                .header("Accept", "application/json")
+                .header("Authorization", "Basic " + authStringEncoded)
+                .build();
+
+        HttpResponse httpResponse = null;
+        try {
+            httpResponse = httpClient.execute(httpRequest);
+        } catch (Exception e) {
+            throw new RabbitMQAdminException("Can't execute rabbitmq admin request. error is: " + e, e);
+        }
+        int status = httpResponse.getStatus();
+        String responseAsString = httpResponse.getResponseAsString();
+        if (status == 200) {
+            return responseAsString;
+        } else {
             throw new RabbitMQAdminException("Got bad response from rabbitmq server. Code: " + status + ". Reason: " + responseAsString);
         }
     }
