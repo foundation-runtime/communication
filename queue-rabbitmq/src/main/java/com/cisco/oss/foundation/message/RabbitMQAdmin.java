@@ -49,15 +49,19 @@ public enum RabbitMQAdmin {
     private HttpClient httpClient;
     private String authStringEncoded;
 
-    public void initAdmin() {
+    public void initAdmin(String adminUser, String adminPwd) {
         if (httpClient == null) {
             httpClient = ApacheHttpClientFactory.createHttpClient("rabbitMqAdmin");
-            String adminUser = ConfigurationFactory.getConfiguration().getString("service.rabbitmq.admin.userName");
-            String adminPwd = ConfigurationFactory.getConfiguration().getString("service.rabbitmq.admin.password");
             String authString = adminUser + ":" + adminPwd;
             byte[] authEncBytes = Base64.encodeBase64(authString.getBytes());
             authStringEncoded = new String(authEncBytes);
         }
+    }
+
+    public void initAdmin() {
+        String adminUser = ConfigurationFactory.getConfiguration().getString("service.rabbitmq.admin.userName");
+        String adminPwd = ConfigurationFactory.getConfiguration().getString("service.rabbitmq.admin.password");
+        initAdmin(adminUser, adminPwd);
     }
 
     public int getQueueLength(String queueName) {
