@@ -41,7 +41,7 @@ import java.util.Set;
 public class HttpMethodFilter extends AbstractInfraHttpFilter {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(HttpMethodFilter.class);
-	private final Set<String> methods = new HashSet<String>(5);
+	private static final Set<String> methods = new HashSet<String>(5);
 //	@Autowired
 //	private ConfigurationFactory configurationFactory;
 	
