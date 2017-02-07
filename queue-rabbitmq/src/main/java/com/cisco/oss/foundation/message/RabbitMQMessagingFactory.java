@@ -305,6 +305,7 @@ public class RabbitMQMessagingFactory {
                 @Override
                 public void shutdownCompleted(ShutdownSignalException cause) {
                     LOGGER.error("Connection shutdown detected. Reason: {}", cause.toString(), cause);
+                    IS_CONNECTED.set(false);
                 }
             });
 
@@ -323,7 +324,7 @@ public class RabbitMQMessagingFactory {
     static Channel getChannel() {
         try {
             if (channelThreadLocal.get() == null) {
-                if (connection != null) {
+                if (connection != null && connection.isOpen()) {
                     Channel channel = connection.createChannel();
                     channelThreadLocal.set(channel);
                     channels.put(channel.getChannelNumber(), channel);
