@@ -128,8 +128,8 @@ class RabbitMQMessageProducer extends AbstractMessageProducer {
     private void sendMessageInternal(byte[] message, Map<String, Object> messageHeaders) {
         int deliveryMode = isPersistent ? 2 : 1;
         AMQP.BasicProperties basicProperties = new AMQP.BasicProperties.Builder().headers(messageHeaders).deliveryMode(deliveryMode).build();
+        String routingKey = "";
         try {
-            String routingKey = "";
             Object routingKeyObj = messageHeaders.get(RabbitMQConstants.ROUTING_KEY);
             if(routingKeyObj!= null  && StringUtils.isNotBlank(routingKeyObj.toString())){
                 routingKey = routingKeyObj.toString();
@@ -139,7 +139,7 @@ class RabbitMQMessageProducer extends AbstractMessageProducer {
             LOGGER.warn("an error occurred trying to publish message: {}", e);
             RabbitMQMessagingFactory.channelThreadLocal.set(null);
             try {
-                RabbitMQMessagingFactory.getChannel().basicPublish(queueName, "", basicProperties, message);
+                RabbitMQMessagingFactory.getChannel().basicPublish(queueName, routingKey, basicProperties, message);
             } catch (Exception e1) {
                 startReConnectThread();
                 throw new QueueException("an error occurred trying to publish message: " + e1, e1);
