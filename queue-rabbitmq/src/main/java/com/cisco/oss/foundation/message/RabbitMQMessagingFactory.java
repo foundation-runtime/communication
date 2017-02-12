@@ -20,8 +20,12 @@ import com.cisco.oss.foundation.configuration.ConfigUtil;
 import com.cisco.oss.foundation.configuration.ConfigurationFactory;
 import com.cisco.oss.foundation.configuration.FoundationConfigurationListener;
 import com.cisco.oss.foundation.configuration.FoundationConfigurationListenerRegistry;
+import com.codahale.metrics.JmxReporter;
+import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.Lists;
 import com.rabbitmq.client.*;
+import com.rabbitmq.client.impl.StandardMetricsCollector;
+import com.rabbitmq.client.impl.nio.NioParams;
 import net.jodah.lyra.ConnectionOptions;
 import net.jodah.lyra.Connections;
 import net.jodah.lyra.config.Config;
@@ -37,7 +41,10 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.net.NoRouteToHostException;
 import java.net.UnknownHostException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.PriorityBlockingQueue;
@@ -64,8 +71,6 @@ public class RabbitMQMessagingFactory {
     static AtomicBoolean IS_BLOCKED = new AtomicBoolean(false);
     static AtomicBoolean IS_CONNECCTION_OR_CHANNEL_UP = new AtomicBoolean(false);
     static AtomicBoolean IS_CONSUMER_UP = new AtomicBoolean(false);
-
-
 
 
     static {
@@ -143,11 +148,13 @@ public class RabbitMQMessagingFactory {
     static void connect() {
         try {
 
+            Configuration configuration = ConfigurationFactory.getConfiguration();
+
             final Map<String, Map<String, String>> serverConnections = ConfigUtil.parseComplexArrayStructure("service.rabbitmq.connections");
             final ArrayList<String> serverConnectionKeys = Lists.newArrayList(serverConnections.keySet());
             Collections.sort(serverConnectionKeys);
 
-            int maxRetryAttempts = ConfigurationFactory.getConfiguration().getInt("service.rabbitmq.maxRetryAttempts",1000);
+            int maxRetryAttempts = configuration.getInt("service.rabbitmq.maxRetryAttempts", 1000);
 
             Config config = new Config()
                     .withRecoveryPolicy(new RecoveryPolicy()
@@ -249,6 +256,7 @@ public class RabbitMQMessagingFactory {
                         }
                     });
 
+
             config.getRecoverableExceptions().add(UnknownHostException.class);
             config.getRecoverableExceptions().add(NoRouteToHostException.class);
 
@@ -267,7 +275,57 @@ public class RabbitMQMessagingFactory {
             ConnectionOptions options = new ConnectionOptions()
                     .withAddresses(addresses.toArray(addrs));
 
-            Configuration configuration = ConfigurationFactory.getConfiguration();
+            final boolean metricsAndMonitoringIsEnabled = configuration.getBoolean("service.rabbitmq.MetricsAndMonitoringJmx.isEnabled", false);
+
+            if (metricsAndMonitoringIsEnabled){
+                MetricRegistry registry = new MetricRegistry();
+                final ConnectionFactory connectionFactory = options.getConnectionFactory();
+                StandardMetricsCollector metrics = new StandardMetricsCollector(registry);
+                connectionFactory.setMetricsCollector(metrics);
+
+                JmxReporter reporter = JmxReporter
+                        .forRegistry(registry)
+                        .inDomain("com.rabbitmq.client.jmx")
+                        .build();
+                reporter.start();
+            }
+
+            final boolean useNio = configuration.getBoolean("service.rabbitmq.useNio", false);
+
+            if (useNio) {
+                final ConnectionFactory connectionFactory = options.getConnectionFactory();
+                connectionFactory.useNio();
+
+                NioParams nioParams = new NioParams();
+
+                final Integer nbIoThreads = configuration.getInteger("service.rabbitmq.nio.nbIoThreads", null);
+                final Integer readByteBufferSize = configuration.getInteger("service.rabbitmq.nio.readByteBufferSize", null);
+                final Integer writeByteBufferSize = configuration.getInteger("service.rabbitmq.nio.writeByteBufferSize", null);
+                final Integer writeEnqueuingTimeoutInMs = configuration.getInteger("service.rabbitmq.nio.writeEnqueuingTimeoutInMs", null);
+                final Integer writeQueueCapacity = configuration.getInteger("service.rabbitmq.nio.writeQueueCapacity", null);
+
+                if (nbIoThreads != null) {
+                    nioParams.setNbIoThreads(nbIoThreads);
+                }
+                if (readByteBufferSize != null) {
+                    nioParams.setReadByteBufferSize(readByteBufferSize);
+                }
+                if (writeByteBufferSize != null) {
+                    nioParams.setWriteByteBufferSize(writeByteBufferSize);
+                }
+                if (writeEnqueuingTimeoutInMs != null) {
+                    nioParams.setWriteEnqueuingTimeoutInMs(writeEnqueuingTimeoutInMs);
+                }
+                if (writeQueueCapacity != null) {
+                    nioParams.setWriteQueueCapacity(writeQueueCapacity);
+                }
+
+//                nioParams.setNioExecutor()
+//                nioParams.setThreadFactory()
+
+                connectionFactory.setNioParams(nioParams);
+            }
+
             Configuration subsetBase = configuration.subset("service.rabbitmq");
             Configuration subsetSecurity = subsetBase.subset("security");
 

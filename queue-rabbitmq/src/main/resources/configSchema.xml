@@ -141,6 +141,20 @@
             </DefaultValue>
         </Parameter>
 
+        <Parameter name="service.rabbitmq.useNio" type="BOOLEAN"
+                   description="Use Java Nio while connecting to RabbitMQ">
+            <DefaultValue>
+                <PrimitiveValue value="false"/>
+            </DefaultValue>
+        </Parameter>
+
+        <Parameter name="service.rabbitmq.MetricsAndMonitoringJmx.isEnabled" type="BOOLEAN"
+                   description="Enable Metrics and monitoring of the client.">
+            <DefaultValue>
+                <PrimitiveValue value="false"/>
+            </DefaultValue>
+        </Parameter>
+
 
         <Parameter name="service.rabbitmq.connections" isArray="true" type="STRUCTURE"
                    description="Connection identifier for queue server(s). For HornetQ this is the connection to HornetQ's jndi service.">
