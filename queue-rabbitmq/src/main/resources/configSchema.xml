@@ -148,7 +148,7 @@
             </DefaultValue>
         </Parameter>
 
-        <Parameter name="service.rabbitmq.MetricsAndMonitoringJmx.isEnabled" type="BOOLEAN"
+        <Parameter name="service.rabbitmq.metricsAndMonitoringJmx.isEnabled" type="BOOLEAN"
                    description="Enable Metrics and monitoring of the client.">
             <DefaultValue>
                 <PrimitiveValue value="false"/>
