@@ -275,7 +275,7 @@ public class RabbitMQMessagingFactory {
             ConnectionOptions options = new ConnectionOptions()
                     .withAddresses(addresses.toArray(addrs));
 
-            final boolean metricsAndMonitoringIsEnabled = configuration.getBoolean("service.rabbitmq.MetricsAndMonitoringJmx.isEnabled", false);
+            final boolean metricsAndMonitoringIsEnabled = configuration.getBoolean("service.rabbitmq.metricsAndMonitoringJmx.isEnabled", false);
 
             if (metricsAndMonitoringIsEnabled){
                 MetricRegistry registry = new MetricRegistry();
