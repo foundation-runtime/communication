@@ -94,7 +94,6 @@ public class RabbitMQMessagingFactory {
                     for (Channel channel : channels.values()) {
                         channel.close();
                     }
-
                     connection.close();
 
                 } catch (Exception e) {
@@ -293,9 +292,6 @@ public class RabbitMQMessagingFactory {
             final boolean useNio = configuration.getBoolean("service.rabbitmq.useNio", false);
 
             if (useNio) {
-                final ConnectionFactory connectionFactory = options.getConnectionFactory();
-                connectionFactory.useNio();
-
                 NioParams nioParams = new NioParams();
 
                 final Integer nbIoThreads = configuration.getInteger("service.rabbitmq.nio.nbIoThreads", null);
@@ -323,7 +319,7 @@ public class RabbitMQMessagingFactory {
 //                nioParams.setNioExecutor()
 //                nioParams.setThreadFactory()
 
-                connectionFactory.setNioParams(nioParams);
+                options.withNio().withNioParams(nioParams);
             }
 
             Configuration subsetBase = configuration.subset("service.rabbitmq");
