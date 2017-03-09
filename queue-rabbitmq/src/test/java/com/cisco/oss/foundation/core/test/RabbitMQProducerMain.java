@@ -45,7 +45,7 @@ public class RabbitMQProducerMain {
 //            producer.sendMessage("hello: " + new String(bytes));
 
             for (int i=0; i < 500; i++) {
-                sendMessage(producer, bytes,"1");
+                sendMessage(producer, bytes ,"" + i);
 //                Thread.sleep(1000);
             }
 //            Runnable target = new Runnable() {
@@ -88,7 +88,7 @@ public class RabbitMQProducerMain {
         props.put("key1","value2");
 //        props.put(MessageImpl.HDR_GROUP_ID.toString(),hhId);
         props.put("HHID",hhId);
-        producer.sendMessage("hello: " + new String(bytes), props);
+        producer.sendMessage("hello: " + new String(bytes) + hhId, props);
         return props;
     }
 }
