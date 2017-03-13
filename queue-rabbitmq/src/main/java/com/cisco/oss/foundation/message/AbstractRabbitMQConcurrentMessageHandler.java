@@ -19,6 +19,7 @@ package com.cisco.oss.foundation.message;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -27,6 +28,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Basic abstract handler that exposes the foundation message handler but also implements silently the RabbitMQ message handler
  * Created by Yair Ogen on 24/04/2014.
  */
+@Component
 public abstract class AbstractRabbitMQConcurrentMessageHandler extends AbstractRabbitMQMessageHandler implements ConcurrentMessageHandler{
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractRabbitMQConcurrentMessageHandler.class);

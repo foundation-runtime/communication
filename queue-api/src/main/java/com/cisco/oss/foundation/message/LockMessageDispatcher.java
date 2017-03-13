@@ -16,6 +16,8 @@
 
 package com.cisco.oss.foundation.message;
 
+import org.springframework.stereotype.Component;
+
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -28,6 +30,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * @author yglass
  *
  */
+@Component
 public class LockMessageDispatcher extends AbstractMessageDispatcher {
 
 	//private static final Logger LOGGER = LoggerFactory.getLogger(LockMessageDispatcher.class);

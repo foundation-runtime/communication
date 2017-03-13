@@ -16,18 +16,12 @@
 
 package com.cisco.oss.foundation.message;
 
-import com.cisco.oss.foundation.configuration.ConfigurationFactory;
-import com.cisco.oss.foundation.monitoring.CommunicationInfo;
-import com.cisco.oss.foundation.monitoring.services.ServiceDetails;
-import org.apache.commons.configuration.Configuration;
-
 /**
  * Created by Yair Ogen on 15/06/2014.
  */
 public abstract class AbstractMessageHandler implements MessageHandler {
 
     private String consumerName;
-    private ServiceDetails serviceDetails = new ServiceDetails(getServiceDescription(),consumerName,getProtocol(),-1);
 
     public AbstractMessageHandler(String consumerName){
         this.consumerName = consumerName;
@@ -35,24 +29,12 @@ public abstract class AbstractMessageHandler implements MessageHandler {
 
 //    @Override
     public void preMessageProcessing(Message message) {
-        if(isMonitoringEnabled()){
-            CommunicationInfo.INSTANCE.transactionStarted(serviceDetails,consumerName);
-        }
     }
 
 //    @Override
     public void postMessageProcessing(Message message) {
-        if(isMonitoringEnabled()){
-            CommunicationInfo.INSTANCE.transactionFinished(serviceDetails,consumerName,false, "N/A");
-        }
     }
 
-    private boolean isMonitoringEnabled() {
-        Configuration configuration = ConfigurationFactory.getConfiguration();
-        Configuration subset = configuration.subset(consumerName);
-        boolean isMonitoringEnabled = subset.getBoolean("queue.isMonitoringEnabled",false);
-        return isMonitoringEnabled;
-    }
 
     public abstract String getServiceDescription();
 
