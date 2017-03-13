@@ -25,7 +25,7 @@
     <groupId>com.cisco.oss.foundation.queue</groupId>
     <artifactId>queue-api</artifactId>
     <name>queue-api</name>
-    <version>1.1.1-1-SNAPSHOT</version>
+    <version>2.0.0-1-SNAPSHOT</version>
     <description>This project defines common api for queue api for foundation runtime software</description>
     <url>https://github.com/foundation-runtime/communication/tree/master/queue-api</url>
     <issueManagement>
@@ -82,15 +82,33 @@
         </plugins>
     </build>
     <dependencies>
-       <dependency>
-            <groupId>com.cisco.oss.foundation</groupId>
-            <artifactId>configuration-api</artifactId>
-            <version>1.0.2-1</version>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-beans</artifactId>
+            <version>${spring-version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>com.cisco.oss.foundation</groupId>
-            <artifactId>monitoring-api</artifactId>
-            <version>1.0.2-1</version>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <version>${spring-version}</version>
+            <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.21</version>
+            <scope>provided</scope>
+        </dependency>
+        <!--<dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context-support</artifactId>
+            <version>${spring-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-core</artifactId>
+            <version>${spring-version}</version>
+        </dependency>-->
     </dependencies>
 </project>

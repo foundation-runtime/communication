@@ -19,6 +19,7 @@ package com.cisco.oss.foundation.message;
 import com.cisco.oss.foundation.flowcontext.FlowContextFactory;
 import com.rabbitmq.client.*;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
@@ -26,6 +27,7 @@ import java.io.IOException;
  * Basic abstract handler that exposes the foundation message handler but also implements silently the RabbitMQ message handler
  * Created by Yair Ogen on 24/04/2014.
  */
+@Component
 public abstract class AbstractRabbitMQMessageHandler extends AbstractMessageHandler implements Consumer {
 
     /**

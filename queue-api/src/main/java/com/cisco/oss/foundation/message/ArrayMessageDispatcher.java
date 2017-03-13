@@ -18,8 +18,10 @@ package com.cisco.oss.foundation.message;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 
+@Component
 class ArrayMessageDispatcher extends AbstractMessageDispatcher {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ArrayMessageDispatcher.class);
