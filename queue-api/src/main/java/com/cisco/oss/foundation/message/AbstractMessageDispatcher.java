@@ -16,10 +16,12 @@
 
 package com.cisco.oss.foundation.message;
 
-import com.cisco.oss.foundation.configuration.ConfigurationFactory;
-import org.apache.commons.configuration.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -27,6 +29,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+@Component
 abstract class AbstractMessageDispatcher implements MessageDispatcher {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(MessageDispatcher.class);
@@ -36,12 +39,17 @@ abstract class AbstractMessageDispatcher implements MessageDispatcher {
 	private ExecutorService executorService;
 	private CapacityEnsurableLinkedBlockingQueue<Runnable> blockingWaitingQueue;
 
+	@Autowired
+	private Environment environment;
+
+	@Value("${"+MessageConstants.QUEUE_SIZE_PROPERTY+"}")
+	private int maxThreadPoolSize=0;
+
+	@Value("${"+MessageConstants.WAITING_QUEUE_SIZE_PROPERTY+"}")
+	private int waitingQueueSize=0;
+
 	public AbstractMessageDispatcher(ConcurrentMessageHandler concurrentMessageHandler){
 		this.concurrentMessageHandler = concurrentMessageHandler;
-
-		Configuration configuration = ConfigurationFactory.getConfiguration();
-		int maxThreadPoolSize = configuration.getInt(MessageConstants.QUEUE_SIZE_PROPERTY);
-		int waitingQueueSize = configuration.getInt(MessageConstants.WAITING_QUEUE_SIZE_PROPERTY);
 
 		waitingList = new CopyOnWriteArrayList<Message>();
 		try {

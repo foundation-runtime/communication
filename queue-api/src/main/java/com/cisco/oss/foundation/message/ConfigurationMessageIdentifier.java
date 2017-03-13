@@ -16,19 +16,26 @@
 
 package com.cisco.oss.foundation.message;
 
-import com.cisco.oss.foundation.configuration.ConfigurationFactory;
-import org.apache.commons.configuration.Configuration;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
+import org.springframework.stereotype.Component;
 
 
+@Component
 public class ConfigurationMessageIdentifier implements MessageIdentifier {
 
     public static final String MESSAGE_IDENTIFIER_PROPERTY = "messageHandling.messageIdentifierProperty";
 
-    private final String identifierProperty;
+
+
+    @Autowired
+    private Environment environment;
+
+    @Value("${"+MESSAGE_IDENTIFIER_PROPERTY+"}")
+    private String identifierProperty=null;
 
     public ConfigurationMessageIdentifier() {
-        Configuration config = ConfigurationFactory.getConfiguration();
-        identifierProperty = config.getString(MESSAGE_IDENTIFIER_PROPERTY);
     }
 
     public String getIdentifier(Message message) {
