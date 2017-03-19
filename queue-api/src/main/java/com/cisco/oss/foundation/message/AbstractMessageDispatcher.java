@@ -17,6 +17,8 @@
 package com.cisco.oss.foundation.message;
 
 import com.cisco.oss.foundation.configuration.ConfigurationFactory;
+import com.cisco.oss.foundation.flowcontext.FlowContext;
+import com.cisco.oss.foundation.flowcontext.FlowContextFactory;
 import org.apache.commons.configuration.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,7 +83,7 @@ abstract class AbstractMessageDispatcher implements MessageDispatcher {
 	}
 
 	protected void dispatchMessage(Message message){
-		MessageProcessorRunnable workerRunnable = new MessageProcessorRunnable(concurrentMessageHandler, message);
+		MessageProcessorRunnable workerRunnable = new MessageProcessorRunnable(concurrentMessageHandler, message, FlowContextFactory.getFlowContext());
 
 		try {
 			LOGGER.trace("On ensure capacity");
@@ -112,15 +114,18 @@ abstract class AbstractMessageDispatcher implements MessageDispatcher {
 
 		private Message message;
 		private ConcurrentMessageHandler concurrentMessageHandler;
+		private FlowContext flowContext;
 
-		public MessageProcessorRunnable(ConcurrentMessageHandler concurrentMessageHandler, Message message){
+		public MessageProcessorRunnable(ConcurrentMessageHandler concurrentMessageHandler, Message message, FlowContext flowContext){
 			this.message = message;
 			this.concurrentMessageHandler = concurrentMessageHandler;
+			this.flowContext = flowContext;
 		}
 
 		@Override
 		public void run() {
 			try {
+				FlowContextFactory.addFlowContext(flowContext);
 				LOGGER.trace("Start running run method");
                 concurrentMessageHandler.process(message);
                 concurrentMessageHandler = null;
