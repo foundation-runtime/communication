@@ -7,11 +7,13 @@ import org.junit.Test;
 /**
  * Created by Yair Ogen (yaogen) on 09/03/2016.
  */
+
 public class AdminTest {
 
-    @Ignore
+
     @Test
-    public void testAdmin(){
+    @Ignore
+    public void testAdminOverview(){
         RabbitMQAdmin.INSTANCE.initAdmin();
         int testQueueLength = RabbitMQAdmin.INSTANCE.getQueueLength("Yair-test-queue");
         System.out.println("testQueueLength: " + testQueueLength);
@@ -20,7 +22,12 @@ public class AdminTest {
             overview = RabbitMQAdmin.INSTANCE.getOverview(true);
         }
         System.out.println("overview: " + overview);
+    }
 
-
+    @Test
+    @Ignore
+    public void testDeleteQueue(){
+        RabbitMQAdmin.INSTANCE.initAdmin();
+        RabbitMQAdmin.INSTANCE.deleteQueue("Yair-test-queue");
     }
 }

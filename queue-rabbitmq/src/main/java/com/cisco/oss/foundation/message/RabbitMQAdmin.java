@@ -119,4 +119,26 @@ public enum RabbitMQAdmin {
             throw new RabbitMQAdminException("Got bad response from rabbitmq server. Code: " + status + ". Reason: " + responseAsString);
         }
     }
+
+    public void deleteQueue(final String queueName){
+        String uri = "api/queues/%2f/" + queueName;
+        HttpRequest httpRequest = HttpRequest.newBuilder()
+                .uri(uri)
+                .httpMethod(HttpMethod.DELETE)
+                .header("Accept", "application/json")
+                .header("Authorization", "Basic " + authStringEncoded)
+                .build();
+
+        HttpResponse httpResponse = null;
+        try {
+            httpResponse = httpClient.execute(httpRequest);
+        } catch (Exception e) {
+            throw new RabbitMQAdminException("Can't execute rabbitmq admin request. error is: " + e, e);
+        }
+        int status = httpResponse.getStatus();
+        String responseAsString = httpResponse.getResponseAsString();
+        if (status != 204) {
+            throw new RabbitMQAdminException("Got bad response from rabbitmq server. Code: " + status + ". Reason: " + responseAsString);
+        }
+    }
 }
