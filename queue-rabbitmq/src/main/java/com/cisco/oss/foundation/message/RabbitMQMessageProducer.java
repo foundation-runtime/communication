@@ -161,5 +161,6 @@ class RabbitMQMessageProducer extends AbstractMessageProducer {
 
     @Override
     public void close() {
+        RabbitMQMessagingFactory.producers.remove(producerName);
     }
 }

@@ -58,8 +58,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class RabbitMQMessagingFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RabbitMQMessagingFactory.class);
-    private static Map<String, MessageConsumer> consumers = new ConcurrentHashMap<String, MessageConsumer>();
-    private static Map<String, MessageProducer> producers = new ConcurrentHashMap<String, MessageProducer>();
+    static Map<String, MessageConsumer> consumers = new ConcurrentHashMap<String, MessageConsumer>();
+    static Map<String, MessageProducer> producers = new ConcurrentHashMap<String, MessageProducer>();
     public static ThreadLocal<Channel> channelThreadLocal = new ThreadLocal<>();
     //    private static List<Channel> channels = new CopyOnWriteArrayList<>();
     private static PriorityBlockingQueue<AckNackMessage> messageAckQueue = new PriorityBlockingQueue<AckNackMessage>(10000);

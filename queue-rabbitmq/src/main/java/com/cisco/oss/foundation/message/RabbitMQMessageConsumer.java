@@ -194,6 +194,7 @@ public class RabbitMQMessageConsumer implements MessageConsumer {
 
     @Override
     public void close() {
+        RabbitMQMessagingFactory.consumers.remove(consumerName);
     }
 
     public String getQueueName() {
