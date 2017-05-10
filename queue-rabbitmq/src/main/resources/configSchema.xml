@@ -75,6 +75,11 @@
                         <PrimitiveValue value="false"/>
                     </DefaultValue>
                 </StructureMemberDefinition>
+                <StructureMemberDefinition name="queue.autoDelete" type="BOOLEAN" required="false" advanced="true">
+                    <DefaultValue>
+                        <PrimitiveValue value="false"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
             </StructureDefinition>
         </ParameterType>
 
