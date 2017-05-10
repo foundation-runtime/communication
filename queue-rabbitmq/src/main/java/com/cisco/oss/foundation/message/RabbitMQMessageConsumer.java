@@ -61,6 +61,7 @@ public class RabbitMQMessageConsumer implements MessageConsumer {
             queueName = subset.getString("queue.name");
 
             String filter = subset.getString("queue.filter", "");
+            boolean isAutoDelete = subset.getBoolean("queue.isAutoDelete", false);
             boolean isDurable = subset.getBoolean("queue.isDurable", true);
             boolean isSubscription = subset.getBoolean("queue.isSubscription", false);
             long expiration = subset.getLong("queue.expiration", 1800000);
@@ -90,11 +91,11 @@ public class RabbitMQMessageConsumer implements MessageConsumer {
 
 
             if (deadLetterIsEnabled) {
-                channel.exchangeDeclare(deadLetterExchangeName, exchangeType, true, false, false, null);
+                channel.exchangeDeclare(deadLetterExchangeName, exchangeType, isDurable, false, false, null);
                 args.put("x-dead-letter-exchange", deadLetterExchangeName);
             }
 
-            String queue = channel.queueDeclare(queueName, isDurable, isExclusive, false, args).getQueue();
+            String queue = channel.queueDeclare(queueName, isDurable, isExclusive, isAutoDelete, args).getQueue();
 
             Map<String, String> filters = ConfigUtil.parseSimpleArrayAsMap(consumerName + ".queue.filters");
             if (filters != null && !filters.isEmpty()) {

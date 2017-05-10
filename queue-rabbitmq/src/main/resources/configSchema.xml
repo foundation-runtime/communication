@@ -54,6 +54,11 @@
                         <PrimitiveValue value="topic"/>
                     </DefaultValue>
                 </StructureMemberDefinition>
+                <StructureMemberDefinition name="queue.isAutoDelete" type="BOOLEAN" advanced="true">
+                    <DefaultValue>
+                        <PrimitiveValue value="false"/>
+                    </DefaultValue>
+                </StructureMemberDefinition>
                 <StructureMemberDefinition name="queue.isDurable" type="BOOLEAN" advanced="true">
                     <DefaultValue>
                         <PrimitiveValue value="true"/>
