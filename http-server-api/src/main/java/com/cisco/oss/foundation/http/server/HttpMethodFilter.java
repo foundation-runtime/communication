@@ -57,6 +57,7 @@ public class HttpMethodFilter extends AbstractInfraHttpFilter {
 
 	@PostConstruct
 	public void init() {
+    	super.init();
 		methods.add("TRACE");
 		updateAllowedMethodsFromConfig(serviceName);
 	}
