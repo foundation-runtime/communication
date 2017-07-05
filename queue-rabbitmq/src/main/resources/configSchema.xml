@@ -115,22 +115,16 @@
         <Parameter name="service.rabbitmq.security.isEnabled" type="BOOLEAN"
                    description="Enable security authentication">
             <DefaultValue>
-                <PrimitiveValue value="false"></PrimitiveValue>
+                <PrimitiveValue value="true"></PrimitiveValue>
             </DefaultValue>
         </Parameter>
 
         <Parameter name="service.rabbitmq.security.userName" type="STRING"
                    description="User name for accessing the Queue with security">
-            <DefaultValue>
-                <PrimitiveValue value="hquser"/>
-            </DefaultValue>
         </Parameter>
 
         <Parameter name="service.rabbitmq.security.password" type="STRING"
                    description="Password for accessing the Queue with security">
-            <DefaultValue>
-                <PrimitiveValue value="hquser"/>
-            </DefaultValue>
             <EnabledBy parameterName="service.rabbitmq.security.isEnabled" operator="E">
                 <Value>
                     <PrimitiveValue value="true"/>
@@ -162,7 +156,7 @@
 
 
         <Parameter name="service.rabbitmq.connections" isArray="true" type="STRUCTURE"
-                   description="Connection identifier for queue server(s). For HornetQ this is the connection to HornetQ's jndi service.">
+                   description="Connection identifier for queue server(s).">
             <StructureDefinition>
                 <StructureMemberDefinition name="host" type="STRING" required="false"/>
                 <StructureMemberDefinition name="port" type="INTEGER" required="false">
@@ -175,12 +169,7 @@
                         <StructureMemberDefinition name="host" type="STRING" required="false"/>
                         <StructureMemberDefinition name="port" type="INTEGER" required="false">
                             <DefaultValue>
-                                <PrimitiveValue value="5900"/>
-                            </DefaultValue>
-                        </StructureMemberDefinition>
-                        <StructureMemberDefinition name="jmxPort" type="INTEGER" required="false">
-                            <DefaultValue>
-                                <PrimitiveValue value="3900"/>
+                                <PrimitiveValue value="5672"/>
                             </DefaultValue>
                         </StructureMemberDefinition>
                     </StructureDefinition>
@@ -190,12 +179,7 @@
                         <StructureMemberDefinition name="host" type="STRING" required="false"/>
                         <StructureMemberDefinition name="port" type="INTEGER" required="false">
                             <DefaultValue>
-                                <PrimitiveValue value="5900"/>
-                            </DefaultValue>
-                        </StructureMemberDefinition>
-                        <StructureMemberDefinition name="jmxPort" type="INTEGER" required="false">
-                            <DefaultValue>
-                                <PrimitiveValue value="3900"/>
+                                <PrimitiveValue value="5672"/>
                             </DefaultValue>
                         </StructureMemberDefinition>
                     </StructureDefinition>
