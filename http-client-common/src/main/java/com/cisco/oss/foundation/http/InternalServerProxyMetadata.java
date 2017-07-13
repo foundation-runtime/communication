@@ -41,6 +41,7 @@ public class InternalServerProxyMetadata {
     private String keyStorePassword = "";
     private String trustStorePath = "";
     private String trustStorePassword = "";
+    private String cookiesSpec = "default";
     private boolean staleConnectionCheckEnabled = false;
     private boolean autoCloseable = true;
 
@@ -129,7 +130,7 @@ public class InternalServerProxyMetadata {
         return serviceName;
     }
 
-    public InternalServerProxyMetadata(int readTimeout, int connectTimeout, long idleTimeout, int maxConnectionsPerAddress, int maxConnectionsTotal, int maxQueueSizePerAddress, long waitingTime, int numberOfAttempts, long retryDelay, List<Pair<String, Integer>> hostAndPortPairs, String keyStorePath, String keyStorePassword, String trustStorePath, String trustStorePassword, boolean followRedirects, boolean autoCloseable, boolean staleConnectionCheckEnabled, boolean disableCookies, boolean serviceDirectoryEnabled, String serviceName, boolean autoEncodeUri) {
+    public InternalServerProxyMetadata(int readTimeout, int connectTimeout, long idleTimeout, int maxConnectionsPerAddress, int maxConnectionsTotal, int maxQueueSizePerAddress, long waitingTime, int numberOfAttempts, long retryDelay, List<Pair<String, Integer>> hostAndPortPairs, String keyStorePath, String keyStorePassword, String trustStorePath, String trustStorePassword, boolean followRedirects, boolean autoCloseable, boolean staleConnectionCheckEnabled, boolean disableCookies, boolean serviceDirectoryEnabled, String serviceName, boolean autoEncodeUri, String cookiesSpec) {
         this.readTimeout = readTimeout;
         this.connectTimeout = connectTimeout;
         this.idleTimeout = idleTimeout;
@@ -153,6 +154,8 @@ public class InternalServerProxyMetadata {
         this.trustStorePath = trustStorePath;
         this.keyStorePassword = keyStorePassword;
         this.keyStorePath = keyStorePath;
+
+        this.cookiesSpec = cookiesSpec;
     }
 
     public int getNumberOfAttempts() {
@@ -165,6 +168,10 @@ public class InternalServerProxyMetadata {
 
     public List<Pair<String, Integer>> getHostAndPortPairs() {
         return hostAndPortPairs;
+    }
+
+    public String getCookiesSpec() {
+        return cookiesSpec;
     }
 
 }
