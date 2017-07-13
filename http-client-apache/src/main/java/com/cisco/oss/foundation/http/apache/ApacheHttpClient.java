@@ -28,6 +28,7 @@ import org.apache.commons.configuration.Configuration;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpHost;
+import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.*;
 import org.apache.http.client.utils.URIBuilder;
@@ -96,6 +97,7 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
         RequestConfig.Builder requestBuilder = RequestConfig.custom();
         requestBuilder = requestBuilder.setConnectTimeout(metadata.getConnectTimeout());
         requestBuilder = requestBuilder.setSocketTimeout(metadata.getReadTimeout());
+        requestBuilder = requestBuilder.setCookieSpec(metadata.getCookiesSpec());
         requestBuilder = requestBuilder.setStaleConnectionCheckEnabled(metadata.isStaleConnectionCheckEnabled());
 
         RequestConfig requestConfig = requestBuilder.build();
