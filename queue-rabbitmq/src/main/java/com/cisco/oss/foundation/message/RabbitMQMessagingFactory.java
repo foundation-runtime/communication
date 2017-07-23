@@ -326,7 +326,7 @@ public class RabbitMQMessagingFactory {
             Configuration subsetSecurity = subsetBase.subset("security");
 
             int requestHeartbeat = subsetBase.getInt("requestHeartbeat", 10);
-//            connectionFactory.setRequestedHeartbeat(requestHeartbeat);
+            options.withRequestedHeartbeat(Duration.seconds(requestHeartbeat));
 
             String userName = subsetSecurity.getString("userName");
             String password = subsetSecurity.getString("password");
