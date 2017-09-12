@@ -24,8 +24,8 @@ import com.codahale.metrics.JmxReporter;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.Lists;
 import com.rabbitmq.client.*;
-//import com.rabbitmq.client.impl.StandardMetricsCollector;
-//import com.rabbitmq.client.impl.nio.NioParams;
+import com.rabbitmq.client.impl.StandardMetricsCollector;
+import com.rabbitmq.client.impl.nio.NioParams;
 import net.jodah.lyra.ConnectionOptions;
 import net.jodah.lyra.Connections;
 import net.jodah.lyra.config.Config;
@@ -279,8 +279,8 @@ public class RabbitMQMessagingFactory {
             if (metricsAndMonitoringIsEnabled){
                 MetricRegistry registry = new MetricRegistry();
                 final ConnectionFactory connectionFactory = options.getConnectionFactory();
-//                StandardMetricsCollector metrics = new StandardMetricsCollector(registry);
-//                connectionFactory.setMetricsCollector(metrics);
+                StandardMetricsCollector metrics = new StandardMetricsCollector(registry);
+                connectionFactory.setMetricsCollector(metrics);
 
                 JmxReporter reporter = JmxReporter
                         .forRegistry(registry)
@@ -292,7 +292,7 @@ public class RabbitMQMessagingFactory {
             final boolean useNio = configuration.getBoolean("service.rabbitmq.useNio", false);
 
             if (useNio) {
-//                NioParams nioParams = new NioParams();
+                NioParams nioParams = new NioParams();
 
                 final Integer nbIoThreads = configuration.getInteger("service.rabbitmq.nio.nbIoThreads", null);
                 final Integer readByteBufferSize = configuration.getInteger("service.rabbitmq.nio.readByteBufferSize", null);
@@ -300,26 +300,26 @@ public class RabbitMQMessagingFactory {
                 final Integer writeEnqueuingTimeoutInMs = configuration.getInteger("service.rabbitmq.nio.writeEnqueuingTimeoutInMs", null);
                 final Integer writeQueueCapacity = configuration.getInteger("service.rabbitmq.nio.writeQueueCapacity", null);
 
-//                if (nbIoThreads != null) {
-//                    nioParams.setNbIoThreads(nbIoThreads);
-//                }
-//                if (readByteBufferSize != null) {
-//                    nioParams.setReadByteBufferSize(readByteBufferSize);
-//                }
-//                if (writeByteBufferSize != null) {
-//                    nioParams.setWriteByteBufferSize(writeByteBufferSize);
-//                }
-//                if (writeEnqueuingTimeoutInMs != null) {
-//                    nioParams.setWriteEnqueuingTimeoutInMs(writeEnqueuingTimeoutInMs);
-//                }
-//                if (writeQueueCapacity != null) {
-//                    nioParams.setWriteQueueCapacity(writeQueueCapacity);
-//                }
+                if (nbIoThreads != null) {
+                    nioParams.setNbIoThreads(nbIoThreads);
+                }
+                if (readByteBufferSize != null) {
+                    nioParams.setReadByteBufferSize(readByteBufferSize);
+                }
+                if (writeByteBufferSize != null) {
+                    nioParams.setWriteByteBufferSize(writeByteBufferSize);
+                }
+                if (writeEnqueuingTimeoutInMs != null) {
+                    nioParams.setWriteEnqueuingTimeoutInMs(writeEnqueuingTimeoutInMs);
+                }
+                if (writeQueueCapacity != null) {
+                    nioParams.setWriteQueueCapacity(writeQueueCapacity);
+                }
 
 //                nioParams.setNioExecutor()
 //                nioParams.setThreadFactory()
 
-//                options.withNio().withNioParams(nioParams);
+                options.withNio().withNioParams(nioParams);
             }
 
             Configuration subsetBase = configuration.subset("service.rabbitmq");
