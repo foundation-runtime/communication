@@ -274,11 +274,14 @@ public class RabbitMQMessagingFactory {
             ConnectionOptions options = new ConnectionOptions()
                     .withAddresses(addresses.toArray(addrs));
 
+            final ConnectionFactory connectionFactory = options.getConnectionFactory();
+            connectionFactory.setAutomaticRecoveryEnabled(false);
+            connectionFactory.setTopologyRecoveryEnabled(false);
+
             final boolean metricsAndMonitoringIsEnabled = configuration.getBoolean("service.rabbitmq.metricsAndMonitoringJmx.isEnabled", false);
 
             if (metricsAndMonitoringIsEnabled){
                 MetricRegistry registry = new MetricRegistry();
-                final ConnectionFactory connectionFactory = options.getConnectionFactory();
                 StandardMetricsCollector metrics = new StandardMetricsCollector(registry);
                 connectionFactory.setMetricsCollector(metrics);
 
