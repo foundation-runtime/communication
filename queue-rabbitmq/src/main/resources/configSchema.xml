@@ -115,7 +115,7 @@
         <Parameter name="service.rabbitmq.security.isEnabled" type="BOOLEAN"
                    description="Enable security authentication">
             <DefaultValue>
-                <PrimitiveValue value="true"></PrimitiveValue>
+                <PrimitiveValue value="false"></PrimitiveValue>
             </DefaultValue>
         </Parameter>
 
