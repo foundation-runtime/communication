@@ -121,6 +121,11 @@
 
         <Parameter name="service.rabbitmq.security.userName" type="STRING"
                    description="User name for accessing the Queue with security">
+            <EnabledBy parameterName="service.rabbitmq.security.isEnabled" operator="E">
+                <Value>
+                    <PrimitiveValue value="true"/>
+                </Value>
+            </EnabledBy>
         </Parameter>
 
         <Parameter name="service.rabbitmq.security.password" type="STRING"
