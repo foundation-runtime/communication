@@ -106,6 +106,8 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
 
         boolean addTrustSupport = StringUtils.isNotEmpty(metadata.getTrustStorePath()) && StringUtils.isNotEmpty(metadata.getTrustStorePassword());
 
+        boolean enforceTLS = metadata.isEnforceTLS();
+
         autoCloseable = metadata.isAutoCloseable();
 
         HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
@@ -171,6 +173,9 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
 
         } catch (Exception e) {
             LOGGER.error("can't set TLS Support. Error is: {}", e, e);
+            if (enforceTLS) {
+                throw new ClientException("Failed to create secure TLS connection: {} " + e.toString(), e);
+            }
         }
 
 
