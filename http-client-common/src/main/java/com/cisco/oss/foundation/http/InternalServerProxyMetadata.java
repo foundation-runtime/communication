@@ -41,6 +41,7 @@ public class InternalServerProxyMetadata {
     private String keyStorePassword = "";
     private String trustStorePath = "";
     private String trustStorePassword = "";
+    private boolean enforceTLS = false;
     private String cookiesSpec = "default";
     private boolean staleConnectionCheckEnabled = false;
     private boolean autoCloseable = true;
@@ -114,6 +115,8 @@ public class InternalServerProxyMetadata {
         return trustStorePassword;
     }
 
+    public boolean isEnforceTLS() {return enforceTLS;}
+
     public long getWaitingTime() {
         return waitingTime;
     }
@@ -130,7 +133,7 @@ public class InternalServerProxyMetadata {
         return serviceName;
     }
 
-    public InternalServerProxyMetadata(int readTimeout, int connectTimeout, long idleTimeout, int maxConnectionsPerAddress, int maxConnectionsTotal, int maxQueueSizePerAddress, long waitingTime, int numberOfAttempts, long retryDelay, List<Pair<String, Integer>> hostAndPortPairs, String keyStorePath, String keyStorePassword, String trustStorePath, String trustStorePassword, boolean followRedirects, boolean autoCloseable, boolean staleConnectionCheckEnabled, boolean disableCookies, boolean serviceDirectoryEnabled, String serviceName, boolean autoEncodeUri, String cookiesSpec) {
+    public InternalServerProxyMetadata(int readTimeout, int connectTimeout, long idleTimeout, int maxConnectionsPerAddress, int maxConnectionsTotal, int maxQueueSizePerAddress, long waitingTime, int numberOfAttempts, long retryDelay, List<Pair<String, Integer>> hostAndPortPairs, String keyStorePath, String keyStorePassword, String trustStorePath, String trustStorePassword, boolean enforceTLS, boolean followRedirects, boolean autoCloseable, boolean staleConnectionCheckEnabled, boolean disableCookies, boolean serviceDirectoryEnabled, String serviceName, boolean autoEncodeUri, String cookiesSpec) {
         this.readTimeout = readTimeout;
         this.connectTimeout = connectTimeout;
         this.idleTimeout = idleTimeout;
@@ -154,6 +157,7 @@ public class InternalServerProxyMetadata {
         this.trustStorePath = trustStorePath;
         this.keyStorePassword = keyStorePassword;
         this.keyStorePath = keyStorePath;
+        this.enforceTLS = enforceTLS;
 
         this.cookiesSpec = cookiesSpec;
     }
