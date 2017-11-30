@@ -156,7 +156,7 @@ public class RabbitMQMessagingFactory {
         try {
             if (channel != null) {
                 int channelNumber = channel.getChannelNumber();
-                LOGGER.warn("closeChannel " + channelNumber + " reason: " + reason);
+                LOGGER.info("closeChannel " + channelNumber + " reason: " + reason);
                 channel.close(200, reason);
                 channels.remove(channelNumber);
             }
