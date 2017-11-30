@@ -48,7 +48,29 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+
+/* Since channel is kept per Thread and we don't have control on its life cycle (its the caller Thread),
+   we want to make sure it released properly when the Thread is released so we won't have zombie channels in the system */
+class ChannelWrapper {
+    private Channel channel;
+
+    ChannelWrapper(Channel channel) {
+        this.channel = channel;
+    }
+
+    public Channel getChannel() {
+        return channel;
+    }
+
+    protected void finalize() throws Throwable
+    {
+        RabbitMQMessagingFactory.closeChannelAndRemoveFromMap(channel, "thread finalize");
+    }
+}
+
 
 /**
  * This is the main API tp be used to instantiate new consumers and producers.
@@ -60,7 +82,7 @@ public class RabbitMQMessagingFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(RabbitMQMessagingFactory.class);
     static Map<String, MessageConsumer> consumers = new ConcurrentHashMap<String, MessageConsumer>();
     static Map<String, MessageProducer> producers = new ConcurrentHashMap<String, MessageProducer>();
-    public static ThreadLocal<Channel> channelThreadLocal = new ThreadLocal<>();
+    public static ThreadLocal<ChannelWrapper> channelThreadLocal = new ThreadLocal<>();
     //    private static List<Channel> channels = new CopyOnWriteArrayList<>();
     private static PriorityBlockingQueue<AckNackMessage> messageAckQueue = new PriorityBlockingQueue<AckNackMessage>(10000);
     static Map<Integer, Channel> channels = new ConcurrentHashMap<Integer, Channel>();
@@ -90,9 +112,8 @@ public class RabbitMQMessagingFactory {
                 try {
                     //allow possible background work to finish
                     Thread.sleep(1000);
-
                     for (Channel channel : channels.values()) {
-                        channel.close();
+                        closeChannelAndRemoveFromMap(channel, "shutdown hook");
                     }
                     connection.close();
 
@@ -110,7 +131,6 @@ public class RabbitMQMessagingFactory {
                     try {
 
                         AckNackMessage message = messageAckQueue.take();
-
                         Channel channel = channels.get(message.channelNumber);
                         if (channel != null && channel.isOpen()) {
                             if (message.ack)
@@ -128,6 +148,25 @@ public class RabbitMQMessagingFactory {
         };
         rabbitAckThread.setDaemon(true);
         rabbitAckThread.start();
+    }
+
+    protected static void closeChannelAndRemoveFromMap(Channel channel, String reason) {
+
+        // Note: once channel was closed, any action on the object will result with AlreadyClosedException :(
+        try {
+            if (channel != null) {
+                int channelNumber = channel.getChannelNumber();
+                LOGGER.info("closeChannel " + channelNumber + " reason: " + reason);
+                channel.close(200, reason);
+                channels.remove(channelNumber);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (TimeoutException e) {
+            e.printStackTrace();
+        } catch (AlreadyClosedException e){
+            e.printStackTrace();
+        }
     }
 
 
@@ -383,14 +422,13 @@ public class RabbitMQMessagingFactory {
             if (channelThreadLocal.get() == null) {
                 if (connection != null && connection.isOpen()) {
                     Channel channel = connection.createChannel();
-                    channelThreadLocal.set(channel);
+                    channelThreadLocal.set(new ChannelWrapper(channel));
                     channels.put(channel.getChannelNumber(), channel);
                 } else {
                     throw new QueueException("RabbitMQ appears to be down. Please try again later.");
                 }
             }
-
-            return channelThreadLocal.get();
+            return channelThreadLocal.get().getChannel();
         } catch (IOException e) {
             throw new QueueException("can't create channel: " + e.toString(), e);
         }
