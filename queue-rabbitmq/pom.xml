@@ -51,6 +51,7 @@
         <logging-api-version>1.0.2-1</logging-api-version>
         <logging-log4j-version>1.0.2-1</logging-log4j-version>
         <configuration-lib-version>1.0.3-1</configuration-lib-version>
+        <javaVersion>1.8</javaVersion>
     </properties>
     <scm>
         <connection>scm:git:git@github.com:foundation-runtime/communication.git</connection>
