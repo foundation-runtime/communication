@@ -435,6 +435,20 @@ public class RabbitMQMessagingFactory {
 
     }
 
+    static Channel createChannelWithoutTL() {
+        try {
+            if (connection != null && connection.isOpen()) {
+                Channel channel = connection.createChannel();
+                channels.put(channel.getChannelNumber(), channel);
+                return channel;
+            } else {
+                throw new QueueException("RabbitMQ appears to be down. Please try again later.");
+            }
+        } catch (IOException e) {
+            throw new QueueException("can't create channel: " + e.toString(), e);
+        }
+    }
+
     public static void ackMessage(Integer channelNumber, Long deliveryTag) {
         messageAckQueue.add(new AckNackMessage(channelNumber, deliveryTag, true));
     }
@@ -496,6 +510,23 @@ public class RabbitMQMessagingFactory {
         return consumers.get(consumerName);
     }
 
+    /**
+     * create a new consumer if one doesn't already exist (without ThreadLocal)
+     * the consumer will bonded to an address with a queue-name as defined in the configuration.
+     * the configuration subset is defined by finding a subset starting with the given consumer name.
+     * E.g. consumer name = consumer1
+     * Config:
+     * consumer1.queue.name=consumer1
+     * consumer1.queue.filter=key1='value2'
+     * consumer1.queue.isSubscription=true
+     * consumer1.queue.subscribedTo=myExample
+     */
+    public static MessageConsumer createConsumerWithoutTL(String consumerName) {
+        if (!consumers.containsKey(consumerName)) {
+            consumers.put(consumerName, new RabbitMQMessageConsumerWithoutTL(consumerName));
+        }
+        return consumers.get(consumerName);
+    }
 
     /**
      * create a new producer if one doesn't already exist in the ThreadLocal
