@@ -67,7 +67,12 @@ class ChannelWrapper {
 
     protected void finalize() throws Throwable
     {
-        RabbitMQMessagingFactory.closeChannelAndRemoveFromMap(channel, "thread finalize");
+        boolean closeChannelEnabled = ConfigurationFactory.getConfiguration().
+                getBoolean("service.rabbitmq.closeChannelOnThreadRelease.isEnabled", false);
+
+        if (closeChannelEnabled){
+            RabbitMQMessagingFactory.closeChannelAndRemoveFromMap(channel, "thread finalize");
+        }
     }
 }
 
@@ -505,28 +510,19 @@ public class RabbitMQMessagingFactory {
      */
     public static MessageConsumer createConsumer(String consumerName) {
         if (!consumers.containsKey(consumerName)) {
-            consumers.put(consumerName, new RabbitMQMessageConsumer(consumerName));
+            boolean withoutThreadLocal = ConfigurationFactory.getConfiguration().
+                    getBoolean("service.rabbitmq.setConsumerWithoutThreadLocal.isEnabled", false);
+            MessageConsumer consumer;
+            if (withoutThreadLocal){
+                consumer = new RabbitMQMessageConsumerWithoutTL(consumerName);
+            }else{
+                consumer = new RabbitMQMessageConsumer(consumerName);
+            }
+            consumers.put(consumerName, consumer);
         }
         return consumers.get(consumerName);
     }
 
-    /**
-     * create a new consumer if one doesn't already exist (without ThreadLocal)
-     * the consumer will bonded to an address with a queue-name as defined in the configuration.
-     * the configuration subset is defined by finding a subset starting with the given consumer name.
-     * E.g. consumer name = consumer1
-     * Config:
-     * consumer1.queue.name=consumer1
-     * consumer1.queue.filter=key1='value2'
-     * consumer1.queue.isSubscription=true
-     * consumer1.queue.subscribedTo=myExample
-     */
-    public static MessageConsumer createConsumerWithoutTL(String consumerName) {
-        if (!consumers.containsKey(consumerName)) {
-            consumers.put(consumerName, new RabbitMQMessageConsumerWithoutTL(consumerName));
-        }
-        return consumers.get(consumerName);
-    }
 
     /**
      * create a new producer if one doesn't already exist in the ThreadLocal
