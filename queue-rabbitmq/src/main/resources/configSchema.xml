@@ -272,5 +272,20 @@
                 <PrimitiveValue value="hh"/>
             </DefaultValue>
         </Parameter>
+
+        <Parameter name="service.rabbitmq.setConsumerWithoutThreadLocal.isEnabled" type="BOOLEAN"
+                   description="Enable set consumer without using ThreadLocal ">
+            <DefaultValue>
+                <PrimitiveValue value="false"/>
+            </DefaultValue>
+        </Parameter>
+
+        <Parameter name="service.rabbitmq.closeChannelOnThreadRelease.isEnabled" type="BOOLEAN"
+                   description="Enable close channel that is kept on ThreadLocal, when thread resources are freed ">
+            <DefaultValue>
+                <PrimitiveValue value="false"/>
+            </DefaultValue>
+        </Parameter>
+
     </NamespaceDefinition>
 </NamespaceDefinitions>
