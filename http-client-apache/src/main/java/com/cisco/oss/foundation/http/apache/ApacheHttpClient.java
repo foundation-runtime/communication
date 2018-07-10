@@ -46,6 +46,7 @@ import org.apache.http.impl.nio.client.HttpAsyncClientBuilder;
 import org.apache.http.impl.nio.client.HttpAsyncClients;
 import org.apache.http.message.BasicHttpEntityEnclosingRequest;
 import org.apache.http.message.BasicHttpRequest;
+import org.apache.http.ssl.TrustStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,6 +56,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.KeyStore;
+import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -107,6 +109,7 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
         boolean addTrustSupport = StringUtils.isNotEmpty(metadata.getTrustStorePath()) && StringUtils.isNotEmpty(metadata.getTrustStorePassword());
 
         boolean enforceTLS = metadata.isEnforceTLS();
+        boolean trustAll = metadata.isTrustAll();
 
         autoCloseable = metadata.isAutoCloseable();
 
@@ -168,8 +171,18 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
             if (addSslSupport | addTrustSupport) {
                 SSLContext.setDefault(sslContext);
                 httpClientBuilder.setSslcontext(sslContext);
+            } else if (trustAll) { // Currently not supporting the combination of keystore with trustAll since it is not very reasonable
+                sslContext = SSLContexts.custom()
+                        .useProtocol("TLS")
+                        .loadTrustMaterial(new TrustStrategy() {
+                            @Override
+                            public boolean isTrusted(X509Certificate[] chain, String authType) {
+                                return true;
+                            }
+                        })
+                        .build();
+                httpClientBuilder.setSSLContext(sslContext); // Do not set default context with trustAll strategy but only the specific client
             }
-
 
         } catch (Exception e) {
             LOGGER.error("can't set TLS Support. Error is: {}", e, e);
