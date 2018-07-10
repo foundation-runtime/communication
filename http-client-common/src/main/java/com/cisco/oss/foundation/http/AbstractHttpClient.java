@@ -315,6 +315,7 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
         String trustStorePath = subset.getString("http." + LoadBalancerConstants.TRUSTSTORE_PATH, "");
         String trustStorePassword = subset.getString("http." + LoadBalancerConstants.TRUSTSTORE_PASSWORD, "");
         boolean enforceTLS = subset.getBoolean("http.enforceTLS", false);
+        boolean trustAll = subset.getBoolean("http.trustAll", false);
         boolean reportClientExceptionToMonitor = subset.getBoolean("http.reportClientExceptionToMonitor", false);
 
         String cookiesSpec = subset.getString("http.cookiesSpec", "default");
@@ -351,7 +352,7 @@ public abstract class AbstractHttpClient<S extends HttpRequest, R extends HttpRe
 
         }
 
-        InternalServerProxyMetadata metadata = new InternalServerProxyMetadata(readTimeout, connectTimeout, idleTimeout, maxConnectionsPerAddress, maxConnectionsTotal, maxQueueSizePerAddress, waitingTime, numberOfAttempts, retryDelay, hostAndPortPairs, keyStorePath, keyStorePassword, trustStorePath, trustStorePassword, enforceTLS, followRedirects, autoCloseable, staleConnectionCheckEnabled, disableCookies, serviceDirectoryEnabled, serviceName, autoEncodeUri, cookiesSpec,reportClientExceptionToMonitor);
+        InternalServerProxyMetadata metadata = new InternalServerProxyMetadata(readTimeout, connectTimeout, idleTimeout, maxConnectionsPerAddress, maxConnectionsTotal, maxQueueSizePerAddress, waitingTime, numberOfAttempts, retryDelay, hostAndPortPairs, keyStorePath, keyStorePassword, trustStorePath, trustStorePassword, enforceTLS, trustAll, followRedirects, autoCloseable, staleConnectionCheckEnabled, disableCookies, serviceDirectoryEnabled, serviceName, autoEncodeUri, cookiesSpec,reportClientExceptionToMonitor);
 //        metadata.getHostAndPortPairs().addAll(hostAndPortPairs);
 //        metadata.setReadTimeout(readTimeout);
 //        metadata.setConnectTimeout(connectTimeout);

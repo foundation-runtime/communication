@@ -42,6 +42,7 @@ public class InternalServerProxyMetadata {
     private String trustStorePath = "";
     private String trustStorePassword = "";
     private boolean enforceTLS = false;
+    private boolean trustAll = false;
     private boolean reportClientExceptionToMonitor = false;
     private String cookiesSpec = "default";
     private boolean staleConnectionCheckEnabled = false;
@@ -118,6 +119,8 @@ public class InternalServerProxyMetadata {
 
     public boolean isEnforceTLS() {return enforceTLS;}
 
+    public boolean isTrustAll() {return trustAll;}
+
     public long getWaitingTime() {
         return waitingTime;
     }
@@ -138,7 +141,7 @@ public class InternalServerProxyMetadata {
         return reportClientExceptionToMonitor;
     }
 
-    public InternalServerProxyMetadata(int readTimeout, int connectTimeout, long idleTimeout, int maxConnectionsPerAddress, int maxConnectionsTotal, int maxQueueSizePerAddress, long waitingTime, int numberOfAttempts, long retryDelay, List<Pair<String, Integer>> hostAndPortPairs, String keyStorePath, String keyStorePassword, String trustStorePath, String trustStorePassword, boolean enforceTLS, boolean followRedirects, boolean autoCloseable, boolean staleConnectionCheckEnabled, boolean disableCookies, boolean serviceDirectoryEnabled, String serviceName, boolean autoEncodeUri, String cookiesSpec,boolean reportClientExceptionToMonitor) {
+    public InternalServerProxyMetadata(int readTimeout, int connectTimeout, long idleTimeout, int maxConnectionsPerAddress, int maxConnectionsTotal, int maxQueueSizePerAddress, long waitingTime, int numberOfAttempts, long retryDelay, List<Pair<String, Integer>> hostAndPortPairs, String keyStorePath, String keyStorePassword, String trustStorePath, String trustStorePassword, boolean enforceTLS, boolean trustAll, boolean followRedirects, boolean autoCloseable, boolean staleConnectionCheckEnabled, boolean disableCookies, boolean serviceDirectoryEnabled, String serviceName, boolean autoEncodeUri, String cookiesSpec,boolean reportClientExceptionToMonitor) {
         this.readTimeout = readTimeout;
         this.connectTimeout = connectTimeout;
         this.idleTimeout = idleTimeout;
@@ -163,6 +166,7 @@ public class InternalServerProxyMetadata {
         this.keyStorePassword = keyStorePassword;
         this.keyStorePath = keyStorePath;
         this.enforceTLS = enforceTLS;
+        this.trustAll = trustAll;
         this.reportClientExceptionToMonitor = reportClientExceptionToMonitor;
         this.cookiesSpec = cookiesSpec;
     }
