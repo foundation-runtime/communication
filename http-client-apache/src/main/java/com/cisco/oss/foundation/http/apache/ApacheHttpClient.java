@@ -16,6 +16,8 @@
 
 package com.cisco.oss.foundation.http.apache;
 
+import com.cisco.oss.foundation.flowcontext.FlowContext;
+import com.cisco.oss.foundation.flowcontext.FlowContextFactory;
 import com.cisco.oss.foundation.http.AbstractHttpClient;
 import com.cisco.oss.foundation.http.ClientException;
 import com.cisco.oss.foundation.http.HttpRequest;
@@ -426,7 +428,9 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
 
         HttpHost httpHost = new HttpHost(requestUri.getHost(),requestUri.getPort(),requestUri.getScheme());
 
-        httpAsyncClient.execute(httpHost, httpRequest, new FoundationFutureCallBack(this,request, responseCallback, serverProxy, loadBalancerStrategy, apiName));
+        FlowContext flowContext			= FlowContextFactory.getFlowContext();
+        
+        httpAsyncClient.execute(httpHost, httpRequest, new FoundationFutureCallBack(this,request, responseCallback, serverProxy, loadBalancerStrategy, apiName, flowContext.getUniqueId()));
 
     }
 
@@ -488,20 +492,23 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
         private String apiName;
         private HttpRequest request;
         private ApacheHttpClient apacheHttpClient;
+		private String flowContext;
 
 
-        private FoundationFutureCallBack(ApacheHttpClient apacheHttpClient, HttpRequest request, ResponseCallback<ApacheHttpResponse> responseCallback, InternalServerProxy serverProxy, LoadBalancerStrategy loadBalancerStrategy, String apiName) {
+        private FoundationFutureCallBack(ApacheHttpClient apacheHttpClient, HttpRequest request, ResponseCallback<ApacheHttpResponse> responseCallback, InternalServerProxy serverProxy, LoadBalancerStrategy loadBalancerStrategy, String apiName, String flowContext) {
             this.responseCallback = responseCallback;
             this.apacheHttpClient = apacheHttpClient;
             this.serverProxy = serverProxy;
             this.loadBalancerStrategy = loadBalancerStrategy;
             this.apiName = apiName;
             this.request = request;
+            this.flowContext = flowContext;
         }
 
         @Override
         public void completed(org.apache.http.HttpResponse response) {
-
+        	FlowContextFactory.deserializeNativeFlowContext(flowContext);
+        	
             serverProxy.setCurrentNumberOfAttempts(0);
             serverProxy.setFailedAttemptTimeStamp(0);
 
@@ -516,7 +523,8 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
 
         @Override
         public void failed(Exception ex) {
-
+        	FlowContextFactory.deserializeNativeFlowContext(flowContext);
+        	
             try {
                 loadBalancerStrategy.handleException(apiName, serverProxy, ex);
             } catch (Exception e) {
@@ -534,6 +542,7 @@ class ApacheHttpClient<S extends HttpRequest, R extends HttpResponse> extends Ab
 
         @Override
         public void cancelled() {
+        	FlowContextFactory.deserializeNativeFlowContext(flowContext);
             responseCallback.cancelled();
         }
     }
